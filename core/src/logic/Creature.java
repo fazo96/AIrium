@@ -2,6 +2,7 @@ package logic;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
+import logic.neural.Brain;
 
 /**
  * A (hopefully) smart biological creature.
@@ -11,8 +12,10 @@ import com.mygdx.game.Game;
 public class Creature extends Element {
 
     public static final int default_radius = 20;
+    public static final float max_speed = 3;
 
-    private float dir, speed, accel, sightRange, fov, fitness, rotSpeed;
+    private Brain brain;
+    private float dir, speed, sightRange, fov, fitness, rotSpeed;
     private float hp;
     private Sight sight;
 
@@ -20,12 +23,12 @@ public class Creature extends Element {
         super(x, y, default_radius);
         dir = (float) (Math.random() * 2 * Math.PI);
         hp = 100;
-        speed = (float) Math.random() * 3;
-        rotSpeed = (float) Math.random() - 0.5f;
-        accel = 0f;
+        speed = 0;//(float) Math.random() * 3;
+        rotSpeed = 0;//(float) Math.random() - 0.5f;
         sightRange = 40;
         fov = (float) Math.PI / 2;
         fitness = 100;
+        brain = new Brain(3, 2, 1, 4);
     }
 
     @Override
@@ -35,12 +38,11 @@ public class Creature extends Element {
         if (hp < 0) {
             Game.get().getWorld().getGraveyard().add(this);
         }
-        speed += accel; // apply acceleration
-        if (speed > 0) {
-            speed -= 0.001; // attrito
+        if (speed > max_speed) {
+            speed = max_speed;
         }
-        if (speed < 0) {
-            speed = 0;
+        if (speed < -max_speed) {
+            speed = -max_speed;
         }
         // apply speed
         float xMul = (float) Math.cos(dir), yMul = (float) Math.sin(dir);
@@ -48,11 +50,38 @@ public class Creature extends Element {
         dir += rotSpeed;
         // try eating
         eat();
-        fitness -= 0.1;
+        //fitness -= 0.1;
         if (dir > 2 * Math.PI) {
             dir -= 2 * Math.PI;
         }
-        sight = look();
+        if (dir < 0) {
+            dir += 2 * Math.PI;
+        }
+        sight = look(); // take a look
+        // feed data to brain
+        float[] values = new float[3];
+        // 0: type of sight
+        // 1: distance
+        // 2: angle
+        if (sight == null) {
+            values[0] = 0;
+            values[1] = 1;
+            values[2] = 0;
+        } else if (sight.getElement() instanceof Creature) {
+            values[0] = 1;
+            values[1] = sight.getDistance() / sightRange;
+            values[2] = sight.getAngle();
+        } else {
+            values[0] = 0.5f;
+            values[1] = sight.getDistance() / sightRange;
+            values[2] = sight.getAngle();
+        }
+        brain.input(values);
+        // compute behavior
+        float[] actions = brain.compute();
+        System.out.println("Accel: " + actions[0] + " Rot: " + actions[1]);
+        speed = actions[0]*max_speed;
+        rotSpeed = actions[1] - 1f;
     }
 
     @Override
@@ -116,7 +145,7 @@ public class Creature extends Element {
         for (Element e : Game.get().getWorld().getElements()) {
             if (e instanceof Vegetable && overlaps(e)) {
                 e.setSize(e.getSize() - 0.1f);
-                hp += 0.1f;
+                hp ++;
                 fitness++;
                 if (hp > 100) {
                     hp = 100;

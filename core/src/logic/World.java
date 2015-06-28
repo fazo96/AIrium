@@ -25,8 +25,8 @@ public class World {
     }
 
     public void update() {
-        while (elements.size() < 20) {
-            if (Math.random() < 0.2) {
+        while (elements.size() < 40) {
+            if (Math.random() < 0.4) {
                 spawnCreature();
             } else {
                 spawnVegetable();
