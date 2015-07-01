@@ -20,7 +20,7 @@ public class Neuron {
     private float cachedValue;
     private boolean cachedValueValid = false;
 
-    public Neuron(int layer) {
+    public Neuron(int layer, float bias) {
         this.layer = layer;
         inputs = new ArrayList<NeuralConnection>();
     }
@@ -44,6 +44,10 @@ public class Neuron {
         return cachedValue;
     }
 
+    public void mutate(float mutationFactor){
+        for(NeuralConnection n : inputs) n.mutate(mutationFactor);
+    }
+    
     public void setOutput(float output) {
         isInputNeuron = true;
         this.output = output;

@@ -6,6 +6,8 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import logic.neural.Brain;
 
 /**
  *
@@ -13,34 +15,80 @@ import java.util.ArrayList;
  */
 public class World {
 
+    public static final int creatPerGen = 10;
     private int width, height;
     public ArrayList<Element> elements;
-    public ArrayList<Element> graveyard;
+    public ArrayList<Creature> creatures;
+    public ArrayList<Creature> graveyard;
+    public ArrayList<Vegetable> plants;
+    public ArrayList<Vegetable> deadPlants;
 
     public World(int width, int height) {
         this.width = width;
         this.height = height;
         elements = new ArrayList();
+        creatures = new ArrayList();
+        plants = new ArrayList();
+        deadPlants = new ArrayList();
         graveyard = new ArrayList();
+        newGen();
     }
 
     public void update() {
-        while (elements.size() < 40) {
-            if (Math.random() < 0.4) {
-                spawnCreature();
-            } else {
-                spawnVegetable();
-            }
-            /*Creature c = new Creature(300,400);
-             elements.add(c);
-             elements.add(new Vegetable(300,450));*/
-        }
         elements.removeAll(graveyard);
-        graveyard.clear();
-        for(Element e: elements) e.update();
+        elements.removeAll(deadPlants);
+        plants.removeAll(deadPlants);
+        creatures.removeAll(graveyard);
+        deadPlants.clear();
+        if (creatures.isEmpty()) {
+            // All dead, next gen
+            newGen();
+        }
+        while (plants.size() < 50) {
+            spawnVegetable();
+        }
+        for (Creature e : creatures) {
+            e.update();
+        }
     }
 
-    private void spawn(boolean isCreature) {
+    public void newGen() {
+        elements.removeAll(creatures);
+        creatures.clear();
+        Comparator creatureComp = new Comparator<Creature>() {
+
+            @Override
+            public int compare(Creature t, Creature t1) {
+                if (t.getFitness() < t1.getFitness()) {
+                    return -1;
+                } else if (t.getFitness() > t1.getFitness()) {
+                    return 1;
+                }
+                return 0;
+            }
+        };
+        if (graveyard.size() == 0) { // First gen
+            for (int i = 0; i < creatPerGen; i++) {
+                spawnCreature();
+            }
+        } else { // Mutate previous gen
+            //graveyard.sort(creatureComp);
+            int x = 0;
+            for (Creature c : graveyard) {
+                c.getBrain().mutate(5f);
+                if (x < creatPerGen) {
+                    c.setHp(100);
+                    creatures.add(c);
+                    elements.add(c);
+                } else {
+                    break;
+                }
+            }
+            graveyard.clear();
+        }
+    }
+
+    private void spawn(boolean isCreature, Brain brain) {
         int x, y, r;
         boolean overlaps = false;
         if (isCreature) {
@@ -60,19 +108,27 @@ public class World {
         } while (overlaps);
         if (isCreature) {
             System.out.println("New Creat: " + x + " " + y);
-            elements.add(new Creature(x, y));
+            Creature c = new Creature(x, y);
+            elements.add(c);
+            creatures.add(c);
         } else {
             System.out.println("New Veg: " + x + " " + y);
-            elements.add(new Vegetable(x, y));
+            Vegetable v = new Vegetable(x, y);
+            elements.add(v);
+            plants.add(v);
         }
     }
 
     private void spawnVegetable() {
-        spawn(false);
+        spawn(false, null);
     }
 
     private void spawnCreature() {
-        spawn(true);
+        spawn(true, null);
+    }
+
+    private void spawnCreature(Brain b) {
+        spawn(true, b);
     }
 
     public int getWidth() {
@@ -87,8 +143,12 @@ public class World {
         return elements;
     }
 
-    public ArrayList<Element> getGraveyard() {
+    public ArrayList<Creature> getGraveyard() {
         return graveyard;
     }
-    
+
+    public ArrayList<Vegetable> getDeadPlants() {
+        return deadPlants;
+    }
+
 }

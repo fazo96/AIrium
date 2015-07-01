@@ -6,6 +6,7 @@
 package logic;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.mygdx.game.Game;
 
 /**
  *
@@ -22,7 +23,9 @@ public class Vegetable extends Element {
 
     @Override
     public void update() {
-
+        if(getSize() < 0){
+            Game.get().getWorld().getDeadPlants().add(this);
+        }
     }
 
     @Override

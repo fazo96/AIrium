@@ -19,6 +19,7 @@ public class NeuralConnection {
 
     public NeuralConnection(float weight, Neuron source) {
         this.source = source;
+        this.weight = weight;
     }
 
     public float compute() {
@@ -30,6 +31,11 @@ public class NeuralConnection {
         return cachedValue = source.compute() * getWeight();
     }
 
+    public void mutate(float mutationFactor) {
+        float mutation = (float) (Math.random() * mutationFactor - mutationFactor/2);
+        weight += mutation;
+    }
+    
     public void clearCachedValue() {
         cachedValueValid = false;
     }

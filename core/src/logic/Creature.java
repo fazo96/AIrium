@@ -25,16 +25,16 @@ public class Creature extends Element {
         hp = 100;
         speed = 0;//(float) Math.random() * 3;
         rotSpeed = 0;//(float) Math.random() - 0.5f;
-        sightRange = 40;
-        fov = (float) Math.PI / 2;
+        sightRange = 60;
+        fov = (float) Math.PI / 1.5f;
         fitness = 100;
-        brain = new Brain(3, 2, 1, 4);
+        brain = new Brain(3, 2, 2, 8);
     }
 
     @Override
     public void update() {
         // apply hunger
-        hp -= 0.1f;
+        hp -= 0.5f;
         if (hp < 0) {
             Game.get().getWorld().getGraveyard().add(this);
         }
@@ -47,6 +47,12 @@ public class Creature extends Element {
         // apply speed
         float xMul = (float) Math.cos(dir), yMul = (float) Math.sin(dir);
         move(xMul * speed, yMul * speed);
+        if(getX() < 0) setX(0);
+        if(getY() < 0) setX(0);
+        if(getX() > Game.get().getWorld().getWidth())
+            setX(Game.get().getWorld().getWidth());
+        if(getY() > Game.get().getWorld().getHeight())
+            setY(Game.get().getWorld().getHeight());
         dir += rotSpeed;
         // try eating
         eat();
@@ -81,7 +87,11 @@ public class Creature extends Element {
         float[] actions = brain.compute();
         System.out.println("Accel: " + actions[0] + " Rot: " + actions[1]);
         speed = actions[0]*max_speed;
-        rotSpeed = actions[1] - 1f;
+        rotSpeed = actions[1]/10;
+    }
+
+    public void setHp(float hp) {
+        this.hp = hp;
     }
 
     @Override
@@ -92,7 +102,7 @@ public class Creature extends Element {
         // Eye
         double relX = Math.cos(dir) * getSize(), relY = Math.sin(dir) * getSize();
         if (sight != null) {
-            float c = sight.getDistance() / sightRange;
+            float c = sight.getDistance() / sightRange*2 + sightRange;
             if (sight.getElement() instanceof Creature) {
                 s.setColor(c, 0, 0, 1);
             } else if (sight.getElement() instanceof Vegetable) {
@@ -145,7 +155,7 @@ public class Creature extends Element {
         for (Element e : Game.get().getWorld().getElements()) {
             if (e instanceof Vegetable && overlaps(e)) {
                 e.setSize(e.getSize() - 0.1f);
-                hp ++;
+                hp++;
                 fitness++;
                 if (hp > 100) {
                     hp = 100;
@@ -154,8 +164,16 @@ public class Creature extends Element {
         }
     }
 
+    public Brain getBrain() {
+        return brain;
+    }
+
     public void setDirection(float dir) {
         this.dir = dir;
+    }
+
+    public float getFitness() {
+        return fitness;
     }
 
 }
