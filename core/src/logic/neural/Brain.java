@@ -94,12 +94,15 @@ public class Brain {
     }
 
     public float[][][] mutate(float mutationFactor) {
-        float[][][] res = new float[neurons.length][neurons[1].length][neurons[1].length];
+        float[][][] res = new float[neurons.length][][];
         for (int i = 0; i < neurons.length; i++) // layers
         {
-            for (int j = 0; i < neurons[i].length; j++) // neurons per layer
+            res[i] = new float[neurons[i].length][];
+            for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                res[i][j] = neurons[i][j].mutate(mutationFactor);
+                if (neurons[i][j] != null) {
+                    res[i][j] = neurons[i][j].mutate(mutationFactor);
+                }
             }
         }
         return res;
