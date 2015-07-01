@@ -6,8 +6,6 @@
 package logic.neural;
 
 import com.mygdx.game.Log;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +16,7 @@ import java.util.logging.Logger;
 public class Neuron {
 
     private float[] weights;
+    private NeuronCache cache;
     private float bias, output;
     private boolean isInputNeuron;
     private int layer;
@@ -35,6 +34,7 @@ public class Neuron {
         } else {
             this.weights = weights;
         }
+        cache = new NeuronCache(this.weights.length);
     }
 
     private void scramble() {
@@ -61,6 +61,14 @@ public class Neuron {
         for (int i = 0; i < weights.length; i++) {
             //if(brain == null) System.out.println("BRAINS NULL"); else if(brain.getNeurons() == null) System.out.println("NEURONS NULL");
             //System.out.println(Arrays.toString(brain.getNeurons()));
+            if (cache.has(i)) {
+                try {
+                    return cache.get(i);
+                } catch (Exception ex) {
+                    // This should never happen
+                    Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             Neuron n = brain.getNeurons()[layer - 1][i];
             a += n.compute() * weights[i];
         }
@@ -109,6 +117,10 @@ public class Neuron {
 
     public void setWeights(float[] weights) {
         this.weights = weights;
+    }
+
+    public void clearCache() {
+        cache.clear();
     }
 
 }

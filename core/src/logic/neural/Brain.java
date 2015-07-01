@@ -54,6 +54,7 @@ public class Brain {
     }
 
     public float[] compute() {
+        clearCache();
         float[] res = new float[neurons[neurons.length - 1].length];
         for (int i = 0; i < neurons[neurons.length - 1].length; i++) {
             Neuron n = neurons[neurons.length - 1][i];
@@ -102,6 +103,16 @@ public class Brain {
             }
         }
         return res;
+    }
+
+    private void clearCache() {
+        for (int i = 1; i < neurons.length; i++) {
+            for (int j = 0; j < neurons[i].length; j++) {
+                if (neurons[i][j] != null) {
+                    neurons[i][j].clearCache();
+                }
+            }
+        }
     }
 
     public Neuron[][] getNeurons() {
