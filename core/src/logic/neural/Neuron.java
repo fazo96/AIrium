@@ -39,10 +39,8 @@ public class Neuron {
 
     private void scramble() {
         // init weights
-        if (layer > 1) {
+        if (layer > 0) {
             weights = new float[brain.getNeurons()[layer - 1].length];
-        } else if (layer == 1) {
-            weights = new float[brain.howManyInputNeurons()];
         } else { // layer 0
             isInputNeuron = true;
             weights = new float[0];

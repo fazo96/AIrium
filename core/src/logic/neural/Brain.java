@@ -11,22 +11,22 @@ public class Brain {
 
     public static final float bias = 0.5f;
     private Neuron[][] neurons;
-    private int nInputs;
 
     public Brain(int nInputs, int nOutputs, int hiddenLayers, int neuronsPerHiddenLayer) {
-        this.nInputs = nInputs;
-        neurons = new Neuron[hiddenLayers + 2][Math.max(nInputs, Math.max(nOutputs, neuronsPerHiddenLayer))];
+        neurons = new Neuron[hiddenLayers + 2][];
         populate(nInputs, nOutputs, hiddenLayers, neuronsPerHiddenLayer);
     }
 
     private void populate(int nInputs, int nOutputs, int hiddenLayers, int neuronsPerHiddenLayer) {
         // Create input neurons
+        neurons[0] = new Neuron[nInputs];
         for (int i = 0; i < nInputs; i++) {
             neurons[0][i] = new Neuron(0, bias, this);
             Log.log(Log.DEBUG, "Adding Input Layer Neuron " + (i + 1));
         }
         // popiulate hidden layers
         for (int i = 0; i < hiddenLayers; i++) {
+            neurons[i + 1] = new Neuron[neuronsPerHiddenLayer];
             for (int j = 0; j < neuronsPerHiddenLayer; j++) {
                 // create neuron
                 Neuron n = new Neuron(i + 1, bias, this);
@@ -35,6 +35,7 @@ public class Brain {
             }
         }
         // populate output layer
+        neurons[hiddenLayers + 1] = new Neuron[nOutputs];
         for (int i = 0; i < nOutputs; i++) {
             // add neuron
             Neuron n = new Neuron(hiddenLayers + 1, bias, this);
@@ -100,9 +101,7 @@ public class Brain {
             res[i] = new float[neurons[i].length][];
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                if (neurons[i][j] != null) {
-                    res[i][j] = neurons[i][j].mutate(mutationFactor);
-                }
+                res[i][j] = neurons[i][j].mutate(mutationFactor);
             }
         }
         return res;
@@ -111,9 +110,7 @@ public class Brain {
     private void clearCache() {
         for (int i = 1; i < neurons.length; i++) {
             for (int j = 0; j < neurons[i].length; j++) {
-                if (neurons[i][j] != null) {
-                    neurons[i][j].clearCache();
-                }
+                neurons[i][j].clearCache();
             }
         }
     }
@@ -121,9 +118,4 @@ public class Brain {
     public Neuron[][] getNeurons() {
         return neurons;
     }
-
-    public int howManyInputNeurons() {
-        return nInputs;
-    }
-
 }
