@@ -57,8 +57,6 @@ public class Neuron {
         }
         float a = bias * -1; // activation
         for (int i = 0; i < weights.length; i++) {
-            //if(brain == null) System.out.println("BRAINS NULL"); else if(brain.getNeurons() == null) System.out.println("NEURONS NULL");
-            //System.out.println(Arrays.toString(brain.getNeurons()));
             if (cache.has(i)) {
                 try {
                     return cache.get(i);
@@ -97,7 +95,7 @@ public class Neuron {
         this.bias = bias;
     }
 
-    public boolean isIsInputNeuron() {
+    public boolean isInputNeuron() {
         return isInputNeuron;
     }
 
@@ -115,6 +113,8 @@ public class Neuron {
 
     public void setWeights(float[] weights) {
         this.weights = weights;
+        // Changing the neuron makes the cache invalid
+        clearCache();
     }
 
     public void clearCache() {
