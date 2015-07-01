@@ -76,7 +76,7 @@ public class World {
             //graveyard.sort(creatureComp);
             int x = 0;
             for (Creature c : graveyard) {
-                c.getBrain().getMutatedCopy(5f);
+                c.getBrain().remap(c.getBrain().getMutatedMap(3f));
                 if (x < creatPerGen) {
                     c.setHp(100);
                     creatures.add(c);
