@@ -1,5 +1,6 @@
 package logic.neural;
 
+import com.mygdx.game.Log;
 import java.util.ArrayList;
 
 /**
@@ -33,7 +34,7 @@ public class Brain {
                     n.getInputs().add(new NeuralConnection(randWeight(), s));
                 }
                 hidden.add(n);
-                System.out.println("Adding Hidden Layer " + (i + 1) + " Neuron " + j + " with " + inputs.size() + " inputs");
+                Log.log(Log.DEBUG,"Adding Hidden Layer " + (i + 1) + " Neuron " + j + " with " + inputs.size() + " inputs");
             }
         }
         // populate output layer
@@ -48,7 +49,7 @@ public class Brain {
                     n.getInputs().add(new NeuralConnection(randWeight(), s));
                 }
             }
-            System.out.println("Adding Output Layer Neuron " + i + " with " + conn + " inputs");
+            Log.log(Log.DEBUG,"Adding Output Layer Neuron " + i + " with " + conn + " inputs");
             outputs.add(n);
         }
     }

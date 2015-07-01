@@ -5,6 +5,7 @@
  */
 package logic;
 
+import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
 import logic.neural.Brain;
@@ -107,12 +108,12 @@ public class World {
             }
         } while (overlaps);
         if (isCreature) {
-            System.out.println("New Creat: " + x + " " + y);
+            Log.log(Log.INFO,"New Creat: " + x + " " + y);
             Creature c = new Creature(x, y);
             elements.add(c);
             creatures.add(c);
         } else {
-            System.out.println("New Veg: " + x + " " + y);
+            Log.log(Log.INFO,"New Veg: " + x + " " + y);
             Vegetable v = new Vegetable(x, y);
             elements.add(v);
             plants.add(v);

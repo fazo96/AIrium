@@ -2,6 +2,7 @@ package logic;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
+import com.mygdx.game.Log;
 import logic.neural.Brain;
 
 /**
@@ -85,7 +86,7 @@ public class Creature extends Element {
         brain.input(values);
         // compute behavior
         float[] actions = brain.compute();
-        System.out.println("Accel: " + actions[0] + " Rot: " + actions[1]);
+        Log.log(Log.DEBUG,"Accel: " + actions[0] + " Rot: " + actions[1]);
         speed = actions[0]*max_speed;
         rotSpeed = actions[1]/10;
     }
@@ -130,7 +131,7 @@ public class Creature extends Element {
             if (tempDist > sightRange) {
                 continue;
             }
-            //System.out.println("TempDist "+tempDist+" SightRange "+sightRange);
+            //Log.log(Log.DEBUG,"TempDist "+tempDist+" SightRange "+sightRange);
             if (tempDist > dist && seen != null) {
                 continue;
             }
@@ -142,7 +143,7 @@ public class Creature extends Element {
                 angle = relAngle - ndir;
                 dist = tempDist;
             }
-            //System.out.println("RelAngle "+relAngle+" Dir "+ndir);
+            //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
         }
         if (seen != null) {
             return new Sight(seen, dist, angle);

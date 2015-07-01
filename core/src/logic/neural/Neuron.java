@@ -5,6 +5,7 @@
  */
 package logic.neural;
 
+import com.mygdx.game.Log;
 import java.util.ArrayList;
 
 /**
@@ -36,11 +37,10 @@ public class Neuron {
         for (NeuralConnection i : inputs) {
             a += i.compute();
         }
-        System.out.println("Computed Value "+a+" for neuron");
         cachedValueValid = true;
         // sigmoid function
         cachedValue = (float) (1 / (1 + Math.pow(Math.E, a * -1)));
-        System.out.println("Computed Value "+cachedValue+" for neuron");
+        Log.log(Log.DEBUG,"Computed Value "+cachedValue+" for neuron");
         return cachedValue;
     }
 
