@@ -4,7 +4,7 @@ This project aims to build an interactive simple artificial life simulation that
 
 ## Development
 
-AIrium is still a barely functional prototype. To work on the project or try it out, install __Netbeans__ and follow _Libgdx_'s guide to set it up for Libgdx development (mobile platform are ignored for now so you won't need the Android SDK). It should be possible to work on the project without using Netbeans, but further explanation is out of the scope of this document (follow Libgdx's wiki).
+__AIrium is still a barely functional prototype. It works (barely), but creatures can't evolve yet and the interface is non-existant.__ To work on the project or try it out, install __Netbeans__ and follow _Libgdx_'s guide to set it up for Libgdx development (mobile platform are ignored for now so you won't need the Android SDK). It should be possible to work on the project without using Netbeans, but further explanation is out of the scope of this document (follow Libgdx's wiki).
 
 ## License
 
