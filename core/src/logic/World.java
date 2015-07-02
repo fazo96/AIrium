@@ -18,8 +18,9 @@ import java.util.logging.Logger;
 public class World {
 
     private final int width, height, nPlants, creatPerGen;
-    private int generation = 0;
+    private int generation = 1;
     public ArrayList<Element> elements;
+    public ArrayList<Element> toAdd;
     public ArrayList<Creature> creatures;
     public ArrayList<Creature> graveyard;
     public ArrayList<Vegetable> plants;
@@ -30,8 +31,9 @@ public class World {
         this.height = height;
         elements = new ArrayList();
         creatures = new ArrayList();
+        toAdd = new ArrayList();
         creatPerGen = Math.min(Math.round(width * height / 20000), 50);
-        nPlants = Math.round(width * height / 5000);
+        nPlants = Math.round(width * height / 5500);
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
@@ -39,6 +41,15 @@ public class World {
     }
 
     public void update() {
+        for (Element e : toAdd) {
+            elements.add(e);
+            if (e instanceof Creature) {
+                creatures.add((Creature) e);
+            } else if (e instanceof Vegetable) {
+                plants.add((Vegetable) e);
+            }
+        }
+        toAdd.clear();
         elements.removeAll(graveyard);
         elements.removeAll(deadPlants);
         plants.removeAll(deadPlants);
@@ -69,14 +80,15 @@ public class World {
             }
         };
         if (graveyard.isEmpty() || restart) { // First gen
-            generation = 0;
+            generation = 1;
+            Log.log(Log.INFO, "Starting from generation 1: spawning "+creatPerGen+" creatures.");
             for (int i = 0; i < creatPerGen; i++) {
                 spawnCreature();
             }
         } else { // Evolve previous gen
             graveyard.sort(creatureComp); // sort by fitness
             // Prepare best agent list
-            int topSize = (int) Math.floor(graveyard.size() * 0.1f);
+            int topSize = (int) Math.round(graveyard.size() * 0.05f);
             Creature[] top = new Creature[topSize];
             // Calculate avg fitness and prepare best agent list
             float avgFitness = 0;
@@ -105,7 +117,7 @@ public class World {
                     Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Creature ne = spawnCreature(n);
-                //ne.getBrain().mutate(0.1f); // mutate children
+                ne.getBrain().mutate(0.05f); // mutate children
             }
             graveyard.clear();
             generation++;
@@ -136,12 +148,14 @@ public class World {
             if (brainMap != null) {
                 c.getBrain().remap(brainMap);
             }
+            //add(c);
             elements.add(c);
             creatures.add(c);
             return c;
         } else {
             Log.log(Log.DEBUG, "New Veg: " + x + " " + y);
             Vegetable v = new Vegetable(x, y);
+            //add(v);
             elements.add(v);
             plants.add(v);
             return v;
@@ -166,6 +180,10 @@ public class World {
 
     public int getHeight() {
         return height;
+    }
+
+    public void add(Element e) {
+        toAdd.add(e);
     }
 
     public ArrayList<Element> getElements() {

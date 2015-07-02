@@ -18,8 +18,8 @@ public class Creature extends Element {
     public static final float max_speed = 3;
 
     private Brain brain;
-    private float dir, hp, speed, sightRange, fov, fitness, rotSpeed;
-    private boolean eating = false;
+    private float dir, hp, speed, sightRange, fov, fitness, rotSpeed, beak;
+    private boolean eating = false, killing = false;
     private Sight sight;
 
     public Creature(float x, float y) {
@@ -31,15 +31,20 @@ public class Creature extends Element {
         sightRange = 100;
         fov = (float) Math.PI / 2.5f;
         fitness = 0;
-        brain = new Brain(4, 3, 1, 8);
+        brain = new Brain(6, 5, 2, 10);
     }
 
     @Override
     public void update() {
         // apply hunger
         hp -= 0.5f;
-        if (hp < 0) {
+        if (hp < 0) { // Dead
             Game.get().getWorld().getGraveyard().add(this);
+            Vegetable carcass = new Vegetable(getX(), getY());
+            carcass.setSize(getSize());
+            //carcass.setDecayRate(0.01f);
+            Game.get().getWorld().add(carcass);
+            return;
         }
         if (speed > max_speed) {
             speed = max_speed;
@@ -51,16 +56,16 @@ public class Creature extends Element {
         float xMul = (float) Math.cos(dir), yMul = (float) Math.sin(dir);
         move(xMul * speed, yMul * speed);
         if (getX() < 0) {
-            setX(Game.get().getWorld().getWidth()+getX());
+            setX(Game.get().getWorld().getWidth() + getX());
         }
         if (getY() < 0) {
-            setX(Game.get().getWorld().getHeight()+getY());
+            setY(Game.get().getWorld().getHeight() + getY());
         }
         if (getX() > Game.get().getWorld().getWidth()) {
-            setX(getX()-Game.get().getWorld().getWidth());
+            setX(getX() - Game.get().getWorld().getWidth());
         }
         if (getY() > Game.get().getWorld().getHeight()) {
-            setY(getY()-Game.get().getWorld().getHeight());
+            setY(getY() - Game.get().getWorld().getHeight());
         }
         dir += rotSpeed;
         // try eating
@@ -72,51 +77,63 @@ public class Creature extends Element {
         if (dir < 0) {
             dir += 2 * Math.PI;
         }
-        sight = look(); // take a look
+        sight = lookAndHit(); // take a look
         // feed data to brain
-        float[] values = new float[4];
-        // 0: see food
-        // 1: distance
-        // 2: angle
-        // 3: food sensor
+        float[] values = new float[brain.getNeurons()[0].length];
+        // 0: sight: see food?
+        // 1: sight: see creat?
+        // 2: sight: distance
+        // 3: sight: angle
+        // 4: sight: size for vegetables, hunger for creatures
+        // 5: food sensor
         if (sight == null || sight.getElement() == null) {
+            // See nothing
             values[0] = 0;
             values[1] = 0;
             values[2] = 0;
-        } else if (sight.getElement() instanceof Vegetable) {
-            values[1] = 1;
-            values[1] = sight.getDistance() / sightRange;
-            values[2] = sight.getAngle();
+            values[3] = 0;
+            values[4] = 0;
         } else {
-            values[0] = 0f;
-            values[1] = sight.getDistance() / sightRange;
-            values[2] = sight.getAngle();
+            // See something
+            values[2] = sight.getDistance() / sightRange;
+            values[3] = sight.getAngle();
+            if (sight.getElement() instanceof Vegetable) {
+                values[0] = 1f;
+                values[1] = 0;
+                values[4] = sight.getElement().getSize() / default_radius;
+            } else {
+                values[0] = 0f;
+                values[1] = 1f;
+                values[4] = 100 - ((Creature) sight.getElement()).getHp() / 100;
+            }
         }
-        values[3] = eating ? 1 : 0;
+        values[5] = eating ? 1 : 0;
+        // compute behavior
+        float[] actions = null;
         try {
-            brain.input(values);
+            actions = brain.compute(values);
         } catch (Exception ex) {
             // Should not happen
             Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
         }
-        // compute behavior
-        float[] actions = brain.compute();
-        Log.log(Log.DEBUG, "Accel: " + actions[0] + " RotClock: " + actions[1] + " RotAntiClock: " + actions[2]);
-        speed = actions[0] * max_speed;
+        Log.log(Log.DEBUG, "Accel: " + actions[0] + " RotClock: " + actions[1] + " RotAntiClock: " + actions[2] + " Beak: " + actions[3]);
+        speed = (actions[0] * 2 - actions[4] / 2) * max_speed;
         rotSpeed = actions[1] - actions[2];
-    }
-
-    public void setHp(float hp) {
-        this.hp = hp;
+        beak = actions[3];
+        if (beak > 20) {
+            beak = 20;
+        } else if (beak < 0) {
+            beak = 0;
+        }
     }
 
     @Override
     public void render(ShapeRenderer s) {
         // Body
         s.setColor(1 - (hp / 100), hp / 100, 0, 1);
-        s.circle(getX() , getY(), getSize());
+        s.circle(getX(), getY(), getSize());
         // Eye
-        double relX = Math.cos(dir) * getSize(), relY = Math.sin(dir) * getSize();
+        double relX = Math.cos(dir), relY = Math.sin(dir);
         s.setColor(1, 1, 1, 1);
         if (sight != null) {
             float c = sight.getDistance() / sightRange * 2 + sightRange;
@@ -126,17 +143,29 @@ public class Creature extends Element {
                 s.setColor(0, c, 0, 1);
             }
         }
-        s.circle((float) relX + getX() , (float) relY + getY() , 3);
+        // Eye
+        s.circle((float) relX * getSize() * 0.6f + getX(), (float) relY * getSize() * 0.6f + getY(), 3);
+        if (killing) {
+            // Evil mark
+            s.set(ShapeRenderer.ShapeType.Filled);
+            s.setColor(1, 0, 0, 1);
+            s.circle(getX(), getY(), 5);
+        }
+        s.set(ShapeRenderer.ShapeType.Line);
+        // Beak
+        s.setColor(1, 1, 0, beak / 20);
+        s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / 20) + getX()), (float) (relY * getSize() * (1.5f + beak / 20) + getY()));
         //FOV
         float degrees = fov * 180f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
         s.setColor(0.3f, 0.3f, 0.3f, 1);
-        s.arc((float) relX + getX() , (float) relY + getY() , sightRange, orient, degrees);
+        s.arc((float) relX * getSize() + getX(), (float) relY * getSize() + getY(), sightRange, orient, degrees);
     }
 
-    public Sight look() {
+    public Sight lookAndHit() {
         Element seen = null;
         float dist = 0, angle = 0, ndir = dir - (float) Math.PI;
+        killing = false;
         for (Element e : Game.get().getWorld().getElements()) {
             if (e == this) {
                 continue;
@@ -146,18 +175,30 @@ public class Creature extends Element {
                 continue;
             }
             //Log.log(Log.DEBUG,"TempDist "+tempDist+" SightRange "+sightRange);
-            if (tempDist > dist && seen != null) {
-                continue;
-            }
             float relAngle = (float) (Math.atan2(getY() - e.getY(), getX() - e.getX()));
-            //if((relAngle > dir-fov/2 && relAngle < dir+fov/2)){
-            if (Math.abs(relAngle - ndir) < fov) {
-                // Visible
-                seen = e;
-                angle = relAngle - ndir;
-                dist = tempDist;
+            if (tempDist < dist || seen == null) {
+                // Check if Visible
+                if (Math.abs(relAngle - ndir) < fov) {
+                    // Visible
+                    seen = e;
+                    angle = relAngle - ndir;
+                    dist = tempDist;
+                }
+                //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
             }
-            //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
+            // Check if attackable
+            if (e instanceof Creature && beak > 5 && tempDist < beak * 1.5f && Math.abs(relAngle - ndir) < (float) Math.PI / 10f) {
+                // Attacking!
+                hp++;
+                fitness++;
+                if (hp > 100) {
+                    hp = 100;
+                }
+                killing = true;
+                Creature c = (Creature) e;
+                c.setHp(c.getHp() - 0.2f);
+            }
+
         }
         if (seen != null) {
             return new Sight(seen, dist, angle);
@@ -172,7 +213,9 @@ public class Creature extends Element {
             if (overlaps(e)) {
                 eating = true;
                 e.setSize(e.getSize() - 0.1f);
-                if(e.getSize() == 0) e.setSize(0);
+                if (e.getSize() == 0) {
+                    e.setSize(0);
+                }
                 hp++;
                 fitness++;
                 if (hp > 100) {
@@ -199,4 +242,11 @@ public class Creature extends Element {
         hp = 100;
     }
 
+    public float getHp() {
+        return hp;
+    }
+
+    public void setHp(float hp) {
+        this.hp = hp;
+    }
 }

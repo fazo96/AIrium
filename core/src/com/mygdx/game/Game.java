@@ -16,13 +16,14 @@ public class Game extends ApplicationAdapter {
     private World world;
     private float cameraSpeed = 15;
     private BitmapFont font;
+    private boolean paused = false;
 
     @Override
     public void create() {
-        
         game = this;
         world = new World(2500, 2500);
         shaper = new ShapeRenderer();
+        shaper.setAutoShapeType(true);
         font = new BitmapFont();
     }
 
@@ -50,8 +51,13 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
             shaper.scale(1.5f, 1.5f, 1);
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            paused = !paused;
+        }
         // Update
-        world.update();
+        if (!paused) {
+            world.update();
+        }
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

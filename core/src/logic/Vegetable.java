@@ -15,7 +15,7 @@ import com.mygdx.game.Game;
 public class Vegetable extends Element {
 
     public static final int default_radius = 5;
-    private float x, y;
+    private float decayRate = 0;
 
     public Vegetable(float x, float y) {
         super(x, y, default_radius);
@@ -23,6 +23,7 @@ public class Vegetable extends Element {
 
     @Override
     public void update() {
+        setSize(getSize()-decayRate);
         if (getSize() <= 0) {
             Game.get().getWorld().getDeadPlants().add(this);
         }
@@ -32,5 +33,13 @@ public class Vegetable extends Element {
     public void render(ShapeRenderer s) {
         s.setColor(1, 1, 1, 1);
         s.circle(getX(), getY(), getSize());
+    }
+
+    public float getDecayRate() {
+        return decayRate;
+    }
+
+    public void setDecayRate(float decayRate) {
+        this.decayRate = decayRate;
     }
 }
