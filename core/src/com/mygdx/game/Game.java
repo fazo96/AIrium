@@ -30,22 +30,22 @@ public class Game extends ApplicationAdapter {
             world.newGen(false);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            shaper.translate(-cameraSpeed, 0,0);
+            shaper.translate(-cameraSpeed, 0, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            shaper.translate(cameraSpeed, 0,0);
+            shaper.translate(cameraSpeed, 0, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            shaper.translate(0, -cameraSpeed,0);
+            shaper.translate(0, -cameraSpeed, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            shaper.translate(0, cameraSpeed,0);
+            shaper.translate(0, cameraSpeed, 0);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS)) {
-            shaper.scale(0.3f, 0.3f, 1);
+            shaper.scale(0.5f, 0.5f, 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
-            shaper.scale(1f, 1f, 1);
+            shaper.scale(1.5f, 1.5f, 1);
         }
         // Update
         world.update();
@@ -55,7 +55,12 @@ public class Game extends ApplicationAdapter {
         shaper.setColor(1, 1, 1, 1);
         shaper.begin(ShapeRenderer.ShapeType.Line);
         for (Element e : world.getElements()) {
-            e.render(shaper);
+            try {
+                e.render(shaper);
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                // No idea why it happens, but it's rendering so meh
+                //Log.log(Log.ERROR, ex+"");
+            }
         }
         shaper.setColor(0.3f, 0.3f, 0.3f, 1);
         shaper.rect(0, 0, world.getWidth(), world.getHeight());

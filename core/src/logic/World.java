@@ -18,8 +18,8 @@ import logic.neural.Brain;
  */
 public class World {
 
-    public static final int creatPerGen = 10;
     private int width, height, generation = 0;
+    private final int nPlants, creatPerGen;
     public ArrayList<Element> elements;
     public ArrayList<Creature> creatures;
     public ArrayList<Creature> graveyard;
@@ -31,6 +31,8 @@ public class World {
         this.height = height;
         elements = new ArrayList();
         creatures = new ArrayList();
+        creatPerGen = Math.min(Math.round(width * height / 20000), 50);
+        nPlants = Math.round(width * height / 5000);
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
@@ -47,7 +49,7 @@ public class World {
             // All dead, next gen
             newGen(false);
         }
-        while (plants.size() < (width*height)/5000) {
+        while (plants.size() < nPlants) {
             spawnVegetable();
         }
         for (Element e : elements) {

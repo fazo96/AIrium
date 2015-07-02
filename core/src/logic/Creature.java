@@ -31,7 +31,7 @@ public class Creature extends Element {
         sightRange = 100;
         fov = (float) Math.PI / 2.5f;
         fitness = 0;
-        brain = new Brain(4, 3, 1, 6);
+        brain = new Brain(4, 3, 1, 8);
     }
 
     @Override
