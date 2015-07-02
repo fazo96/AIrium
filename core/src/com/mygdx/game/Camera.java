@@ -12,6 +12,7 @@ package com.mygdx.game;
 public class Camera {
 
     private int x, y, speed;
+    private float scale = 1;
 
     public Camera() {
         x = 0;
@@ -22,6 +23,14 @@ public class Camera {
     public void translate(int deltaX, int deltaY) {
         x += deltaX;
         y += deltaY;
+    }
+
+    public void zoomOut() {
+        scale -= 0.001f;
+    }
+
+    public void zoomIn() {
+        scale += 0.001f;
     }
 
     public int getX() {
@@ -46,6 +55,14 @@ public class Camera {
 
     public void setSpeed(int speed) {
         this.speed = speed;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
     }
 
 }

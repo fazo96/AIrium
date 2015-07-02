@@ -31,6 +31,6 @@ public class Vegetable extends Element {
     @Override
     public void render(ShapeRenderer s) {
         s.setColor(1, 1, 1, 1);
-        s.circle(getX() + Game.get().getCamera().getX(), getY() + Game.get().getCamera().getY(), getSize());
+        s.circle(getX(), getY(), getSize());
     }
 }

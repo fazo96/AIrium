@@ -28,8 +28,8 @@ public class Creature extends Element {
         hp = 100;
         speed = 0;//(float) Math.random() * 3;
         rotSpeed = 0;//(float) Math.random() - 0.5f;
-        sightRange = 60;
-        fov = (float) Math.PI / 1.5f;
+        sightRange = 100;
+        fov = (float) Math.PI / 2.5f;
         fitness = 0;
         brain = new Brain(4, 3, 1, 6);
     }
@@ -114,7 +114,7 @@ public class Creature extends Element {
     public void render(ShapeRenderer s) {
         // Body
         s.setColor(1 - (hp / 100), hp / 100, 0, 1);
-        s.circle(getX() + Game.get().getCamera().getX(), getY() + Game.get().getCamera().getY(), getSize());
+        s.circle(getX() , getY(), getSize());
         // Eye
         double relX = Math.cos(dir) * getSize(), relY = Math.sin(dir) * getSize();
         s.setColor(1, 1, 1, 1);
@@ -126,12 +126,12 @@ public class Creature extends Element {
                 s.setColor(0, c, 0, 1);
             }
         }
-        s.circle((float) relX + getX() + Game.get().getCamera().getX(), (float) relY + getY() + Game.get().getCamera().getY(), 3);
+        s.circle((float) relX + getX() , (float) relY + getY() , 3);
         //FOV
         float degrees = fov * 180f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
         s.setColor(0.3f, 0.3f, 0.3f, 1);
-        s.arc((float) relX + getX() + Game.get().getCamera().getX(), (float) relY + getY() + Game.get().getCamera().getY(), sightRange, orient, degrees);
+        s.arc((float) relX + getX() , (float) relY + getY() , sightRange, orient, degrees);
     }
 
     public Sight look() {

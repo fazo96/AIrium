@@ -12,15 +12,14 @@ public class Game extends ApplicationAdapter {
 
     private static Game game;
     ShapeRenderer shaper;
-    private Camera camera;
     private World world;
+    private float cameraSpeed = 5;
 
     @Override
     public void create() {
         game = this;
         world = new World(1920, 1080);
         shaper = new ShapeRenderer();
-        camera = new Camera();
         //shaper.setAutoShapeType(true);
     }
 
@@ -31,16 +30,22 @@ public class Game extends ApplicationAdapter {
             world.newGen(false);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.translate(-camera.getSpeed(), 0);
+            shaper.translate(-cameraSpeed, 0,0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.translate(1+camera.getSpeed(), 0);
+            shaper.translate(cameraSpeed, 0,0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.translate(0, -camera.getSpeed());
+            shaper.translate(0, -cameraSpeed,0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.translate(0, camera.getSpeed());
+            shaper.translate(0, cameraSpeed,0);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS)) {
+            shaper.scale(0.3f, 0.3f, 1);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
+            shaper.scale(1f, 1f, 1);
         }
         // Update
         world.update();
@@ -53,16 +58,12 @@ public class Game extends ApplicationAdapter {
             e.render(shaper);
         }
         shaper.setColor(0.3f, 0.3f, 0.3f, 1);
-        shaper.rect(camera.getX(), camera.getY(), world.getWidth(), world.getHeight());
+        shaper.rect(0, 0, world.getWidth(), world.getHeight());
         shaper.end();
     }
 
     public World getWorld() {
         return world;
-    }
-
-    public Camera getCamera() {
-        return camera;
     }
 
     public static Game get() {
