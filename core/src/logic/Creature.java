@@ -28,7 +28,7 @@ public class Creature extends Element {
         rotSpeed = 0;//(float) Math.random() - 0.5f;
         sightRange = 60;
         fov = (float) Math.PI / 1.5f;
-        fitness = 100;
+        fitness = 0;
         brain = new Brain(3, 2, 2, 8);
     }
 
@@ -177,4 +177,9 @@ public class Creature extends Element {
         return fitness;
     }
 
+    public void reset(){
+        fitness = 0;
+        hp = 100;
+    }
+    
 }

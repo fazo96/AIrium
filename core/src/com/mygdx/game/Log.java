@@ -15,7 +15,7 @@ public class Log {
     public static final int INFO = 1;
     public static final int DEBUG = 2;
 
-    private static int logLevel = 0;
+    private static int logLevel = 1;
 
     public static void log(int level, String msg) {
         if (level <= logLevel) {

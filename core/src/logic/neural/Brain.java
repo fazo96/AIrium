@@ -56,10 +56,11 @@ public class Brain {
     public void remap(float[][][] brainMap) {
         for (int i = 0; i < brainMap.length; i++) { // for each layer
             for (int j = 0; j < brainMap[i].length; j++) { // for each neuron
-                if (neurons[i][j] == null) {
-                    neurons[i][j] = new Neuron(j, bias, this, brainMap[i][j]);
+                // skip input layer
+                if (neurons[i+1][j] == null) {
+                    neurons[i+1][j] = new Neuron(j, bias, this, brainMap[i][j]);
                 } else {
-                    neurons[i][j].setWeights(brainMap[i][j]);
+                    neurons[i+1][j].setWeights(brainMap[i][j]);
                 }
             }
         }
@@ -126,15 +127,13 @@ public class Brain {
      * mind
      */
     public float[][][] getMap() {
-        float[][][] res = new float[neurons.length][neurons[1].length][neurons[1].length];
-        for (int i = 0; i < neurons.length; i++) // layers
+        float[][][] res = new float[neurons.length-1][][];
+        for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
-            for (int j = 0; i < neurons[i].length; j++) // neurons per layer
+            res[i-1] = new float[neurons[i].length][];
+            for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                if (neurons[i][j] == null) {
-                    continue;
-                }
-                res[i][j] = neurons[i][j].getWeights();
+                res[i-1][j] = neurons[i][j].getWeights();
             }
         }
         return res;
@@ -147,13 +146,47 @@ public class Brain {
      * @return a mutated brain map of this brain's mind
      */
     public float[][][] getMutatedMap(float mutationFactor) {
-        float[][][] res = new float[neurons.length][][];
-        for (int i = 0; i < neurons.length; i++) // layers
+        float[][][] res = new float[neurons.length-1][][];
+        for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
-            res[i] = new float[neurons[i].length][];
+            res[i-1] = new float[neurons[i].length][];
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                res[i][j] = neurons[i][j].mutate(mutationFactor);
+                res[i-1][j] = neurons[i][j].mutate(mutationFactor);
+            }
+        }
+        return res;
+    }
+
+    public float[][][] breed(float[][][] map) throws Exception {
+        float[][][] res = new float[neurons.length-1][][];
+        if (map.length != neurons.length-1) {
+            throw new Exception("incompatible brains");
+        }
+        for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
+        {
+            res[i-1] = new float[neurons[i].length][];
+            if (map[i-1].length != neurons[i].length) {
+                throw new Exception("incompatible brains");
+            }
+            for (int j = 0; j < neurons[i].length; j++) // neurons per layer
+            {
+                // j = 8 not valid for neurons[i][j]. investigate why.
+                //System.out.println(i+" "+j+" | "+neurons[i].length+" "+res[i-1].length+" "+neurons[i][j].getWeights().length);
+                //System.out.println(neurons[i].length +" has to be > "+j);
+                res[i-1][j] = new float[neurons[i][j].getWeights().length];
+                if (map[i-1][j].length != neurons[i][j].getWeights().length) {
+                    throw new Exception("incompatible brains");
+                }
+                for (int z = 0; z < neurons[i][j].getWeights().length; z++) // each weight
+                {
+                    // Combine the two weights
+                    if (Math.random() < 0.5) {
+                        res[i-1][j][z] = map[i-1][j][z];
+                    } else {
+                        res[i-1][j][z] = neurons[i][j].getWeights()[z];
+                    }
+                }
             }
         }
         return res;

@@ -8,6 +8,8 @@ package logic;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import logic.neural.Brain;
 
 /**
@@ -17,7 +19,7 @@ import logic.neural.Brain;
 public class World {
 
     public static final int creatPerGen = 10;
-    private int width, height;
+    private int width, height, generation = 0;
     public ArrayList<Element> elements;
     public ArrayList<Creature> creatures;
     public ArrayList<Creature> graveyard;
@@ -32,7 +34,7 @@ public class World {
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
-        newGen();
+        newGen(true);
     }
 
     public void update() {
@@ -43,7 +45,7 @@ public class World {
         deadPlants.clear();
         if (creatures.isEmpty()) {
             // All dead, next gen
-            newGen();
+            newGen(false);
         }
         while (plants.size() < 50) {
             spawnVegetable();
@@ -53,43 +55,65 @@ public class World {
         }
     }
 
-    public void newGen() {
+    public void newGen(boolean restart) {
         elements.removeAll(creatures);
-        creatures.clear();
+        graveyard.addAll(creatures);
         Comparator creatureComp = new Comparator<Creature>() {
 
             @Override
             public int compare(Creature t, Creature t1) {
-                if (t.getFitness() < t1.getFitness()) {
-                    return -1;
-                } else if (t.getFitness() > t1.getFitness()) {
-                    return 1;
-                }
-                return 0;
+                // put the highest fitness first (sort in reverse)
+                return (int) (t1.getFitness() - t.getFitness() );
+                /*if (t.getFitness() < t1.getFitness()) {
+                 return -1;
+                 } else if (t.getFitness() > t1.getFitness()) {
+                 return 1;
+                 }
+                 return 0;*/
             }
         };
-        if (graveyard.size() == 0) { // First gen
+        if (graveyard.isEmpty() || restart) { // First gen
+            generation = 0;
             for (int i = 0; i < creatPerGen; i++) {
                 spawnCreature();
             }
-        } else { // Mutate previous gen
-            //graveyard.sort(creatureComp);
-            int x = 0;
+        } else { // Evolve previous gen
+            // Calculate avg fitness
+            float avgFitness = 0;
             for (Creature c : graveyard) {
-                c.getBrain().remap(c.getBrain().getMutatedMap(3f));
-                if (x < creatPerGen) {
-                    c.setHp(100);
-                    creatures.add(c);
-                    elements.add(c);
-                } else {
-                    break;
+                avgFitness += c.getFitness();
+            }
+            avgFitness = avgFitness / graveyard.size();
+            Log.log(Log.INFO, "Gen " + generation + " done. Avg fitness: " + avgFitness);
+            // Start evolution
+            graveyard.sort(creatureComp);
+            for (int i = 0; i < creatPerGen / 2; i++) {
+                Creature c = graveyard.get(i);
+                c.reset();
+                // Mutate
+                if (i != 0) {
+                    try {
+                        // create a child
+                        float[][][] mind = c.getBrain().breed(graveyard.get(i - 1).getBrain().getMap());
+                        // spawn it
+                        spawnCreature(mind);
+                    } catch (Exception ex) {
+                        // Should never happen
+                        Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+                // Mutate parent
+                c.getBrain().remap(c.getBrain().getMutatedMap(0.1f));
+                // Add it back in
+                creatures.add(c);
+                elements.add(c);
             }
             graveyard.clear();
+            generation++;
         }
     }
 
-    private void spawn(boolean isCreature, Brain brain) {
+    private void spawn(boolean isCreature, float[][][] brainMap) {
         int x, y, r;
         boolean overlaps = false;
         if (isCreature) {
@@ -108,12 +132,15 @@ public class World {
             }
         } while (overlaps);
         if (isCreature) {
-            Log.log(Log.INFO,"New Creat: " + x + " " + y);
+            Log.log(Log.INFO, "New Creat: " + x + " " + y);
             Creature c = new Creature(x, y);
+            if (brainMap != null) {
+                c.getBrain().remap(brainMap);
+            }
             elements.add(c);
             creatures.add(c);
         } else {
-            Log.log(Log.INFO,"New Veg: " + x + " " + y);
+            Log.log(Log.INFO, "New Veg: " + x + " " + y);
             Vegetable v = new Vegetable(x, y);
             elements.add(v);
             plants.add(v);
@@ -128,7 +155,7 @@ public class World {
         spawn(true, null);
     }
 
-    private void spawnCreature(Brain b) {
+    private void spawnCreature(float[][][] b) {
         spawn(true, b);
     }
 

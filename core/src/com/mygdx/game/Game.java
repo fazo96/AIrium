@@ -32,7 +32,7 @@ public class Game extends ApplicationAdapter {
     public void render() {
         // Input
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-            world.newGen();
+            world.newGen(false);
         }
         // Update
         world.update();
