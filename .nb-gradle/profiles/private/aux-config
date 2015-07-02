@@ -8,7 +8,13 @@
     </open-files>
     <editor-bookmarks lastBookmarkId="0" xmlns="http://www.netbeans.org/ns/editor-bookmarks/2"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-      <group/>
+      <group>
+        <file>file:/home/fazo/Documents/Git/AIrium/core/src/com/mygdx/game/Game.java</file>
+        <file>file:/home/fazo/Documents/Git/AIrium/core/src/logic/neural/Neuron.java</file>
+        <file>file:/home/fazo/Documents/Git/AIrium/core/src/logic/Creature.java</file>
+        <file>file:/home/fazo/Documents/Git/AIrium/core/src/logic/neural/Brain.java</file>
+        <file>file:/home/fazo/Documents/Git/AIrium/core/src/logic/World.java</file>
+      </group>
     </open-files>
   </auxiliary>
 </gradle-project-properties>

@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import logic.Element;
 import logic.World;
@@ -13,14 +14,16 @@ public class Game extends ApplicationAdapter {
     private static Game game;
     ShapeRenderer shaper;
     private World world;
-    private float cameraSpeed = 5;
+    private float cameraSpeed = 15;
+    private BitmapFont font;
 
     @Override
     public void create() {
+        
         game = this;
-        world = new World(1920, 1080);
+        world = new World(2500, 2500);
         shaper = new ShapeRenderer();
-        //shaper.setAutoShapeType(true);
+        font = new BitmapFont();
     }
 
     @Override
@@ -63,6 +66,7 @@ public class Game extends ApplicationAdapter {
             }
         }
         shaper.setColor(0.3f, 0.3f, 0.3f, 1);
+        // draw borders
         shaper.rect(0, 0, world.getWidth(), world.getHeight());
         shaper.end();
     }

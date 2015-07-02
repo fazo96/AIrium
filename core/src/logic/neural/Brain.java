@@ -149,7 +149,7 @@ public class Brain {
     /**
      * Get a map of this brain's mind.. with a mutation
      *
-     * @param mutationFactor the highest this number, the bigger the mutation
+     * @param mutationFactor the higher this number, the bigger the mutation
      * @return a mutated brain map of this brain's mind
      */
     public float[][][] getMutatedMap(float mutationFactor) {
@@ -163,6 +163,21 @@ public class Brain {
             }
         }
         return res;
+    }
+
+    /**
+     * Apply a mutation to this brain
+     *
+     * @param mutationFactor the higher this number, the bigger the mutation
+     */
+    public void mutate(float mutationFactor) {
+        for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
+        {
+            for (int j = 0; j < neurons[i].length; j++) // neurons per layer
+            {
+                neurons[i][j].setWeights(neurons[i][j].mutate(mutationFactor));
+            }
+        }
     }
 
     public float[][][] breed(float[][][] map) throws Exception {
