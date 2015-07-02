@@ -41,16 +41,16 @@ public class World {
         elements.removeAll(graveyard);
         elements.removeAll(deadPlants);
         plants.removeAll(deadPlants);
-        creatures.removeAll(graveyard);
         deadPlants.clear();
+        creatures.removeAll(graveyard);
         if (creatures.isEmpty()) {
             // All dead, next gen
             newGen(false);
         }
-        while (plants.size() < 50) {
+        while (plants.size() < (width*height)/5000) {
             spawnVegetable();
         }
-        for (Creature e : creatures) {
+        for (Element e : elements) {
             e.update();
         }
     }
@@ -63,7 +63,7 @@ public class World {
             @Override
             public int compare(Creature t, Creature t1) {
                 // put the highest fitness first (sort in reverse)
-                return (int) (t1.getFitness() - t.getFitness() );
+                return (int) (t1.getFitness() - t.getFitness());
                 /*if (t.getFitness() < t1.getFitness()) {
                  return -1;
                  } else if (t.getFitness() > t1.getFitness()) {
@@ -132,7 +132,7 @@ public class World {
             }
         } while (overlaps);
         if (isCreature) {
-            Log.log(Log.INFO, "New Creat: " + x + " " + y);
+            Log.log(Log.DEBUG, "New Creat: " + x + " " + y);
             Creature c = new Creature(x, y);
             if (brainMap != null) {
                 c.getBrain().remap(brainMap);
@@ -140,7 +140,7 @@ public class World {
             elements.add(c);
             creatures.add(c);
         } else {
-            Log.log(Log.INFO, "New Veg: " + x + " " + y);
+            Log.log(Log.DEBUG, "New Veg: " + x + " " + y);
             Vegetable v = new Vegetable(x, y);
             elements.add(v);
             plants.add(v);
@@ -177,6 +177,14 @@ public class World {
 
     public ArrayList<Vegetable> getDeadPlants() {
         return deadPlants;
+    }
+
+    public ArrayList<Creature> getCreatures() {
+        return creatures;
+    }
+
+    public ArrayList<Vegetable> getPlants() {
+        return plants;
     }
 
 }

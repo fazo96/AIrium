@@ -23,7 +23,7 @@ public class Vegetable extends Element {
 
     @Override
     public void update() {
-        if(getSize() < 0){
+        if (getSize() <= 0) {
             Game.get().getWorld().getDeadPlants().add(this);
         }
     }
@@ -31,6 +31,6 @@ public class Vegetable extends Element {
     @Override
     public void render(ShapeRenderer s) {
         s.setColor(1, 1, 1, 1);
-        s.circle(getX(), getY(), getSize());
+        s.circle(getX() + Game.get().getCamera().getX(), getY() + Game.get().getCamera().getY(), getSize());
     }
 }

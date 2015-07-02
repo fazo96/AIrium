@@ -3,6 +3,8 @@ package logic;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
 import com.mygdx.game.Log;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import logic.neural.Brain;
 
 /**
@@ -16,8 +18,8 @@ public class Creature extends Element {
     public static final float max_speed = 3;
 
     private Brain brain;
-    private float dir, speed, sightRange, fov, fitness, rotSpeed;
-    private float hp;
+    private float dir, hp, speed, sightRange, fov, fitness, rotSpeed;
+    private boolean eating = false;
     private Sight sight;
 
     public Creature(float x, float y) {
@@ -29,7 +31,7 @@ public class Creature extends Element {
         sightRange = 60;
         fov = (float) Math.PI / 1.5f;
         fitness = 0;
-        brain = new Brain(3, 2, 2, 8);
+        brain = new Brain(4, 3, 1, 6);
     }
 
     @Override
@@ -48,12 +50,18 @@ public class Creature extends Element {
         // apply speed
         float xMul = (float) Math.cos(dir), yMul = (float) Math.sin(dir);
         move(xMul * speed, yMul * speed);
-        if(getX() < 0) setX(0);
-        if(getY() < 0) setX(0);
-        if(getX() > Game.get().getWorld().getWidth())
-            setX(Game.get().getWorld().getWidth());
-        if(getY() > Game.get().getWorld().getHeight())
-            setY(Game.get().getWorld().getHeight());
+        if (getX() < 0) {
+            setX(Game.get().getWorld().getWidth()+getX());
+        }
+        if (getY() < 0) {
+            setX(Game.get().getWorld().getHeight()+getY());
+        }
+        if (getX() > Game.get().getWorld().getWidth()) {
+            setX(getX()-Game.get().getWorld().getWidth());
+        }
+        if (getY() > Game.get().getWorld().getHeight()) {
+            setY(getY()-Game.get().getWorld().getHeight());
+        }
         dir += rotSpeed;
         // try eating
         eat();
@@ -66,29 +74,36 @@ public class Creature extends Element {
         }
         sight = look(); // take a look
         // feed data to brain
-        float[] values = new float[3];
-        // 0: type of sight
+        float[] values = new float[4];
+        // 0: see food
         // 1: distance
         // 2: angle
-        if (sight == null) {
+        // 3: food sensor
+        if (sight == null || sight.getElement() == null) {
             values[0] = 0;
-            values[1] = 1;
+            values[1] = 0;
             values[2] = 0;
-        } else if (sight.getElement() instanceof Creature) {
-            values[0] = 1;
+        } else if (sight.getElement() instanceof Vegetable) {
+            values[1] = 1;
             values[1] = sight.getDistance() / sightRange;
             values[2] = sight.getAngle();
         } else {
-            values[0] = 0.5f;
+            values[0] = 0f;
             values[1] = sight.getDistance() / sightRange;
             values[2] = sight.getAngle();
         }
-        brain.input(values);
+        values[3] = eating ? 1 : 0;
+        try {
+            brain.input(values);
+        } catch (Exception ex) {
+            // Should not happen
+            Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
+        }
         // compute behavior
         float[] actions = brain.compute();
-        Log.log(Log.DEBUG,"Accel: " + actions[0] + " Rot: " + actions[1]);
-        speed = actions[0]*max_speed;
-        rotSpeed = actions[1]/10;
+        Log.log(Log.DEBUG, "Accel: " + actions[0] + " RotClock: " + actions[1] + " RotAntiClock: " + actions[2]);
+        speed = actions[0] * max_speed;
+        rotSpeed = actions[1] - actions[2];
     }
 
     public void setHp(float hp) {
@@ -99,25 +114,24 @@ public class Creature extends Element {
     public void render(ShapeRenderer s) {
         // Body
         s.setColor(1 - (hp / 100), hp / 100, 0, 1);
-        s.circle(getX(), getY(), getSize());
+        s.circle(getX() + Game.get().getCamera().getX(), getY() + Game.get().getCamera().getY(), getSize());
         // Eye
         double relX = Math.cos(dir) * getSize(), relY = Math.sin(dir) * getSize();
+        s.setColor(1, 1, 1, 1);
         if (sight != null) {
-            float c = sight.getDistance() / sightRange*2 + sightRange;
+            float c = sight.getDistance() / sightRange * 2 + sightRange;
             if (sight.getElement() instanceof Creature) {
                 s.setColor(c, 0, 0, 1);
             } else if (sight.getElement() instanceof Vegetable) {
                 s.setColor(0, c, 0, 1);
-            } else {
-                s.setColor(1, 1, 1, 1);
             }
         }
-        s.circle((float) relX + getX(), (float) relY + getY(), 3);
+        s.circle((float) relX + getX() + Game.get().getCamera().getX(), (float) relY + getY() + Game.get().getCamera().getY(), 3);
         //FOV
         float degrees = fov * 180f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
         s.setColor(0.3f, 0.3f, 0.3f, 1);
-        s.arc((float) relX + getX(), (float) relY + getY(), sightRange, orient, degrees);
+        s.arc((float) relX + getX() + Game.get().getCamera().getX(), (float) relY + getY() + Game.get().getCamera().getY(), sightRange, orient, degrees);
     }
 
     public Sight look() {
@@ -153,9 +167,12 @@ public class Creature extends Element {
     }
 
     public void eat() {
-        for (Element e : Game.get().getWorld().getElements()) {
-            if (e instanceof Vegetable && overlaps(e)) {
+        eating = false;
+        for (Element e : Game.get().getWorld().getPlants()) {
+            if (overlaps(e)) {
+                eating = true;
                 e.setSize(e.getSize() - 0.1f);
+                if(e.getSize() == 0) e.setSize(0);
                 hp++;
                 fitness++;
                 if (hp > 100) {
@@ -177,9 +194,9 @@ public class Creature extends Element {
         return fitness;
     }
 
-    public void reset(){
+    public void reset() {
         fitness = 0;
         hp = 100;
     }
-    
+
 }
