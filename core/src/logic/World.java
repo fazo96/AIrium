@@ -32,7 +32,7 @@ public class World {
         elements = new ArrayList();
         creatures = new ArrayList();
         toAdd = new ArrayList();
-        creatPerGen = Math.min(Math.round(width * height / 20000), 50);
+        creatPerGen = 50;
         nPlants = Math.round(width * height / 5500);
         plants = new ArrayList();
         deadPlants = new ArrayList();
