@@ -26,6 +26,7 @@ public class Game extends ApplicationAdapter {
         shaper.setAutoShapeType(true);
         font = new BitmapFont();
     }
+    
 
     @Override
     public void render() {
@@ -55,7 +56,7 @@ public class Game extends ApplicationAdapter {
             paused = !paused;
         }
         // Update
-        if (!paused) {
+        if (!paused && !world.isBusy()) {
             world.update();
         }
         // Draw

@@ -42,7 +42,7 @@ public abstract class Element {
         y += deltaY;
     }
 
-    public abstract void update();
+    public abstract boolean update();
 
     public abstract void render(ShapeRenderer s);
 

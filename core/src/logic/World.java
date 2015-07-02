@@ -19,6 +19,8 @@ public class World {
 
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
+    private boolean busy = true, workerDone = false;
+    private Thread worker;
     public ArrayList<Element> elements;
     public ArrayList<Element> toAdd;
     public ArrayList<Creature> creatures;
@@ -37,10 +39,26 @@ public class World {
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
+        worker = new Thread() {
+            public void run() {
+                for (;;) {
+                    if (!isBusy() && !workerDone) {
+                        workerDone = false;
+                        for (Vegetable v : plants) {
+                            v.update();
+                        }
+                        workerDone = true;
+                    } else {
+                        Thread.yield();
+                    }
+                }
+            }
+        };
         newGen(true);
     }
 
     public void update() {
+        busy = true;
         for (Element e : toAdd) {
             elements.add(e);
             if (e instanceof Creature) {
@@ -62,8 +80,19 @@ public class World {
         while (plants.size() < nPlants) {
             spawnVegetable();
         }
-        for (Element e : elements) {
-            e.update();
+        busy = false;
+        workerDone = false;
+        boolean ready = true;
+        do {
+            for (Creature c : creatures) {
+                if (!c.isDone()) {
+                    ready = false;
+                }
+            }
+        } while (!workerDone || !ready);
+        busy = true;
+        for (Creature c : creatures) {
+            c.applyToWorld();
         }
     }
 
@@ -81,7 +110,7 @@ public class World {
         };
         if (graveyard.isEmpty() || restart) { // First gen
             generation = 1;
-            Log.log(Log.INFO, "Starting from generation 1: spawning "+creatPerGen+" creatures.");
+            Log.log(Log.INFO, "Starting from generation 1: spawning " + creatPerGen + " creatures.");
             for (int i = 0; i < creatPerGen; i++) {
                 spawnCreature();
             }
@@ -121,6 +150,13 @@ public class World {
             }
             graveyard.clear();
             generation++;
+        }
+        for (Creature c : creatures) {
+            try {
+                c.getThread().start();
+            } catch (Exception ex) {
+                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -204,6 +240,10 @@ public class World {
 
     public ArrayList<Vegetable> getPlants() {
         return plants;
+    }
+
+    public boolean isBusy() {
+        return busy;
     }
 
 }

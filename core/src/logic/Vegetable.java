@@ -22,11 +22,13 @@ public class Vegetable extends Element {
     }
 
     @Override
-    public void update() {
+    public boolean update() {
         setSize(getSize()-decayRate);
         if (getSize() <= 0) {
             Game.get().getWorld().getDeadPlants().add(this);
+            return false;
         }
+        return true;
     }
 
     @Override

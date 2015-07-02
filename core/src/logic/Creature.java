@@ -19,8 +19,9 @@ public class Creature extends Element implements Runnable {
 
     private Brain brain;
     private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
-    private boolean eating = false, killing = false;
+    private boolean eating = false, killing = false, done = false;
     private Sight[] sights;
+    private Thread thread;
 
     public Creature(float x, float y) {
         super(x, y, default_radius);
@@ -33,15 +34,25 @@ public class Creature extends Element implements Runnable {
         fov = (float) Math.PI / 2f;
         fitness = 0;
         brain = new Brain(10, 5, 2, 10);
+        thread = new Thread(this);
     }
 
     @Override
     public void run() {
-        update();
+        for (;;) {
+            done = false;
+            while (Game.get().getWorld().isBusy()) {
+                Thread.yield();
+            }
+            if (!update()) {
+                break;
+            }
+            done = true;
+        }
     }
 
     @Override
-    public void update() {
+    public boolean update() {
         // apply hunger
         hp -= 0.3f;
         prevHp = hp;
@@ -51,7 +62,7 @@ public class Creature extends Element implements Runnable {
              carcass.setSize(getSize());
              carcass.setDecayRate(0.01f);
              Game.get().getWorld().add(carcass);*/
-            return;
+            return false;
         }
         // take a look
         sights = interactWithWorld();
@@ -116,7 +127,7 @@ public class Creature extends Element implements Runnable {
         } else if (beak < 0) {
             beak = 0;
         }
-        applyToWorld();
+        return true;
     }
 
     public void applyToWorld() {
@@ -286,11 +297,19 @@ public class Creature extends Element implements Runnable {
         hp = 100;
     }
 
+    public boolean isDone() {
+        return done;
+    }
+
     public float getHp() {
         return hp;
     }
 
     public void setHp(float hp) {
         this.hp = hp;
+    }
+
+    public Thread getThread() {
+        return thread;
     }
 }
