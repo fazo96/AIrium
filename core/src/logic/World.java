@@ -59,6 +59,7 @@ public class World {
     public void newGen(boolean restart) {
         elements.removeAll(creatures);
         graveyard.addAll(creatures);
+        creatures.clear();
         Comparator creatureComp = new Comparator<Creature>() {
 
             @Override

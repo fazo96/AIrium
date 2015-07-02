@@ -1,3 +1,5 @@
+.nb-gradle/profiles/private/*
+
 ## Java
 
 *.class
