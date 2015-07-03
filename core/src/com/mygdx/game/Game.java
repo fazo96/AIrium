@@ -66,7 +66,7 @@ public class Game extends ApplicationAdapter {
                 try {
                     e.render(shaper);
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                // No idea why it happens, but it's rendering so meh
+                    // Killed while rendering
                     //Log.log(Log.ERROR, ex+"");
                 }
             }
