@@ -9,6 +9,7 @@ import com.mygdx.game.Game;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,7 @@ public class World implements Runnable {
     private final Comparator<Creature> creatureComp;
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
+    private float fpsLimit = 60;
     private boolean busy = true;
     public ArrayList<Element> elements;
     public ArrayList<Element> toAdd;
@@ -51,10 +53,24 @@ public class World implements Runnable {
 
     @Override
     public void run() {
+        Date d;
+        long time;
+        float target;
         for (;;) {
-            // Add speed limiter here
             if (!Game.get().isPaused()) {
+                d = new Date();
                 update();
+                if (fpsLimit > 0) {
+                    time = new Date().getTime() - d.getTime();
+                    target = 1000 / fpsLimit;
+                    if (time < target) {
+                        try {
+                            Thread.sleep((long) (target - time));
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
             } else {
                 try {
                     Thread.sleep(100);
@@ -228,6 +244,14 @@ public class World implements Runnable {
 
     public void add(Element e) {
         toAdd.add(e);
+    }
+
+    public float getFpsLimit() {
+        return fpsLimit;
+    }
+
+    public void setFpsLimit(float fpsLimit) {
+        this.fpsLimit = fpsLimit;
     }
 
     public ArrayList<Element> getElements() {

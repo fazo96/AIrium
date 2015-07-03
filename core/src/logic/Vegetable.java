@@ -14,11 +14,11 @@ import com.mygdx.game.Game;
  */
 public class Vegetable extends Element {
 
-    public static final int default_radius = 5;
+    public static final int default_radius = 10;
     private float decayRate = 0;
 
     public Vegetable(float x, float y) {
-        super(x, y, default_radius);
+        super(x, y, (float) (default_radius+(Math.random()*default_radius/2)-default_radius/2));
     }
 
     @Override

@@ -3,6 +3,7 @@ package logic;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
 import com.mygdx.game.Log;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import logic.neural.Brain;
@@ -15,19 +16,19 @@ import logic.neural.Brain;
 public class Creature extends Element implements Runnable {
 
     public static final int default_radius = 20;
-    public static final float max_speed = 3, max_rot_speed = 0.05f;
+    public static final float max_speed = 3, max_rot_speed = 0.05f, max_beak = default_radius / 2;
 
     private Brain brain;
-    private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
+    private float dir, hp, speed, sightRange, fov, fitness, rotSpeed, beak, hpDiff;
     private boolean eating = false, killing = false, done = true;
     private Sight[] sights;
     private Thread thread;
+    private ArrayList<Action> actions;
 
     public Creature(float x, float y) {
         super(x, y, default_radius);
         dir = (float) (Math.random() * 2 * Math.PI);
         hp = 100;
-        prevHp = 100;
         speed = 0;
         rotSpeed = 0;
         sightRange = 350;
@@ -35,6 +36,7 @@ public class Creature extends Element implements Runnable {
         fitness = 0;
         brain = new Brain(10, 5, 2, 10);
         sights = new Sight[2];
+        actions = new ArrayList<Action>();
     }
 
     @Override
@@ -64,16 +66,16 @@ public class Creature extends Element implements Runnable {
 
     @Override
     public boolean update() {
+        actions.clear();
         // apply hunger
         hp -= 0.3f;
-        prevHp = hp;
         if (hp < 0) { // Dead
             /*
-            Vegetable carcass = new Vegetable(getX(), getY());
-            carcass.setSize(getSize());
-            carcass.setDecayRate(0.01f);
-            Game.get().getWorld().add(carcass);
-            */
+             Vegetable carcass = new Vegetable(getX(), getY());
+             carcass.setSize(getSize());
+             carcass.setDecayRate(0.01f);
+             Game.get().getWorld().add(carcass);
+             */
             return false;
         }
         // take a look
@@ -115,27 +117,27 @@ public class Creature extends Element implements Runnable {
             }
         }
         values[8] = eating || killing ? 1 : 0;
-        values[9] = prevHp > hp ? 1 : 0;
+        values[9] = hpDiff < 0 ? 1 : 0;
         // Compute brain
-        float[] actions = null;
+        float[] outputs = null;
         try {
-            actions = brain.compute(values);
+            outputs = brain.compute(values);
         } catch (Exception ex) {
             // Should not happen
             Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Log.log(Log.DEBUG, "Accel: " + actions[0] + " RotClock: " + actions[1] + " RotAntiClock: " + actions[2] + " Beak: " + actions[3]);
-        speed = (actions[0] * 2 - actions[4] / 2) * max_speed;
-        rotSpeed = (actions[1] - actions[2]) / 3;
+        Log.log(Log.DEBUG, "Accel: " + outputs[0] + " RotClock: " + outputs[1] + " RotAntiClock: " + outputs[2] + " Beak: " + outputs[3]);
+        speed = (outputs[0] * 2 - outputs[4] / 2) * max_speed;
+        rotSpeed = (outputs[1] - outputs[2]) / 3;
         /*if (rotSpeed > max_rot_speed) {
          rotSpeed = max_rot_speed;
          }
          if (rotSpeed < -max_rot_speed) {
          rotSpeed = -max_rot_speed;
          }*/
-        beak = actions[3];
-        if (beak > default_radius * 3) {
-            beak = default_radius * 3;
+        beak = outputs[3] * max_beak;
+        if (beak > max_beak) {
+            beak = max_beak;
         } else if (beak < 0) {
             beak = 0;
         }
@@ -146,6 +148,9 @@ public class Creature extends Element implements Runnable {
      * Applies the creature's desired movements to the world
      */
     public void applyToWorld() {
+        for (Action a : actions) {
+            a.apply();
+        }
         if (speed > max_speed) {
             speed = max_speed;
         }
@@ -178,10 +183,10 @@ public class Creature extends Element implements Runnable {
 
     @Override
     public void render(ShapeRenderer s) {
-        if (prevHp > hp || killing) {
+        if (hpDiff < 0 || killing) {
             // Kill/BeKilled mark
             s.set(ShapeRenderer.ShapeType.Filled);
-            s.setColor(prevHp > hp ? 1 : 0, killing ? 1 : 0, 0, 1);
+            s.setColor(hpDiff < 0 ? 1 : 0, killing ? 1 : 0, 0, 1);
             s.circle(getX(), getY(), default_radius);
             s.set(ShapeRenderer.ShapeType.Line);
         }
@@ -195,8 +200,8 @@ public class Creature extends Element implements Runnable {
         s.setColor(c0, c1, sights[0] == null && sights[1] == null ? 1 : 0, 1);
         s.circle((float) relX * getSize() * 0.6f + getX(), (float) relY * getSize() * 0.6f + getY(), 3);
         // Beak
-        s.setColor(beak / default_radius * 3, 1 - beak / default_radius * 3, 0, 1);
-        s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / default_radius * 3) + getX()), (float) (relY * getSize() * (1.5f + beak / default_radius * 3) + getY()));
+        s.setColor(beak / max_beak, 1 - beak / max_beak, 0, 1);
+        s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / max_beak) + getX()), (float) (relY * getSize() * (1.5f + beak / max_beak) + getY()));
         //FOV
         float degrees = fov * 180f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
@@ -236,11 +241,12 @@ public class Creature extends Element implements Runnable {
             if (overlaps(e)) {
                 eating = true;
                 if (hp < 100) {
-                    e.setSize(e.getSize() - 0.5f);
+                    actions.add(new Action(this, e, 0.5f));
+                    //e.setSize(e.getSize() - 0.5f);
                 }
-                if (e.getSize() <= 0) {
-                    e.setSize(0);
-                }
+                /*if (e.getSize() <= 0) {
+                 e.setSize(0);
+                 }*/
                 hp++;
                 fitness++;
                 if (hp > 100) {
@@ -282,13 +288,14 @@ public class Creature extends Element implements Runnable {
             // Check if attackable
             if (tempDist < beak && Math.abs(relAngle - ndir) < fov / 4) {
                 // Attacking!
-                hp += beak / default_radius * 3;
-                fitness += 10;
+                hp += beak / max_beak;
+                fitness++;
                 if (hp > 100) {
                     hp = 100;
                 }
                 killing = true;
-                e.setHp(e.getHp() - beak / default_radius * 3);
+                actions.add(new Action(this, e, beak / max_beak));
+                //e.setHp(e.getHp() - beak / max_beak);
             }
 
         }
@@ -345,5 +352,9 @@ public class Creature extends Element implements Runnable {
 
     public Thread getThread() {
         return thread;
+    }
+
+    public ArrayList<Action> getActions() {
+        return actions;
     }
 }

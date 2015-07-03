@@ -60,6 +60,15 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             paused = !paused;
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            if (world.getFpsLimit() > 0) {
+                Log.log(Log.INFO, "Disabling FPS Limit");
+                world.setFpsLimit(0);
+            } else {
+                Log.log(Log.INFO, "Setting FPS Limit to 60");
+                world.setFpsLimit(60);
+            }
+        }
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
