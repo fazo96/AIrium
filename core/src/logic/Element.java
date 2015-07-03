@@ -42,8 +42,18 @@ public abstract class Element {
         y += deltaY;
     }
 
+    /**
+     * Update element logic
+     *
+     * @return true if element is still alive
+     */
     public abstract boolean update();
 
+    /**
+     * Draw the element
+     *
+     * @param s the instance used to draw shapes
+     */
     public abstract void render(ShapeRenderer s);
 
     public float getX() {

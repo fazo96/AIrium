@@ -19,7 +19,7 @@ public class Creature extends Element implements Runnable {
 
     private Brain brain;
     private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
-    private boolean eating = false, killing = false, done = false;
+    private boolean eating = false, killing = false, done = true;
     private Sight[] sights;
     private Thread thread;
 
@@ -35,8 +35,6 @@ public class Creature extends Element implements Runnable {
         fitness = 0;
         brain = new Brain(10, 5, 2, 10);
         sights = new Sight[2];
-        thread = new Thread(this);
-        thread.start();
     }
 
     @Override
@@ -44,21 +42,24 @@ public class Creature extends Element implements Runnable {
         for (;;) {
             while (Game.get().getWorld() == null || Game.get().getWorld().isBusy()) {
                 /*try {
-                    Thread.sleep(30);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
+                 Thread.sleep(30);
+                 } catch (InterruptedException ex) {
+                 Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
+                 }*/
                 Thread.yield();
             }
-            if (!done && !update()) {
+            if (done) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    //Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else if (!update()) {
                 // Dead
-                break;
+                Game.get().getWorld().getGraveyard().add(this);
             }
             done = true;
         }
-            done = true;
-        // Dead
-        Game.get().getWorld().getGraveyard().add(this);
     }
 
     @Override
@@ -140,6 +141,9 @@ public class Creature extends Element implements Runnable {
         return true;
     }
 
+    /**
+     * Applies the creature's desired movements to the world
+     */
     public void applyToWorld() {
         if (speed > max_speed) {
             speed = max_speed;
@@ -199,6 +203,11 @@ public class Creature extends Element implements Runnable {
         s.arc((float) relX * getSize() + getX(), (float) relY * getSize() + getY(), sightRange, orient, degrees);
     }
 
+    /**
+     * Reads data from sensors and applies eat/kill mechanics
+     *
+     * @return sensor data
+     */
     public Sight[] interactWithWorld() {
         eating = false;
         Sight[] sights = new Sight[2];
@@ -290,6 +299,20 @@ public class Creature extends Element implements Runnable {
         return sights;
     }
 
+    public void resume() {
+        if (!done) {
+            Log.log(Log.ERROR, "Tried to resume running worker!");
+        } else {
+            done = false;
+            if (thread == null) {
+                thread = new Thread(this);
+                thread.start();
+            } else {
+                thread.interrupt();
+            }
+        }
+    }
+
     public Brain getBrain() {
         return brain;
     }
@@ -309,10 +332,6 @@ public class Creature extends Element implements Runnable {
 
     public boolean isDone() {
         return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
     }
 
     public float getHp() {

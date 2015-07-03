@@ -17,6 +17,7 @@ public class Game extends ApplicationAdapter {
     private World world;
     private float cameraSpeed = 15;
     private BitmapFont font;
+    private Thread worldThread;
     private boolean paused = false;
 
     @Override
@@ -26,7 +27,10 @@ public class Game extends ApplicationAdapter {
         shaper = new ShapeRenderer();
         shaper.setAutoShapeType(true);
         font = new BitmapFont();
-        new Thread(world).start();
+        worldThread = new Thread(world);
+        worldThread.setPriority(Thread.MAX_PRIORITY);
+        world.newGen(true);
+        worldThread.start();
     }
 
     @Override

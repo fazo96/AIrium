@@ -180,6 +180,13 @@ public class Brain {
         }
     }
 
+    /**
+     * Use this brain's neural map and another one to create a unique child
+     *
+     * @param map the other parent of the child
+     * @return a unique child mind
+     * @throws Exception if the brains have a different layout
+     */
     public float[][][] breed(float[][][] map) throws Exception {
         float[][][] res = new float[neurons.length - 1][][];
         if (map.length != neurons.length - 1) {

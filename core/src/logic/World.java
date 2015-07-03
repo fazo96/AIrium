@@ -18,10 +18,10 @@ import java.util.logging.Logger;
  */
 public class World implements Runnable {
 
+    private final Comparator<Creature> creatureComp;
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
-    private boolean busy = true, workerDone = false;
-    private final Thread worker;
+    private boolean busy = true;
     public ArrayList<Element> elements;
     public ArrayList<Element> toAdd;
     public ArrayList<Creature> creatures;
@@ -40,28 +40,13 @@ public class World implements Runnable {
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
-        worker = new Thread() {
+        creatureComp = new Comparator<Creature>() {
             @Override
-            public void run() {
-                for (;;) {
-                    if (!workerDone) {
-                        for (Vegetable v : plants) {
-                            v.update();
-                        }
-                        workerDone = true;
-                    } else {
-                        Thread.yield();
-                        /*try {
-                         Thread.sleep(30);
-                         } catch (InterruptedException ex) {
-                         Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-                         }*/
-                    }
-                }
+            public int compare(Creature t, Creature t1) {
+                // put the highest fitness first (sort in reverse)
+                return (int) (t1.getFitness() - t.getFitness());
             }
         };
-        worker.start();
-        newGen(true);
     }
 
     @Override
@@ -105,12 +90,14 @@ public class World implements Runnable {
         while (plants.size() < nPlants) {
             spawnVegetable();
         }
-        for (Creature c : creatures) {
-            c.setDone(false);
+        for (Vegetable v : plants) {
+            v.update();
         }
-        workerDone = false;
-        busy = false;
         Log.log(Log.DEBUG, "Launching Creature workers");
+        for (Creature c : creatures) {
+            c.resume();
+        }
+        busy = false;
         int readyCount = 0;
         Thread.yield();
         do {
@@ -120,17 +107,8 @@ public class World implements Runnable {
                     readyCount++;
                 }
             }
-            Log.log(Log.DEBUG, "DoneCount: " + readyCount + " out of " + creatures.size());
+            //Log.log(Log.DEBUG, "DoneCount: " + readyCount + " out of " + creatures.size());
         } while (readyCount < creatures.size());
-        Log.log(Log.DEBUG, "Done creatures, awaiting veg worker...");
-        while (!workerDone) {
-            Thread.yield();
-            /*try {
-             Thread.sleep(30);
-             } catch (InterruptedException ex) {
-             Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-             }*/
-        }
         busy = true;
         Log.log(Log.DEBUG, "Paused workers. Applying modifications to world... ");
         for (Creature c : creatures) {
@@ -143,14 +121,6 @@ public class World implements Runnable {
         elements.removeAll(creatures);
         graveyard.addAll(creatures);
         creatures.clear();
-        Comparator creatureComp = new Comparator<Creature>() {
-
-            @Override
-            public int compare(Creature t, Creature t1) {
-                // put the highest fitness first (sort in reverse)
-                return (int) (t1.getFitness() - t.getFitness());
-            }
-        };
         if (graveyard.isEmpty() || restart) { // First gen
             generation = 1;
             Log.log(Log.INFO, "Starting from generation 1: spawning " + creatPerGen + " creatures.");

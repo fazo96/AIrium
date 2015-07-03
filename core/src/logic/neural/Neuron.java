@@ -70,7 +70,7 @@ public class Neuron {
         }
         // sigmoid function
         float res = (float) (1 / (1 + Math.pow(Math.E, a * -1)));
-        Log.log(Log.DEBUG, "Computed Value " + res + " for neuron");
+        //Log.log(Log.DEBUG, "Computed Value " + res + " for neuron");
         return res;
     }
 
