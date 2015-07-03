@@ -35,8 +35,8 @@ public class World implements Runnable {
         elements = new ArrayList();
         creatures = new ArrayList();
         toAdd = new ArrayList();
-        creatPerGen = 50;
-        nPlants = Math.round(width * height / 5500);
+        creatPerGen = 40;
+        nPlants = Math.round(width * height / 11000);
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
@@ -84,8 +84,9 @@ public class World implements Runnable {
         creatures.removeAll(graveyard);
         if (creatures.isEmpty()) {
             // All dead, next gen
-            Log.log(Log.DEBUG, "Newgen.");
             newGen(false);
+        } else {
+            Log.log(Log.DEBUG, "Dead: " + graveyard.size() + " Alive: " + creatures.size());
         }
         while (plants.size() < nPlants) {
             spawnVegetable();
@@ -128,6 +129,7 @@ public class World implements Runnable {
                 spawnCreature();
             }
         } else { // Evolve previous gen
+            Log.log(Log.INFO, "Preparing generation " + (generation + 1));
             graveyard.sort(creatureComp); // sort by fitness
             // Prepare best agent list
             int topSize = (int) Math.round(graveyard.size() * 0.05f);

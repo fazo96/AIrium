@@ -68,11 +68,12 @@ public class Creature extends Element implements Runnable {
         hp -= 0.3f;
         prevHp = hp;
         if (hp < 0) { // Dead
-            //Game.get().getWorld().getGraveyard().add(this);
-            /*Vegetable carcass = new Vegetable(getX(), getY());
-             carcass.setSize(getSize());
-             carcass.setDecayRate(0.01f);
-             Game.get().getWorld().add(carcass);*/
+            /*
+            Vegetable carcass = new Vegetable(getX(), getY());
+            carcass.setSize(getSize());
+            carcass.setDecayRate(0.01f);
+            Game.get().getWorld().add(carcass);
+            */
             return false;
         }
         // take a look
