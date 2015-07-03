@@ -34,21 +34,31 @@ public class Creature extends Element implements Runnable {
         fov = (float) Math.PI / 2f;
         fitness = 0;
         brain = new Brain(10, 5, 2, 10);
+        sights = new Sight[2];
         thread = new Thread(this);
+        thread.start();
     }
 
     @Override
     public void run() {
         for (;;) {
-            done = false;
-            while (Game.get().getWorld().isBusy()) {
+            while (Game.get().getWorld() == null || Game.get().getWorld().isBusy()) {
+                /*try {
+                    Thread.sleep(30);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
+                }*/
                 Thread.yield();
             }
-            if (!update()) {
+            if (!done && !update()) {
+                // Dead
                 break;
             }
             done = true;
         }
+            done = true;
+        // Dead
+        Game.get().getWorld().getGraveyard().add(this);
     }
 
     @Override
@@ -57,7 +67,7 @@ public class Creature extends Element implements Runnable {
         hp -= 0.3f;
         prevHp = hp;
         if (hp < 0) { // Dead
-            Game.get().getWorld().getGraveyard().add(this);
+            //Game.get().getWorld().getGraveyard().add(this);
             /*Vegetable carcass = new Vegetable(getX(), getY());
              carcass.setSize(getSize());
              carcass.setDecayRate(0.01f);
@@ -299,6 +309,10 @@ public class Creature extends Element implements Runnable {
 
     public boolean isDone() {
         return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 
     public float getHp() {

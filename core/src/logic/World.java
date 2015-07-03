@@ -20,7 +20,7 @@ public class World {
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
     private boolean busy = true, workerDone = false;
-    private Thread worker;
+    private final Thread worker;
     public ArrayList<Element> elements;
     public ArrayList<Element> toAdd;
     public ArrayList<Creature> creatures;
@@ -40,25 +40,32 @@ public class World {
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
         worker = new Thread() {
+            @Override
             public void run() {
                 for (;;) {
-                    if (!isBusy() && !workerDone) {
-                        workerDone = false;
+                    if (!workerDone) {
                         for (Vegetable v : plants) {
                             v.update();
                         }
                         workerDone = true;
                     } else {
                         Thread.yield();
+                        /*try {
+                         Thread.sleep(30);
+                         } catch (InterruptedException ex) {
+                         Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                         }*/
                     }
                 }
             }
         };
+        worker.start();
         newGen(true);
     }
 
     public void update() {
         busy = true;
+        Log.log(Log.DEBUG,"Started.");
         for (Element e : toAdd) {
             elements.add(e);
             if (e instanceof Creature) {
@@ -75,25 +82,44 @@ public class World {
         creatures.removeAll(graveyard);
         if (creatures.isEmpty()) {
             // All dead, next gen
+            Log.log(Log.DEBUG,"Newgen.");
             newGen(false);
         }
         while (plants.size() < nPlants) {
             spawnVegetable();
         }
-        busy = false;
+        for (Creature c : creatures) {
+            c.setDone(false);
+        }
         workerDone = false;
-        boolean ready = true;
+        busy = false;
+        Log.log(Log.DEBUG,"Launching Creature workers");
+        int readyCount = 0;
+        Thread.yield();
         do {
+            readyCount = 0;
             for (Creature c : creatures) {
-                if (!c.isDone()) {
-                    ready = false;
+                if (c.isDone()) {
+                    readyCount++;
                 }
             }
-        } while (!workerDone || !ready);
+            Log.log(Log.DEBUG,"DoneCount: " + readyCount + " out of " + creatures.size());
+        } while (readyCount < creatures.size());
+        Log.log(Log.DEBUG,"Done creatures, awaiting veg worker...");
+        while (!workerDone) {
+            Thread.yield();
+            /*try {
+             Thread.sleep(30);
+             } catch (InterruptedException ex) {
+             Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+             }*/
+        }
         busy = true;
+        Log.log(Log.DEBUG,"Paused workers. Applying modifications to world... ");
         for (Creature c : creatures) {
             c.applyToWorld();
         }
+        Log.log(Log.DEBUG,"Done.");
     }
 
     public void newGen(boolean restart) {
@@ -150,13 +176,6 @@ public class World {
             }
             graveyard.clear();
             generation++;
-        }
-        for (Creature c : creatures) {
-            try {
-                c.getThread().start();
-            } catch (Exception ex) {
-                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
     }
 

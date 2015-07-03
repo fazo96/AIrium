@@ -56,7 +56,7 @@ public class Game extends ApplicationAdapter {
             paused = !paused;
         }
         // Update
-        if (!paused && !world.isBusy()) {
+        if (!paused && world.isBusy()) {
             world.update();
         }
         // Draw
