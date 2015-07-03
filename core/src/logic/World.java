@@ -5,6 +5,7 @@
  */
 package logic;
 
+import com.mygdx.game.Game;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author fazo
  */
-public class World {
+public class World implements Runnable {
 
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
@@ -63,9 +64,25 @@ public class World {
         newGen(true);
     }
 
+    @Override
+    public void run() {
+        for (;;) {
+            // Add speed limiter here
+            if (!Game.get().isPaused()) {
+                update();
+            } else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
     public void update() {
         busy = true;
-        Log.log(Log.DEBUG,"Started.");
+        Log.log(Log.DEBUG, "Started.");
         for (Element e : toAdd) {
             elements.add(e);
             if (e instanceof Creature) {
@@ -82,7 +99,7 @@ public class World {
         creatures.removeAll(graveyard);
         if (creatures.isEmpty()) {
             // All dead, next gen
-            Log.log(Log.DEBUG,"Newgen.");
+            Log.log(Log.DEBUG, "Newgen.");
             newGen(false);
         }
         while (plants.size() < nPlants) {
@@ -93,7 +110,7 @@ public class World {
         }
         workerDone = false;
         busy = false;
-        Log.log(Log.DEBUG,"Launching Creature workers");
+        Log.log(Log.DEBUG, "Launching Creature workers");
         int readyCount = 0;
         Thread.yield();
         do {
@@ -103,9 +120,9 @@ public class World {
                     readyCount++;
                 }
             }
-            Log.log(Log.DEBUG,"DoneCount: " + readyCount + " out of " + creatures.size());
+            Log.log(Log.DEBUG, "DoneCount: " + readyCount + " out of " + creatures.size());
         } while (readyCount < creatures.size());
-        Log.log(Log.DEBUG,"Done creatures, awaiting veg worker...");
+        Log.log(Log.DEBUG, "Done creatures, awaiting veg worker...");
         while (!workerDone) {
             Thread.yield();
             /*try {
@@ -115,11 +132,11 @@ public class World {
              }*/
         }
         busy = true;
-        Log.log(Log.DEBUG,"Paused workers. Applying modifications to world... ");
+        Log.log(Log.DEBUG, "Paused workers. Applying modifications to world... ");
         for (Creature c : creatures) {
             c.applyToWorld();
         }
-        Log.log(Log.DEBUG,"Done.");
+        Log.log(Log.DEBUG, "Done.");
     }
 
     public void newGen(boolean restart) {

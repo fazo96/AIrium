@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import java.util.ConcurrentModificationException;
 import logic.Element;
 import logic.World;
 
@@ -25,8 +26,8 @@ public class Game extends ApplicationAdapter {
         shaper = new ShapeRenderer();
         shaper.setAutoShapeType(true);
         font = new BitmapFont();
+        new Thread(world).start();
     }
-    
 
     @Override
     public void render() {
@@ -55,22 +56,21 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             paused = !paused;
         }
-        // Update
-        if (!paused && world.isBusy()) {
-            world.update();
-        }
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         shaper.setColor(1, 1, 1, 1);
         shaper.begin(ShapeRenderer.ShapeType.Line);
-        for (Element e : world.getElements()) {
-            try {
-                e.render(shaper);
-            } catch (ArrayIndexOutOfBoundsException ex) {
+        try {
+            for (Element e : world.getElements()) {
+                try {
+                    e.render(shaper);
+                } catch (ArrayIndexOutOfBoundsException ex) {
                 // No idea why it happens, but it's rendering so meh
-                //Log.log(Log.ERROR, ex+"");
+                    //Log.log(Log.ERROR, ex+"");
+                }
             }
+        } catch (ConcurrentModificationException e) {
         }
         shaper.setColor(0.3f, 0.3f, 0.3f, 1);
         // draw borders
@@ -84,5 +84,9 @@ public class Game extends ApplicationAdapter {
 
     public static Game get() {
         return game;
+    }
+
+    public boolean isPaused() {
+        return paused;
     }
 }
