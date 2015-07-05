@@ -20,7 +20,7 @@ public class Creature extends Element {
     private Brain brain;
     private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
     private boolean eating = false, killing = false;
-    private Sight sight;
+    private Sight[] sights;
 
     public Creature(float x, float y) {
         super(x, y, default_radius);
@@ -32,7 +32,7 @@ public class Creature extends Element {
         sightRange = 100;
         fov = (float) Math.PI / 2.5f;
         fitness = 0;
-        brain = new Brain(6, 5, 2, 10);
+        brain = new Brain(10, 5, 2, 10);
     }
 
     @Override
@@ -78,37 +78,46 @@ public class Creature extends Element {
             dir += 2 * Math.PI;
         }
         // read from sensors and interact with world
-        sight = interactWithWorld();
+        sights = interactWithWorld();
         // feed data to brain
         float[] values = new float[brain.getNeurons()[0].length];
-        // 0: sight: see food?
-        // 1: sight: see creat?
-        // 2: sight: distance
-        // 3: sight: angle
-        // 4: sight: size for vegetables, hunger for creatures
-        // 5: food sensor
-        if (sight == null || sight.getElement() == null) {
-            // See nothing
-            values[0] = 0;
-            values[1] = 0;
-            values[2] = 0;
-            values[3] = 0;
-            values[4] = 0;
-        } else {
-            // See something
-            values[2] = sight.getDistance() / sightRange;
-            values[3] = sight.getAngle();
-            if (sight.getElement() instanceof Vegetable) {
-                values[0] = 1f;
-                values[1] = 0;
-                values[4] = sight.getElement().getSize() / default_radius;
+        // VIEW: PLANTS
+        // 0: sight(v): see food?
+        // 1: sight(v): distance
+        // 2: sight(v): angle
+        // 3: sight(v): size
+        // VIEW: CREATS
+        // 4: sight(c): see food?
+        // 5: sight(c): distance
+        // 6: sight(c): angle
+        // 8: sight(c): hunger
+        // 7: sight(c): beak
+        // OTHER:
+        // 9: food sensor
+        int viewSensors = 4;
+        for (int i = 0; i < sights.length; i++) {
+            int mul = i * viewSensors;
+            if (sights[i] == null || sights[i].getElement() == null) {
+                // See nothing
+                values[0 + mul] = 0;
+                values[1 + mul] = 0;
+                values[2 + mul] = 0;
+                values[3 + mul] = 0;
             } else {
-                values[0] = 0f;
-                values[1] = 1f;
-                values[4] = maxHp - ((Creature) sight.getElement()).getHp() / maxHp;
+                // See something
+                values[1 + mul] = sights[i].getDistance() / sightRange;
+                values[2 + mul] = sights[i].getAngle();
+                if (sights[i].getElement() instanceof Vegetable) {
+                    values[0 + mul] = 1f;
+                    values[3 + mul] = sights[i].getElement().getSize() / default_radius;
+                } else {
+                    values[0 + mul] = 1f;
+                    values[3 + mul] = maxHp - ((Creature) sights[i].getElement()).getHp() / maxHp;
+                    values[3 + mul] = ((Creature) sights[i].getElement()).getBeak() / max_beak;
+                }
             }
         }
-        values[5] = eating ? 1 : 0;
+        values[9] = eating ? 1 : 0;
         // compute behavior
         float[] actions = null;
         try {
@@ -136,19 +145,25 @@ public class Creature extends Element {
         // Vision
         double relX = Math.cos(dir), relY = Math.sin(dir);
         float c = 0;
-        if (sight != null) {
-            c = sight.getDistance() / sightRange * 2 + sightRange;
-        } else {
-            s.setColor(1, 1, 1, 1);
-        }
         float eyeX = (float) (relX * getSize() * 0.6f), eyeY = (float) (relY * getSize() * 0.6f);
-        if (sight != null) {
-            s.line(eyeX + getX(), getY() + eyeY, sight.getElement().getX(), sight.getElement().getY());
-            if (sight.getElement() instanceof Creature) {
-                s.setColor(c, 0, 0, 1);
-            } else if (sight.getElement() instanceof Vegetable) {
-                s.setColor(0, c, 0, 1);
+        for (int i = 0; i < sights.length; i++) {
+            if (sights[i] != null) {
+                c = sights[i].getDistance() / sightRange * 2 + sightRange;
+            } else {
             }
+            if (sights[i] != null) {
+                if (sights[i].getElement() instanceof Creature) {
+                    s.setColor(c, 0, 0, 1);
+                } else if (sights[i].getElement() instanceof Vegetable) {
+                    s.setColor(0, c, 0, 1);
+                }
+                s.line(eyeX + getX(), getY() + eyeY, sights[i].getElement().getX(), sights[i].getElement().getY());
+            }
+        }
+        if (sights[0] == null && sights[1] == null) {
+            s.setColor(1, 1, 1, 1);
+        } else {
+            s.setColor(sights[1] == null ? 0 : 1, sights[0] == null ? 0 : 1, 0, 1);
         }
         s.circle(getX() + eyeX, getY() + eyeY, 3);
         //FOV
@@ -173,12 +188,56 @@ public class Creature extends Element {
         s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / max_beak) + getX()), (float) (relY * getSize() * (1.5f + beak / max_beak) + getY()));
     }
 
-    public Sight interactWithWorld() {
+    public Sight[] interactWithWorld() {
+        Sight[] newSights = new Sight[2];
+        // Try to see plant
         Element seen = null;
         float dist = 0, angle = 0, ndir = dir - (float) Math.PI;
         killing = false;
         eating = false;
-        for (Element e : Game.get().getWorld().getElements()) {
+        for (Element e : Game.get().getWorld().getPlants()) {
+            float tempDist = distanceFrom(e);
+            if (tempDist > sightRange) {
+                continue;
+            }
+            //Log.log(Log.DEBUG,"TempDist "+tempDist+" SightRange "+sightRange);
+            float relAngle = (float) (Math.atan2(getY() - e.getY(), getX() - e.getX()));
+            if (tempDist < dist || seen == null) {
+                // Check if Visible
+                if (Math.abs(relAngle - ndir) < fov) {
+                    // Visible
+                    seen = e;
+                    angle = relAngle - ndir;
+                    dist = tempDist;
+                }
+                //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
+            }
+            // Check if eatable
+            if (tempDist < 0) {
+                // Eat
+                eating = true;
+                e.setSize(e.getSize() - 0.1f);
+                if (e.getSize() == 0) {
+                    e.setSize(0);
+                }
+                hp++;
+                fitness++;
+                if (hp > maxHp) {
+                    hp = maxHp;
+                }
+            }
+        }
+        if (seen != null) {
+            newSights[0] = new Sight(seen, dist, angle);
+        }
+        // Try to see creature
+        seen = null;
+        dist = 0;
+        angle = 0;
+        ndir = dir - (float) Math.PI;
+        killing = false;
+        eating = false;
+        for (Element e : Game.get().getWorld().getCreatures()) {
             if (e == this) {
                 continue;
             }
@@ -198,20 +257,6 @@ public class Creature extends Element {
                 }
                 //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
             }
-            // Check if eatable
-            if (e instanceof Vegetable && tempDist < 0) {
-                // Eat
-                eating = true;
-                e.setSize(e.getSize() - 0.1f);
-                if (e.getSize() == 0) {
-                    e.setSize(0);
-                }
-                hp++;
-                fitness++;
-                if (hp > maxHp) {
-                    hp = maxHp;
-                }
-            }
             // Check if attackable
             if (e instanceof Creature && beak > 5 && tempDist < beak * 1.5f && Math.abs(relAngle - ndir) < (float) Math.PI / 10f) {
                 // Attacking!
@@ -224,13 +269,11 @@ public class Creature extends Element {
                 Creature c = (Creature) e;
                 c.setHp(c.getHp() - 0.2f);
             }
-
         }
         if (seen != null) {
-            return new Sight(seen, dist, angle);
-        } else {
-            return null;
+            newSights[1] = new Sight(seen, dist, angle);
         }
+        return newSights;
     }
 
     public void eat() {
@@ -266,6 +309,10 @@ public class Creature extends Element {
     public void reset() {
         fitness = 0;
         hp = maxHp;
+    }
+
+    public float getBeak() {
+        return beak;
     }
 
     public float getHp() {
