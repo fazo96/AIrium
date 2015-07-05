@@ -21,13 +21,14 @@ public class World implements Runnable {
 
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
-    private float fpsLimit = 60;
-    public ArrayList<Element> elements;
-    public ArrayList<Element> toAdd;
-    public ArrayList<Creature> creatures;
-    public ArrayList<Creature> graveyard;
-    public ArrayList<Vegetable> plants;
-    public ArrayList<Vegetable> deadPlants;
+    private int fpsLimit = 60, fps = 0;
+    private final ArrayList<Element> elements;
+    private final ArrayList<Element> toAdd;
+    private final ArrayList<Creature> creatures;
+    private final ArrayList<Creature> graveyard;
+    private final ArrayList<Vegetable> plants;
+    private final ArrayList<Vegetable> deadPlants;
+    private final ArrayList<FpsListener> fpsListeners;
 
     public World(int width, int height) {
         this.width = width;
@@ -40,20 +41,31 @@ public class World implements Runnable {
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
+        fpsListeners = new ArrayList();
         newGen(true);
     }
 
     @Override
     public void run() {
-        Date d;
+        Date d, timekeeper = new Date();
         long time;
-        float target;
+        int target, frames = 0;
         for (;;) {
             if (!Game.get().isPaused()) {
                 d = new Date();
                 update();
+                frames++;
+                Date now = new Date();
+                if (now.getTime() - timekeeper.getTime() > 1000) {
+                    fps = frames;
+                    frames = 0;
+                    for (FpsListener f : fpsListeners) {
+                        f.fpsChanged(fps);
+                    }
+                    timekeeper = new Date();
+                }
                 if (fpsLimit > 0) {
-                    time = new Date().getTime() - d.getTime();
+                    time = now.getTime() - d.getTime();
                     target = 1000 / fpsLimit;
                     if (time < target) {
                         try {
@@ -195,6 +207,11 @@ public class World implements Runnable {
         }
     }
 
+    public interface FpsListener {
+
+        public abstract void fpsChanged(int newValue);
+    }
+
     private void spawnVegetable() {
         spawn(false, null);
     }
@@ -213,6 +230,14 @@ public class World implements Runnable {
 
     public int getHeight() {
         return height;
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public void addFpsListener(FpsListener f) {
+        fpsListeners.add(f);
     }
 
     public void add(Element e) {
@@ -243,8 +268,12 @@ public class World implements Runnable {
         return fpsLimit;
     }
 
-    public void setFpsLimit(float fpsLimit) {
+    public void setFpsLimit(int fpsLimit) {
         this.fpsLimit = fpsLimit;
+    }
+
+    public float getFps() {
+        return fps;
     }
 
 }

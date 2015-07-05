@@ -5,6 +5,8 @@
  */
 package com.mygdx.game;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author fazo
@@ -14,12 +16,18 @@ public class Log {
     public static final int ERROR = 0;
     public static final int INFO = 1;
     public static final int DEBUG = 2;
+    private static ArrayList<LogListener> logListeners;
 
     private static int logLevel = 1;
 
     public static void log(int level, String msg) {
         if (level <= logLevel) {
-            System.out.println(msg);
+            if (logListeners == null) {
+                logListeners = new ArrayList<LogListener>();
+            }
+            for (LogListener l : logListeners) {
+                l.onLog(level, msg);
+            }
         }
     }
 
@@ -29,6 +37,17 @@ public class Log {
 
     public static void setLogLevel(int logLevel) {
         Log.logLevel = logLevel;
+    }
+
+    public interface LogListener {
+        public abstract void onLog(int level, String msg);
+    }
+
+    public static void addListener(LogListener l) {
+        if (logListeners == null) {
+            logListeners = new ArrayList<LogListener>();
+        }
+        logListeners.add(l);
     }
 
 }

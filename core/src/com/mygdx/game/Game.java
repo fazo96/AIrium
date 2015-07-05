@@ -22,7 +22,6 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
         game = this;
-        world = new World(2500, 2500);
         shaper = new ShapeRenderer();
         shaper.setAutoShapeType(true);
         font = new BitmapFont();
@@ -30,6 +29,10 @@ public class Game extends ApplicationAdapter {
         worldThread.setName("Worker");
         worldThread.setPriority(Thread.MAX_PRIORITY);
         worldThread.start();
+    }
+
+    public Game() {
+        world = new World(2500, 2500);
     }
 
     @Override
@@ -76,7 +79,7 @@ public class Game extends ApplicationAdapter {
                 try {
                     e.render(shaper);
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                // No idea why it happens, but it's rendering so meh
+                    // No idea why it happens, but it's rendering so meh
                     //Log.log(Log.ERROR, ex+"");
                 }
             }
