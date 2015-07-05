@@ -5,9 +5,11 @@
  */
 package logic;
 
+import com.mygdx.game.Game;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,10 +17,11 @@ import java.util.logging.Logger;
  *
  * @author fazo
  */
-public class World {
+public class World implements Runnable {
 
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
+    private float fpsLimit = 60;
     public ArrayList<Element> elements;
     public ArrayList<Element> toAdd;
     public ArrayList<Creature> creatures;
@@ -38,6 +41,36 @@ public class World {
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
         newGen(true);
+    }
+
+    @Override
+    public void run() {
+        Date d;
+        long time;
+        float target;
+        for (;;) {
+            if (!Game.get().isPaused()) {
+                d = new Date();
+                update();
+                if (fpsLimit > 0) {
+                    time = new Date().getTime() - d.getTime();
+                    target = 1000 / fpsLimit;
+                    if (time < target) {
+                        try {
+                            Thread.sleep((long) (target - time));
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            } else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
 
     public void update() {
@@ -81,7 +114,7 @@ public class World {
         };
         if (graveyard.isEmpty() || restart) { // First gen
             generation = 1;
-            Log.log(Log.INFO, "Starting from generation 1: spawning "+creatPerGen+" creatures.");
+            Log.log(Log.INFO, "Starting from generation 1: spawning " + creatPerGen + " creatures.");
             for (int i = 0; i < creatPerGen; i++) {
                 spawnCreature();
             }
@@ -204,6 +237,14 @@ public class World {
 
     public ArrayList<Vegetable> getPlants() {
         return plants;
+    }
+
+    public float getFpsLimit() {
+        return fpsLimit;
+    }
+
+    public void setFpsLimit(float fpsLimit) {
+        this.fpsLimit = fpsLimit;
     }
 
 }

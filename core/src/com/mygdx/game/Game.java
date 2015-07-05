@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import java.util.ConcurrentModificationException;
 import logic.Element;
 import logic.World;
 
@@ -25,6 +26,10 @@ public class Game extends ApplicationAdapter {
         shaper = new ShapeRenderer();
         shaper.setAutoShapeType(true);
         font = new BitmapFont();
+        Thread worldThread = new Thread(world);
+        worldThread.setName("Worker");
+        worldThread.setPriority(Thread.MAX_PRIORITY);
+        worldThread.start();
     }
 
     @Override
@@ -54,22 +59,28 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             paused = !paused;
         }
-        // Update
-        if (!paused) {
-            world.update();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            if (world.getFpsLimit() == 60) {
+                world.setFpsLimit(0);
+            } else {
+                world.setFpsLimit(60);
+            }
         }
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         shaper.setColor(1, 1, 1, 1);
         shaper.begin(ShapeRenderer.ShapeType.Line);
-        for (Element e : world.getElements()) {
-            try {
-                e.render(shaper);
-            } catch (ArrayIndexOutOfBoundsException ex) {
+        try {
+            for (Element e : world.getElements()) {
+                try {
+                    e.render(shaper);
+                } catch (ArrayIndexOutOfBoundsException ex) {
                 // No idea why it happens, but it's rendering so meh
-                //Log.log(Log.ERROR, ex+"");
+                    //Log.log(Log.ERROR, ex+"");
+                }
             }
+        } catch (ConcurrentModificationException ex) {
         }
         shaper.setColor(0.3f, 0.3f, 0.3f, 1);
         // draw borders
@@ -83,5 +94,9 @@ public class Game extends ApplicationAdapter {
 
     public static Game get() {
         return game;
+    }
+
+    public boolean isPaused() {
+        return paused;
     }
 }

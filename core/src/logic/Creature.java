@@ -33,6 +33,7 @@ public class Creature extends Element {
         fov = (float) Math.PI / 2.5f;
         fitness = 0;
         brain = new Brain(10, 5, 2, 10);
+        sights = new Sight[2];
     }
 
     @Override
@@ -146,18 +147,18 @@ public class Creature extends Element {
         double relX = Math.cos(dir), relY = Math.sin(dir);
         float c = 0;
         float eyeX = (float) (relX * getSize() * 0.6f), eyeY = (float) (relY * getSize() * 0.6f);
-        for (int i = 0; i < sights.length; i++) {
-            if (sights[i] != null) {
-                c = sights[i].getDistance() / sightRange * 2 + sightRange;
+        for (Sight sight : sights) {
+            if (sight != null) {
+                c = sight.getDistance() / sightRange * 2 + sightRange;
             } else {
             }
-            if (sights[i] != null) {
-                if (sights[i].getElement() instanceof Creature) {
+            if (sight != null) {
+                if (sight.getElement() instanceof Creature) {
                     s.setColor(c, 0, 0, 1);
-                } else if (sights[i].getElement() instanceof Vegetable) {
+                } else if (sight.getElement() instanceof Vegetable) {
                     s.setColor(0, c, 0, 1);
                 }
-                s.line(eyeX + getX(), getY() + eyeY, sights[i].getElement().getX(), sights[i].getElement().getY());
+                s.line(eyeX + getX(), getY() + eyeY, sight.getElement().getX(), sight.getElement().getY());
             }
         }
         if (sights[0] == null && sights[1] == null) {
