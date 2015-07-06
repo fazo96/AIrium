@@ -109,7 +109,7 @@ public class Game extends ApplicationAdapter {
             Creature c = world.getSelectedCreature();
             renderer.setColor(1, 1, 1, 1);
             // Draw selection rectangle
-            renderer.rect(c.getX() - c.getSize() / 2, c.getY() - c.getSize() / 2, c.getSize(), c.getSize());
+            renderer.rect(c.getX() - c.getSize(), c.getY() - c.getSize(), c.getSize()*2, c.getSize()*2);
             // Draw brain
             overlayRenderer.begin();
             c.getBrain().render(overlayRenderer);
@@ -128,5 +128,9 @@ public class Game extends ApplicationAdapter {
 
     public boolean isPaused() {
         return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 }

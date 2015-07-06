@@ -11,6 +11,14 @@ import com.mygdx.game.Game;
 import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
 import com.mygdx.game.Log.LogListener;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -23,14 +31,17 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private LwjglApplication app;
     private boolean shouldUpdateGUI = false;
     private Thread guiUpdater;
+    private Map<String, Float> options;
 
     /**
      * Creates new form GUI
      */
     public GUI() {
         initComponents();
+        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
         setLocationRelativeTo(null); // Center the window
         Log.addListener(this);
+        options = new HashMap<String, Float>();
         guiUpdater = new Thread() {
             @Override
             public void run() {
@@ -70,14 +81,35 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         logLevelBox = new javax.swing.JComboBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         creatureList = new javax.swing.JList();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        fpsLimitSlider = new javax.swing.JSlider();
+        jLabel3 = new javax.swing.JLabel();
+        jCheckBox1 = new javax.swing.JCheckBox();
+        currentFpsLimit = new javax.swing.JLabel();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jLabel4 = new javax.swing.JLabel();
+        nCreaturesSlider = new javax.swing.JSlider();
+        currentNCreatures = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        nPlantsSlider = new javax.swing.JSlider();
+        currentNPlants = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        worldSizeSlider = new javax.swing.JSlider();
+        currentWorldSize = new javax.swing.JLabel();
+        pauseButton = new javax.swing.JToggleButton();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         startButton = new javax.swing.JMenuItem();
         exitButton = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("AIrium");
+        setMinimumSize(new java.awt.Dimension(517, 365));
 
         logTextArea.setEditable(false);
         logTextArea.setColumns(20);
@@ -107,12 +139,12 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 519, Short.MAX_VALUE)
         );
         logPaneLayout.setVerticalGroup(
             logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(logPaneLayout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
                 .addGap(10, 10, 10)
                 .addGroup(logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -136,16 +168,168 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         tabs.addTab("Creatures", jScrollPane2);
 
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Warning: changing settings while the simulation is running could crash the program");
+
+        fpsLimitSlider.setMinimum(1);
+        fpsLimitSlider.setSnapToTicks(true);
+        fpsLimitSlider.setToolTipText("The maximum amount of ticks per second the simulation is allowed to compute");
+        fpsLimitSlider.setValue(60);
+        fpsLimitSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                fpsLimitSliderStateChanged(evt);
+            }
+        });
+
+        jLabel3.setText("FPS Limiter");
+
+        jCheckBox1.setText("Unlimit FPS");
+        jCheckBox1.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jCheckBox1StateChanged(evt);
+            }
+        });
+
+        jCheckBox2.setText("Multithreading (Experimental)");
+        jCheckBox2.setEnabled(false);
+
+        jLabel4.setText("Number of Creatures");
+
+        nCreaturesSlider.setMaximum(150);
+        nCreaturesSlider.setMinimum(1);
+        nCreaturesSlider.setValue(25);
+        nCreaturesSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nCreaturesSliderStateChanged(evt);
+            }
+        });
+
+        currentNCreatures.setText("25");
+
+        jLabel5.setText("Number of Plants");
+
+        nPlantsSlider.setMaximum(5000);
+        nPlantsSlider.setValue(700);
+        nPlantsSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nPlantsSliderStateChanged(evt);
+            }
+        });
+
+        currentNPlants.setText("700");
+
+        jLabel7.setText("World Size");
+
+        worldSizeSlider.setMaximum(5000);
+        worldSizeSlider.setMinimum(200);
+        worldSizeSlider.setValue(2000);
+        worldSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                worldSizeSliderStateChanged(evt);
+            }
+        });
+
+        currentWorldSize.setText("2000");
+
+        pauseButton.setText("Pause");
+        pauseButton.setEnabled(false);
+        pauseButton.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                pauseButtonStateChanged(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fpsLimitSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(currentFpsLimit)
+                            .addComponent(currentNCreatures)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nPlantsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentNPlants))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jCheckBox1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCheckBox2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentWorldSize))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(pauseButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fpsLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentFpsLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBox1)
+                    .addComponent(jCheckBox2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(currentNCreatures, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nPlantsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentNPlants, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentWorldSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 108, Short.MAX_VALUE)
+                .addComponent(pauseButton)
+                .addContainerGap())
+        );
+
+        tabs.addTab("Settings", jPanel1);
+
         status.setText("Simulation stopped");
 
         javax.swing.GroupLayout containerLayout = new javax.swing.GroupLayout(container);
         container.setLayout(containerLayout);
         containerLayout.setHorizontalGroup(
             containerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabs)
             .addGroup(containerLayout.createSequentialGroup()
                 .addComponent(status)
                 .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(tabs)
         );
         containerLayout.setVerticalGroup(
             containerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -157,6 +341,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         jMenu1.setText("File");
 
+        startButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
         startButton.setText("Start");
         startButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -165,6 +350,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         });
         jMenu1.add(startButton);
 
+        exitButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         exitButton.setText("Exit");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -174,6 +360,28 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jMenu1.add(exitButton);
 
         menuBar.add(jMenu1);
+
+        jMenu2.setText("About");
+
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+        jMenuItem1.setText("Help");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem1);
+
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem2.setText("AIrium");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem2);
+
+        menuBar.add(jMenu2);
 
         setJMenuBar(menuBar);
 
@@ -197,16 +405,27 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         if (game != null) {
-            return;
+            if (JOptionPane.showConfirmDialog(this, "Are you sure? The program will exit!") != JOptionPane.YES_OPTION) {
+                return;
+            }
+            game.dispose();
+            app.stop();
+            pauseButton.setEnabled(false);
+            startButton.setText("Start");
+            status.setText("Simulation Stopped.");
+        } else {
+            LwjglApplicationConfiguration.disableAudio = true;
+            LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+            config.height = 600;
+            config.width = 800;
+            config.resizable = false;
+            config.title = "AIrium Renderer";
+            app = new LwjglApplication(game = new Game(options), config);
+            startButton.setText("Stop");
+            pauseButton.setEnabled(true);
+            game.getWorld().addListener(this);
+            setCreatureList();
         }
-        LwjglApplicationConfiguration.disableAudio = true;
-        LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.height = 600;
-        config.width = 800;
-        config.resizable = false;
-        app = new LwjglApplication(game = new Game(), config);
-        game.getWorld().addListener(this);
-        setCreatureList();
     }//GEN-LAST:event_startButtonActionPerformed
     @Override
     public void onLog(int level, String msg) {
@@ -233,6 +452,28 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         creatureList.setListData(list);
     }
 
+    private void updateSettings() {
+        if (fpsLimitSlider.getValueIsAdjusting()) {
+            return;
+        }
+        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
+        if (jCheckBox1.isSelected()) {
+            options.put("fps_limit", 0f);
+        } else {
+            options.put("fps_limit", (float) fpsLimitSlider.getValue());
+        }
+        options.put("number_of_creatures", (float) nCreaturesSlider.getValue());
+        options.put("number_of_plants", (float) nPlantsSlider.getValue());
+        currentNCreatures.setText(nCreaturesSlider.getValue() + "");
+        currentNPlants.setText(nPlantsSlider.getValue() + "");
+        options.put("world_width", (float) worldSizeSlider.getValue());
+        options.put("world_height", (float) worldSizeSlider.getValue());
+        currentWorldSize.setText(worldSizeSlider.getValue() + "");
+        if (game != null) {
+            game.getWorld().reloadOptions();
+        }
+    }
+
     public void setScrollBarToTheBottom() {
         jScrollPane1.getVerticalScrollBar().setValue(jScrollPane1.getVerticalScrollBar().getMaximum());
     }
@@ -251,21 +492,85 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
     }//GEN-LAST:event_creatureListValueChanged
 
+    private void fpsLimitSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fpsLimitSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_fpsLimitSliderStateChanged
+
+    private void jCheckBox1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jCheckBox1StateChanged
+        updateSettings();
+    }//GEN-LAST:event_jCheckBox1StateChanged
+
+    private void nCreaturesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nCreaturesSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nCreaturesSliderStateChanged
+
+    private void nPlantsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nPlantsSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nPlantsSliderStateChanged
+
+    private void worldSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_worldSizeSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_worldSizeSliderStateChanged
+
+    private void pauseButtonStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_pauseButtonStateChanged
+        game.setPaused(pauseButton.isSelected());
+        pauseButton.setText(pauseButton.isSelected() ? "Resume" : "Pause");
+    }//GEN-LAST:event_pauseButtonStateChanged
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null) {
+            try {
+                desktop.browse(new URL("http://github.com/fazo96/AIrium").toURI());
+            } catch (IOException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please visit http://github.com/fazo96/AIrium");
+        }
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        jMenuItem2ActionPerformed(evt);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
     private javax.swing.JList creatureList;
+    private javax.swing.JLabel currentFpsLimit;
+    private javax.swing.JLabel currentNCreatures;
+    private javax.swing.JLabel currentNPlants;
+    private javax.swing.JLabel currentWorldSize;
     private javax.swing.JMenuItem exitButton;
+    private javax.swing.JSlider fpsLimitSlider;
+    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JComboBox logLevelBox;
     private javax.swing.JPanel logPane;
     private javax.swing.JTextArea logTextArea;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JSlider nCreaturesSlider;
+    private javax.swing.JSlider nPlantsSlider;
+    private javax.swing.JToggleButton pauseButton;
     private javax.swing.JMenuItem startButton;
     private javax.swing.JLabel status;
     private javax.swing.JTabbedPane tabs;
+    private javax.swing.JSlider worldSizeSlider;
     // End of variables declaration//GEN-END:variables
 
 }

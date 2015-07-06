@@ -15,7 +15,7 @@ import logic.neural.Brain;
 public class Creature extends Element implements Runnable {
 
     public static int default_radius = 20, max_hp = 100;
-    public static float max_speed = 3, max_beak = default_radius / 4,fov,sightRange;
+    public static float max_speed = 3, max_beak = default_radius / 4, fov, sightRange;
 
     private Brain brain;
     private float dir, hp, prevHp, speed, fitness, rotSpeed, beak;
@@ -262,25 +262,26 @@ public class Creature extends Element implements Runnable {
             float relAngle = (float) (Math.atan2(getY() - e.getY(), getX() - e.getX()));
             if (tempDist < dist || seen == null) {
                 // Check if Visible
-                if (Math.abs(relAngle - ndir) < fov) {
+                float tempAngle = Math.abs(relAngle - ndir);
+                if (tempAngle < fov) {
                     // Visible
                     seen = e;
                     angle = relAngle - ndir;
                     dist = tempDist;
+                    // Check if attackable
+                    if (beak > beak/2 && tempDist < beak * 1.5f && tempAngle < fov/2) {
+                        // Attacking!
+                        hp++;
+                        fitness++;
+                        if (hp > max_hp) {
+                            hp = max_hp;
+                        }
+                        killing = true;
+                        Creature c = (Creature) e;
+                        c.setHp(c.getHp() - 0.2f);
+                    }
                 }
                 //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
-            }
-            // Check if attackable
-            if (e instanceof Creature && beak > 5 && tempDist < beak * 1.5f && Math.abs(relAngle - ndir) < (float) Math.PI / 10f) {
-                // Attacking!
-                hp++;
-                fitness++;
-                if (hp > max_hp) {
-                    hp = max_hp;
-                }
-                killing = true;
-                Creature c = (Creature) e;
-                c.setHp(c.getHp() - 0.2f);
             }
         }
         if (seen != null) {

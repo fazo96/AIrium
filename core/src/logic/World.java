@@ -155,7 +155,12 @@ public class World implements Runnable {
         } else { // Evolve previous gen
             graveyard.sort(creatureComp); // sort by fitness
             // Prepare best agent list
-            int topSize = (int) Math.round(graveyard.size() * 0.05f);
+            int topSize;
+            if (graveyard.size() == 1) {
+                topSize = 1;
+            } else {
+                topSize = (int) Math.max(2,Math.round(graveyard.size() * 0.05f));
+            }
             Creature[] top = new Creature[topSize];
             // Calculate avg fitness and prepare best agent list
             float avgFitness = 0;
@@ -173,7 +178,7 @@ public class World implements Runnable {
             for (Creature c : graveyard) {
                 int first = (int) Math.floor(Math.random() * topSize);
                 int sec = first;
-                while (sec == first) {
+                while (sec == first && topSize > 1) {
                     sec = (int) Math.floor(Math.random() * topSize);
                 }
                 float[][][] n = null;
@@ -196,7 +201,7 @@ public class World implements Runnable {
         width = Math.round(options.getOrDefault("world_width", 2000f));
         height = Math.round(options.getOrDefault("world_height", 2000f));
         fpsLimit = Math.round(options.getOrDefault("fps_limit", 60f));
-        creatPerGen = Math.round(options.getOrDefault("creatures_per_generation", (float) Math.min(Math.round(width * height / 20000), 50)));
+        creatPerGen = Math.round(options.getOrDefault("number_of_creatures", (float) Math.min(Math.round(width * height / 20000), 50)));
         nPlants = Math.round(options.getOrDefault("number_of_plants", width * height / 5500f));
         multithreading = options.getOrDefault("enable_multithreading", -1f) > 0;
         Creature.default_radius = Math.round(options.getOrDefault("creature_radius", 20f));
@@ -214,6 +219,7 @@ public class World implements Runnable {
         } else {
             r = Vegetable.default_radius;
         }
+        int i = 0;
         do {
             overlaps = false;
             x = (int) (Math.random() * width);
@@ -223,7 +229,7 @@ public class World implements Runnable {
                     overlaps = true;
                 }
             }
-        } while (overlaps);
+        } while (overlaps && i++ < 20);
         if (isCreature) {
             Log.log(Log.DEBUG, "New Creat: " + x + " " + y);
             Creature c = new Creature(x, y);
