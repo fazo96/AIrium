@@ -42,7 +42,7 @@ public class Game extends ApplicationAdapter {
     public void render() {
         // Controls
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            world.newGen(false);
+            world.launchNewGen();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             renderer.translate(-cameraSpeed, 0, 0);

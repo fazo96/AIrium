@@ -11,10 +11,7 @@ import com.mygdx.game.Game;
 import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
 import com.mygdx.game.Log.LogListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import logic.World;
 
 /**
  *

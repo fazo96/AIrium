@@ -12,15 +12,16 @@ import logic.neural.Brain;
  *
  * @author fazo
  */
-public class Creature extends Element {
+public class Creature extends Element implements Runnable {
 
     public static final int default_radius = 20, maxHp = 100;
     public static final float max_speed = 3, max_beak = default_radius / 4;
 
     private Brain brain;
     private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
-    private boolean eating = false, killing = false;
+    private boolean eating = false, killing = false, workerDone = false;
     private Sight[] sights;
+    private Thread workerThread;
 
     public Creature(float x, float y) {
         super(x, y, default_radius);
@@ -32,8 +33,23 @@ public class Creature extends Element {
         sightRange = 100;
         fov = (float) Math.PI / 2.5f;
         fitness = 0;
-        brain = new Brain(10, 5, 2, 10);
+        brain = new Brain(9, 5, 2, 10);
         sights = new Sight[2];
+    }
+
+    @Override
+    public void run() {
+        for (;;) {
+            if (workerDone) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+            } else {
+                update();
+                workerDone = true;
+            }
+        }
     }
 
     @Override
@@ -94,7 +110,7 @@ public class Creature extends Element {
         // 8: sight(c): hunger
         // 7: sight(c): beak
         // OTHER:
-        // 9: food sensor
+        // 8: food sensor
         int viewSensors = 4;
         for (int i = 0; i < sights.length; i++) {
             int mul = i * viewSensors;
@@ -118,7 +134,8 @@ public class Creature extends Element {
                 }
             }
         }
-        values[9] = eating ? 1 : 0;
+        values[8] = eating || killing ? 1 : 0;
+        System.out.println(values[8]);
         // compute behavior
         float[] actions = null;
         try {
@@ -194,7 +211,6 @@ public class Creature extends Element {
         // Try to see plant
         Element seen = null;
         float dist = 0, angle = 0, ndir = dir - (float) Math.PI;
-        killing = false;
         eating = false;
         for (Element e : Game.get().getWorld().getPlants()) {
             float tempDist = distanceFrom(e);
@@ -237,7 +253,6 @@ public class Creature extends Element {
         angle = 0;
         ndir = dir - (float) Math.PI;
         killing = false;
-        eating = false;
         for (Element e : Game.get().getWorld().getCreatures()) {
             if (e == this) {
                 continue;
@@ -292,6 +307,26 @@ public class Creature extends Element {
                     hp = maxHp;
                 }
             }
+        }
+    }
+
+    /**
+     * Check if the Worker thread has finished its current iteration
+     *
+     * @return true if worker thread has finished its current iteration
+     */
+    public boolean isWorkerDone() {
+        return workerDone;
+    }
+
+    /**
+     * Command the Worker thread to start another iteration.
+     */
+    public void startWorker() {
+        workerDone = false;
+        if (workerThread == null) {
+            workerThread = new Thread(this);
+            workerThread.start();
         }
     }
 

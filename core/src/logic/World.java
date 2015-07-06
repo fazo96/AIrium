@@ -23,6 +23,7 @@ public class World implements Runnable {
 
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
+    private boolean multithreading = false, cmdLaunchNewGen = false;
     private int fpsLimit = 60, fps = 0;
     private Creature selected;
     private final ArrayList<Element> elements;
@@ -108,6 +109,10 @@ public class World implements Runnable {
         if (creatures.removeAll(graveyard)) {
             fire(Listener.CREATURE_LIST_CHANGED);
         }
+        if (cmdLaunchNewGen) {
+            newGen(false);
+            cmdLaunchNewGen = false;
+        }
         if (creatures.isEmpty()) {
             // All dead, next gen
             newGen(false);
@@ -120,7 +125,7 @@ public class World implements Runnable {
         }
     }
 
-    public void newGen(boolean restart) {
+    private void newGen(boolean restart) {
         elements.removeAll(creatures);
         graveyard.addAll(creatures);
         creatures.clear();
@@ -233,7 +238,7 @@ public class World implements Runnable {
         }
     }
 
-    public void fire(int eventCode) {
+    private void fire(int eventCode) {
         for (Listener f : listeners) {
             f.on(eventCode);
         }
@@ -311,4 +316,15 @@ public class World implements Runnable {
         this.selected = selected;
     }
 
+    public boolean isMultithreading() {
+        return multithreading;
+    }
+
+    public void setMultithreading(boolean multithreading) {
+        this.multithreading = multithreading;
+    }
+
+    public void launchNewGen() {
+        cmdLaunchNewGen = true;
+    }
 }
