@@ -96,20 +96,20 @@ public class Game extends ApplicationAdapter {
             }
         } catch (ConcurrentModificationException ex) {
         }
+        renderer.setColor(0.3f, 0.3f, 0.3f, 1);
+        // draw borders
+        renderer.rect(0, 0, world.getWidth(), world.getHeight());
         if (world.getSelectedCreature() != null) {
             // There is a selection
             Creature c = world.getSelectedCreature();
             renderer.setColor(1, 1, 1, 1);
             // Draw selection rectangle
-            renderer.rect(c.getX() - c.getSize() / 2, c.getY() - c.getSize() / 2, c.getX() + c.getSize() / 2, c.getY() + c.getSize() / 2);
+            renderer.rect(c.getX() - c.getSize() / 2, c.getY() - c.getSize() / 2, c.getSize(), c.getSize());
             // Draw brain
             overlayRenderer.begin();
             c.getBrain().render(overlayRenderer);
             overlayRenderer.end();
         }
-        renderer.setColor(0.3f, 0.3f, 0.3f, 1);
-        // draw borders
-        renderer.rect(0, 0, world.getWidth(), world.getHeight());
         renderer.end();
     }
 

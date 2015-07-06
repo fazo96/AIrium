@@ -88,6 +88,7 @@ public class Brain {
      * @param s the ShapeRenderer to use for the drawing
      */
     public void render(ShapeRenderer s) {
+        int sepX = 100, sepY = 50, offset = 100;
         s.set(ShapeRenderer.ShapeType.Filled);
         int neuronHeight = 0;
         for (Neuron[] ns : neurons) {
@@ -95,22 +96,20 @@ public class Brain {
                 neuronHeight = ns.length;
             }
         }
-        s.rect(0, 0, neurons.length * 50, neuronHeight * 30);
         for (int i = 0; i < neurons.length; i++) {
             //s.set(ShapeRenderer.ShapeType.Line);
             for (int j = 0; j < neurons[i].length; j++) {
                 // get neuron result first so cache system can kick in and save some calculations
                 float nr = neurons[i][j].compute();
                 // Draw neuron links
-                float[] links = neurons[i][j].getInputs();
+                float[] links = neurons[i][j].getWeights();
                 for (int f = 0; f < links.length; f++) {
-                    s.setColor(links[f], links[f], links[f], 1);
-                    s.line(i * 50, j * 30, (i - 1) * 50, f * 30);
+                    s.setColor(links[f] < 0 ? links[f]/2 * -1 : 0, links[f] > 0 ? links[f]/2 : 0, 0, 1);
+                    s.line(i * sepX + offset, j * sepY + offset, (i - 1) * sepX + offset, f * sepY + offset);
                 }
                 // Draw neuron
                 s.setColor(1 - nr, nr, 0, 1);
-                s.set(ShapeRenderer.ShapeType.Filled);
-                s.circle(i * 50, j * 30, 15);
+                s.circle(i * sepX + offset, j * sepY + offset, 15);
             }
         }
     }
@@ -130,7 +129,6 @@ public class Brain {
         for (int i = 0; i < values.length; i++) {
             neurons[0][i].setOutput(values[i]);
         }
-        clearCache();
     }
 
     /**
@@ -140,7 +138,7 @@ public class Brain {
      * result
      */
     public float[] compute() {
-        //clearCache(); // unnecessary if already called when changing inputs
+        clearCache(); // unnecessary if already called when changing inputs
         float[] res = new float[neurons[neurons.length - 1].length];
         for (int i = 0; i < neurons[neurons.length - 1].length; i++) {
             res[i] = neurons[neurons.length - 1][i].compute();

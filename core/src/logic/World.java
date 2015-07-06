@@ -6,6 +6,7 @@
 package logic;
 
 import com.mygdx.game.Game;
+import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +31,7 @@ public class World implements Runnable {
     private final ArrayList<Creature> graveyard;
     private final ArrayList<Vegetable> plants;
     private final ArrayList<Vegetable> deadPlants;
-    private final ArrayList<FpsListener> fpsListeners;
+    private final ArrayList<Listener> listeners;
 
     public World(int width, int height) {
         this.width = width;
@@ -43,7 +44,7 @@ public class World implements Runnable {
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
-        fpsListeners = new ArrayList();
+        listeners = new ArrayList();
         selected = null;
         newGen(true);
     }
@@ -62,9 +63,7 @@ public class World implements Runnable {
                 if (now.getTime() - timekeeper.getTime() > 1000) {
                     fps = frames;
                     frames = 0;
-                    for (FpsListener f : fpsListeners) {
-                        f.fpsChanged(fps);
-                    }
+                    fire(Listener.FPS_CHANGED);
                     timekeeper = new Date();
                 }
                 if (fpsLimit > 0) {
@@ -106,7 +105,9 @@ public class World implements Runnable {
         elements.removeAll(deadPlants);
         plants.removeAll(deadPlants);
         deadPlants.clear();
-        creatures.removeAll(graveyard);
+        if (creatures.removeAll(graveyard)) {
+            fire(Listener.CREATURE_LIST_CHANGED);
+        }
         if (creatures.isEmpty()) {
             // All dead, next gen
             newGen(false);
@@ -176,6 +177,7 @@ public class World implements Runnable {
                 ne.getBrain().mutate(0.05f); // mutate children
             }
             graveyard.clear();
+            fire(Listener.CREATURE_LIST_CHANGED);
             generation++;
         }
     }
@@ -218,11 +220,6 @@ public class World implements Runnable {
         }
     }
 
-    public interface FpsListener {
-
-        public abstract void fpsChanged(int newValue);
-    }
-
     public void selectCreatureAt(int x, int y) {
         selected = null; // Clear selection
         try {
@@ -233,6 +230,12 @@ public class World implements Runnable {
                 }
             }
         } catch (ConcurrentModificationException ex) {
+        }
+    }
+
+    public void fire(int eventCode) {
+        for (Listener f : listeners) {
+            f.on(eventCode);
         }
     }
 
@@ -260,8 +263,8 @@ public class World implements Runnable {
         return generation;
     }
 
-    public void addFpsListener(FpsListener f) {
-        fpsListeners.add(f);
+    public void addListener(Listener f) {
+        listeners.add(f);
     }
 
     public void add(Element e) {

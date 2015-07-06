@@ -8,15 +8,17 @@ package gui;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.mygdx.game.Game;
+import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
 import com.mygdx.game.Log.LogListener;
+import javax.swing.JOptionPane;
 import logic.World;
 
 /**
  *
  * @author fazo
  */
-public class GUI extends javax.swing.JFrame implements LogListener,World.FpsListener {
+public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     private Game game;
     private LwjglApplication app;
@@ -47,6 +49,8 @@ public class GUI extends javax.swing.JFrame implements LogListener,World.FpsList
         logTextArea = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         logLevelBox = new javax.swing.JComboBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        creatureList = new javax.swing.JList();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -98,6 +102,20 @@ public class GUI extends javax.swing.JFrame implements LogListener,World.FpsList
         );
 
         tabs.addTab("Log", logPane);
+
+        creatureList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        creatureList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                creatureListValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(creatureList);
+
+        tabs.addTab("Creatures", jScrollPane2);
 
         status.setText("Simulation stopped");
 
@@ -168,12 +186,30 @@ public class GUI extends javax.swing.JFrame implements LogListener,World.FpsList
         config.width = 800;
         config.resizable = false;
         app = new LwjglApplication(game = new Game(), config);
-        game.getWorld().addFpsListener(this);
+        game.getWorld().addListener(this);
+        setCreatureList();
     }//GEN-LAST:event_startButtonActionPerformed
     @Override
     public void onLog(int level, String msg) {
         logTextArea.append(msg + "\n");
         setScrollBarToTheBottom();
+    }
+
+    @Override
+    public void on(int event) {
+        if (event == Listener.FPS_CHANGED) {
+            status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
+        } else if (event == Listener.CREATURE_LIST_CHANGED) {
+            setCreatureList();
+        }
+    }
+
+    private void setCreatureList() {
+        String list[] = new String[game.getWorld().getCreatures().size()];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = "Fitness: " + game.getWorld().getCreatures().get(i).getFitness();
+        }
+        creatureList.setListData(list);
     }
 
     public void setScrollBarToTheBottom() {
@@ -184,12 +220,24 @@ public class GUI extends javax.swing.JFrame implements LogListener,World.FpsList
         Log.setLogLevel(logLevelBox.getSelectedIndex());
     }//GEN-LAST:event_logLevelBoxItemStateChanged
 
+    private void creatureListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_creatureListValueChanged
+        try {
+            if (creatureList.getSelectedIndex() >= 0) {
+                Game.get().getWorld().selectCreature(Game.get().getWorld().getCreatures().get(creatureList.getSelectedIndex()));
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(this, "This creature is not available");
+        }
+    }//GEN-LAST:event_creatureListValueChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
+    private javax.swing.JList creatureList;
     private javax.swing.JMenuItem exitButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JComboBox logLevelBox;
     private javax.swing.JPanel logPane;
     private javax.swing.JTextArea logTextArea;
@@ -199,8 +247,4 @@ public class GUI extends javax.swing.JFrame implements LogListener,World.FpsList
     private javax.swing.JTabbedPane tabs;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void fpsChanged(int fps) {
-        status.setText("Generation: "+game.getWorld().getGeneration()+" FPS: "+fps);
-    }
 }

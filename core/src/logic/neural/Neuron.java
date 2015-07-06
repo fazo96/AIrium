@@ -55,7 +55,9 @@ public class Neuron {
         if (isInputNeuron) {
             return output;
         }
-        if(cache.hasCachedOutput()) return cache.getCachedOutput();
+        if (cache.hasCachedOutput()) {
+            return cache.getCachedOutput();
+        }
         float a = bias * -1; // activation
         for (int i = 0; i < weights.length; i++) {
             if (cache.has(i)) {
@@ -83,6 +85,11 @@ public class Neuron {
         return mutatedWeights;
     }
 
+    /**
+     * Broken, doesn't work for some reason.
+     *
+     * @return
+     */
     public float[] getInputs() {
         float inputs[] = new float[weights.length];
         for (int i = 0; i < inputs.length; i++) {
@@ -99,7 +106,7 @@ public class Neuron {
         }
         return inputs;
     }
-    
+
     public void setOutput(float output) {
         isInputNeuron = true;
         this.output = output;
