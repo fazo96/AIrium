@@ -14,11 +14,11 @@ import logic.neural.Brain;
  */
 public class Creature extends Element implements Runnable {
 
-    public static final int default_radius = 20, maxHp = 100;
-    public static final float max_speed = 3, max_beak = default_radius / 4;
+    public static int default_radius = 20, max_hp = 100;
+    public static float max_speed = 3, max_beak = default_radius / 4,fov,sightRange;
 
     private Brain brain;
-    private float dir, hp, prevHp, speed, sightRange, fov, fitness, rotSpeed, beak;
+    private float dir, hp, prevHp, speed, fitness, rotSpeed, beak;
     private boolean eating = false, killing = false, workerDone = false;
     private Sight[] sights;
     private Thread workerThread;
@@ -26,12 +26,10 @@ public class Creature extends Element implements Runnable {
     public Creature(float x, float y) {
         super(x, y, default_radius);
         dir = (float) (Math.random() * 2 * Math.PI);
-        hp = maxHp;
+        hp = max_hp;
         prevHp = hp;
-        speed = 0;//(float) Math.random() * 3;
-        rotSpeed = 0;//(float) Math.random() - 0.5f;
-        sightRange = 100;
-        fov = (float) Math.PI / 2.5f;
+        speed = 0;
+        rotSpeed = 0;
         fitness = 0;
         brain = new Brain(9, 5, 2, 10);
         sights = new Sight[2];
@@ -129,13 +127,12 @@ public class Creature extends Element implements Runnable {
                     values[3 + mul] = sights[i].getElement().getSize() / default_radius;
                 } else {
                     values[0 + mul] = 1f;
-                    values[3 + mul] = maxHp - ((Creature) sights[i].getElement()).getHp() / maxHp;
+                    values[3 + mul] = max_hp - ((Creature) sights[i].getElement()).getHp() / max_hp;
                     values[3 + mul] = ((Creature) sights[i].getElement()).getBeak() / max_beak;
                 }
             }
         }
         values[8] = eating || killing ? 1 : 0;
-        System.out.println(values[8]);
         // compute behavior
         float[] actions = null;
         try {
@@ -158,7 +155,7 @@ public class Creature extends Element implements Runnable {
     @Override
     public void render(ShapeRenderer s) {
         // Body
-        s.setColor(1 - (hp / maxHp), hp / maxHp, 0, 1);
+        s.setColor(1 - (hp / max_hp), hp / max_hp, 0, 1);
         s.circle(getX(), getY(), getSize());
         // Vision
         double relX = Math.cos(dir), relY = Math.sin(dir);
@@ -239,8 +236,8 @@ public class Creature extends Element implements Runnable {
                 }
                 hp++;
                 fitness++;
-                if (hp > maxHp) {
-                    hp = maxHp;
+                if (hp > max_hp) {
+                    hp = max_hp;
                 }
             }
         }
@@ -278,8 +275,8 @@ public class Creature extends Element implements Runnable {
                 // Attacking!
                 hp++;
                 fitness++;
-                if (hp > maxHp) {
-                    hp = maxHp;
+                if (hp > max_hp) {
+                    hp = max_hp;
                 }
                 killing = true;
                 Creature c = (Creature) e;
@@ -303,8 +300,8 @@ public class Creature extends Element implements Runnable {
                 }
                 hp++;
                 fitness++;
-                if (hp > maxHp) {
-                    hp = maxHp;
+                if (hp > max_hp) {
+                    hp = max_hp;
                 }
             }
         }
@@ -344,7 +341,7 @@ public class Creature extends Element implements Runnable {
 
     public void reset() {
         fitness = 0;
-        hp = maxHp;
+        hp = max_hp;
     }
 
     public float getBeak() {

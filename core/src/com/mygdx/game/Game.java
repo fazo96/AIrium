@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ConcurrentModificationException;
+import java.util.Map;
 import logic.Creature;
 import logic.Element;
 import logic.World;
@@ -35,7 +36,11 @@ public class Game extends ApplicationAdapter {
     }
 
     public Game() {
-        world = new World(2500, 2500);
+        this(null);
+    }
+
+    public Game(Map<String, Float> options) {
+        world = new World(options);
     }
 
     @Override

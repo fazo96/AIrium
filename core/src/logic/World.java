@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +23,11 @@ import java.util.logging.Logger;
  */
 public class World implements Runnable {
 
-    private final int width, height, nPlants, creatPerGen;
+    private int width, height, nPlants, creatPerGen;
     private int generation = 1;
-    private boolean multithreading = false, cmdLaunchNewGen = false;
-    private int fpsLimit = 60, fps = 0;
+    private boolean multithreading, cmdLaunchNewGen = false;
+    private int fpsLimit, fps = 0;
+    private Map<String, Float> options;
     private Creature selected;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
@@ -34,14 +37,16 @@ public class World implements Runnable {
     private final ArrayList<Vegetable> deadPlants;
     private final ArrayList<Listener> listeners;
 
-    public World(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public World(Map<String, Float> options) {
+        if (options == null) {
+            this.options = new HashMap<String, Float>();
+        } else {
+            this.options = options;
+        }
+        reloadOptions();
         elements = new ArrayList();
         creatures = new ArrayList();
         toAdd = new ArrayList();
-        creatPerGen = Math.min(Math.round(width * height / 20000), 50);
-        nPlants = Math.round(width * height / 5500);
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
@@ -185,6 +190,20 @@ public class World implements Runnable {
             fire(Listener.CREATURE_LIST_CHANGED);
             generation++;
         }
+    }
+
+    public void reloadOptions() {
+        width = Math.round(options.getOrDefault("world_width", 2000f));
+        height = Math.round(options.getOrDefault("world_height", 2000f));
+        fpsLimit = Math.round(options.getOrDefault("fps_limit", 60f));
+        creatPerGen = Math.round(options.getOrDefault("creatures_per_generation", (float) Math.min(Math.round(width * height / 20000), 50)));
+        nPlants = Math.round(options.getOrDefault("number_of_plants", width * height / 5500f));
+        multithreading = options.getOrDefault("enable_multithreading", -1f) > 0;
+        Creature.default_radius = Math.round(options.getOrDefault("creature_radius", 20f));
+        Creature.max_hp = Math.round(options.getOrDefault("creature_max_hp", 100f));
+        Creature.max_speed = Math.round(options.getOrDefault("creature_max_speed", 3f));
+        Creature.fov = Math.round(options.getOrDefault("creature_fov", (float) Math.PI / 2.5f));
+        Creature.sightRange = Math.round(options.getOrDefault("creature_sight_range", 100f));
     }
 
     private Element spawn(boolean isCreature, float[][][] brainMap) {
