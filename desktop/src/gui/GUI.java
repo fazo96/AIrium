@@ -11,6 +11,8 @@ import com.mygdx.game.Game;
 import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
 import com.mygdx.game.Log.LogListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import logic.World;
 
@@ -22,6 +24,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     private Game game;
     private LwjglApplication app;
+    private boolean shouldUpdateGUI = false;
+    private Thread guiUpdater;
 
     /**
      * Creates new form GUI
@@ -30,6 +34,24 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         initComponents();
         setLocationRelativeTo(null); // Center the window
         Log.addListener(this);
+        guiUpdater = new Thread() {
+            @Override
+            public void run() {
+                for (;;) {
+                    if (shouldUpdateGUI) {
+                        updateGUI();
+                        shouldUpdateGUI = false;
+                    } else {
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                }
+            }
+        };
+        guiUpdater.setPriority(Thread.MAX_PRIORITY);
+        guiUpdater.start();
         logTextArea.setText("Started GUI.\n");
     }
 
@@ -197,11 +219,13 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     @Override
     public void on(int event) {
-        if (event == Listener.FPS_CHANGED) {
-            status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
-        } else if (event == Listener.CREATURE_LIST_CHANGED) {
-            setCreatureList();
-        }
+        shouldUpdateGUI = true;
+        guiUpdater.interrupt();
+    }
+
+    public void updateGUI() {
+        status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
+        setCreatureList();
     }
 
     private void setCreatureList() {
