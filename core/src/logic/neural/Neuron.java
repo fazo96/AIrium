@@ -55,11 +55,12 @@ public class Neuron {
         if (isInputNeuron) {
             return output;
         }
+        if(cache.hasCachedOutput()) return cache.getCachedOutput();
         float a = bias * -1; // activation
         for (int i = 0; i < weights.length; i++) {
             if (cache.has(i)) {
                 try {
-                    return cache.get(i);
+                    a += cache.get(i);
                 } catch (Exception ex) {
                     // This should never happen
                     Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,6 +83,23 @@ public class Neuron {
         return mutatedWeights;
     }
 
+    public float[] getInputs() {
+        float inputs[] = new float[weights.length];
+        for (int i = 0; i < inputs.length; i++) {
+            if (cache.has(i)) {
+                try {
+                    inputs[i] = cache.get(i);
+                } catch (Exception ex) {
+                    // Shouldnt happen
+                    Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                inputs[i] = 0;
+            }
+        }
+        return inputs;
+    }
+    
     public void setOutput(float output) {
         isInputNeuron = true;
         this.output = output;

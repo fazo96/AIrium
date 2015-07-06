@@ -8,6 +8,8 @@ package logic.neural;
 public class NeuronCache {
 
     private float[] cache;
+    private float cachedOutput;
+    private boolean cachedOutputValid;
     private boolean[] validity;
 
     /**
@@ -57,6 +59,18 @@ public class NeuronCache {
         return validity[index];
     }
 
+    public float getCachedOutput() {
+        return cachedOutput;
+    }
+
+    public boolean hasCachedOutput() {
+        return cachedOutputValid;
+    }
+
+    public void setCachedOutput(float cachedOutput) {
+        this.cachedOutput = cachedOutput;
+    }
+
     /**
      * Clears cache.
      */
@@ -64,5 +78,7 @@ public class NeuronCache {
         for (int i = 0; i < cache.length; i++) {
             validity[i] = false;
         }
+        cachedOutputValid = false;
+        cachedOutput = 0;
     }
 }

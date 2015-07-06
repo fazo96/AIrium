@@ -24,7 +24,7 @@ public class Vegetable extends Element {
     @Override
     public void update() {
         setSize(getSize()-decayRate);
-        if (getSize() <= 0) {
+        if (getSize() <= 2) {
             Game.get().getWorld().getDeadPlants().add(this);
         }
     }

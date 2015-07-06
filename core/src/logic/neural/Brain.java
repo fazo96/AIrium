@@ -1,5 +1,6 @@
 package logic.neural;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Log;
 
 /**
@@ -77,6 +78,39 @@ public class Brain {
                 Neuron n = new Neuron(i, bias, this);
                 neurons[i][j] = n;
                 Log.log(Log.DEBUG, "Adding Layer " + (i + 1) + " Neuron " + (j + 1));
+            }
+        }
+    }
+
+    /**
+     * Draw this brain's status.
+     *
+     * @param s the ShapeRenderer to use for the drawing
+     */
+    public void render(ShapeRenderer s) {
+        s.set(ShapeRenderer.ShapeType.Filled);
+        int neuronHeight = 0;
+        for (Neuron[] ns : neurons) {
+            if (ns.length > neuronHeight) {
+                neuronHeight = ns.length;
+            }
+        }
+        s.rect(0, 0, neurons.length * 50, neuronHeight * 30);
+        for (int i = 0; i < neurons.length; i++) {
+            //s.set(ShapeRenderer.ShapeType.Line);
+            for (int j = 0; j < neurons[i].length; j++) {
+                // get neuron result first so cache system can kick in and save some calculations
+                float nr = neurons[i][j].compute();
+                // Draw neuron links
+                float[] links = neurons[i][j].getInputs();
+                for (int f = 0; f < links.length; f++) {
+                    s.setColor(links[f], links[f], links[f], 1);
+                    s.line(i * 50, j * 30, (i - 1) * 50, f * 30);
+                }
+                // Draw neuron
+                s.setColor(1 - nr, nr, 0, 1);
+                s.set(ShapeRenderer.ShapeType.Filled);
+                s.circle(i * 50, j * 30, 15);
             }
         }
     }

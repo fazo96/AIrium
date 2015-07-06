@@ -7,13 +7,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ConcurrentModificationException;
+import logic.Creature;
 import logic.Element;
 import logic.World;
 
 public class Game extends ApplicationAdapter {
 
     private static Game game;
-    ShapeRenderer shaper;
+    ShapeRenderer renderer, overlayRenderer;
     private World world;
     private float cameraSpeed = 15;
     private BitmapFont font;
@@ -22,8 +23,10 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
         game = this;
-        shaper = new ShapeRenderer();
-        shaper.setAutoShapeType(true);
+        renderer = new ShapeRenderer();
+        renderer.setAutoShapeType(true);
+        overlayRenderer = new ShapeRenderer();
+        overlayRenderer.setAutoShapeType(true);
         font = new BitmapFont();
         Thread worldThread = new Thread(world);
         worldThread.setName("Worker");
@@ -42,22 +45,22 @@ public class Game extends ApplicationAdapter {
             world.newGen(false);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            shaper.translate(-cameraSpeed, 0, 0);
+            renderer.translate(-cameraSpeed, 0, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            shaper.translate(cameraSpeed, 0, 0);
+            renderer.translate(cameraSpeed, 0, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            shaper.translate(0, -cameraSpeed, 0);
+            renderer.translate(0, -cameraSpeed, 0);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            shaper.translate(0, cameraSpeed, 0);
+            renderer.translate(0, cameraSpeed, 0);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS)) {
-            shaper.scale(0.5f, 0.5f, 1);
+            renderer.scale(0.5f, 0.5f, 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
-            shaper.scale(1.5f, 1.5f, 1);
+            renderer.scale(1.5f, 1.5f, 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             paused = !paused;
@@ -69,15 +72,23 @@ public class Game extends ApplicationAdapter {
                 world.setFpsLimit(60);
             }
         }
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            renderer.translate(Gdx.input.getDeltaX(), Gdx.input.getDeltaY() * -1, 0);
+        }
+        /*
+         // Broken for now
+         if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
+         // TODO: project coordinates to world
+         world.selectCreatureAt(Gdx.input.getX(), Gdx.input.getY());
+         }*/
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        shaper.setColor(1, 1, 1, 1);
-        shaper.begin(ShapeRenderer.ShapeType.Line);
+        renderer.begin(ShapeRenderer.ShapeType.Line);
         try {
             for (Element e : world.getElements()) {
                 try {
-                    e.render(shaper);
+                    e.render(renderer);
                 } catch (ArrayIndexOutOfBoundsException ex) {
                     // No idea why it happens, but it's rendering so meh
                     //Log.log(Log.ERROR, ex+"");
@@ -85,10 +96,21 @@ public class Game extends ApplicationAdapter {
             }
         } catch (ConcurrentModificationException ex) {
         }
-        shaper.setColor(0.3f, 0.3f, 0.3f, 1);
+        if (world.getSelectedCreature() != null) {
+            // There is a selection
+            Creature c = world.getSelectedCreature();
+            renderer.setColor(1, 1, 1, 1);
+            // Draw selection rectangle
+            renderer.rect(c.getX() - c.getSize() / 2, c.getY() - c.getSize() / 2, c.getX() + c.getSize() / 2, c.getY() + c.getSize() / 2);
+            // Draw brain
+            overlayRenderer.begin();
+            c.getBrain().render(overlayRenderer);
+            overlayRenderer.end();
+        }
+        renderer.setColor(0.3f, 0.3f, 0.3f, 1);
         // draw borders
-        shaper.rect(0, 0, world.getWidth(), world.getHeight());
-        shaper.end();
+        renderer.rect(0, 0, world.getWidth(), world.getHeight());
+        renderer.end();
     }
 
     public World getWorld() {

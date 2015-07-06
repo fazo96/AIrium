@@ -9,6 +9,7 @@ import com.mygdx.game.Game;
 import com.mygdx.game.Log;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,6 +23,7 @@ public class World implements Runnable {
     private final int width, height, nPlants, creatPerGen;
     private int generation = 1;
     private int fpsLimit = 60, fps = 0;
+    private Creature selected;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
     private final ArrayList<Creature> creatures;
@@ -42,6 +44,7 @@ public class World implements Runnable {
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
         fpsListeners = new ArrayList();
+        selected = null;
         newGen(true);
     }
 
@@ -96,6 +99,10 @@ public class World implements Runnable {
         }
         toAdd.clear();
         elements.removeAll(graveyard);
+        if (selected != null && graveyard.contains(selected)) {
+            selected = null;
+            Log.log(Log.INFO, "Cleared selection");
+        }
         elements.removeAll(deadPlants);
         plants.removeAll(deadPlants);
         deadPlants.clear();
@@ -116,6 +123,10 @@ public class World implements Runnable {
         elements.removeAll(creatures);
         graveyard.addAll(creatures);
         creatures.clear();
+        if (selected != null) {
+            selected = null;
+            Log.log(Log.INFO, "Cleared selection");
+        }
         Comparator creatureComp = new Comparator<Creature>() {
 
             @Override
@@ -212,6 +223,19 @@ public class World implements Runnable {
         public abstract void fpsChanged(int newValue);
     }
 
+    public void selectCreatureAt(int x, int y) {
+        selected = null; // Clear selection
+        try {
+            for (Creature c : creatures) {
+                if (c.overlaps(x, y)) {
+                    selected = c;
+                    Log.log(Log.INFO, "Selected a creature");
+                }
+            }
+        } catch (ConcurrentModificationException ex) {
+        }
+    }
+
     private void spawnVegetable() {
         spawn(false, null);
     }
@@ -274,6 +298,14 @@ public class World implements Runnable {
 
     public float getFps() {
         return fps;
+    }
+
+    public Creature getSelectedCreature() {
+        return selected;
+    }
+
+    public void selectCreature(Creature selected) {
+        this.selected = selected;
     }
 
 }
