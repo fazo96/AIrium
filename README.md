@@ -6,7 +6,8 @@ This project aims to build an interactive simple artificial life simulation that
 
 - __+__ and __-__ control the zoom of the camera
 - __arrow keys__ allow you to move the camera
-- if the windows loses focus, the simulation will enter _super speed_ running as fast as it can.
+- __P__ pauses the simulation
+- __L__ toggles the frame limiter, allowing the simulation to run as fast as possible
 
 ## Development
 
