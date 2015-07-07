@@ -115,6 +115,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         currentHpDecay = new javax.swing.JLabel();
         currentMaxTicks = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        drawViewCones = new javax.swing.JCheckBox();
+        drawSightLines = new javax.swing.JCheckBox();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -298,6 +300,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         sightRangeSlider.setMaximum(1000);
         sightRangeSlider.setMinimum(20);
+        sightRangeSlider.setValue(100);
         sightRangeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 sightRangeSliderStateChanged(evt);
@@ -337,6 +340,20 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
         });
 
+        drawViewCones.setText("Draw view cones");
+        drawViewCones.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                drawViewConesStateChanged(evt);
+            }
+        });
+
+        drawSightLines.setText("Draw sight lines");
+        drawSightLines.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                drawSightLinesStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -344,6 +361,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(drawViewCones)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(drawSightLines)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -470,7 +492,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(maxTicksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentMaxTicks, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(drawViewCones)
+                    .addComponent(drawSightLines))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pauseButton)
                     .addComponent(jButton1))
@@ -648,9 +674,14 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         worldSizeSlider.setValue(2000);
         corpseDecaySlider.setValue(0);
         topSizeSlider.setValue(0);
-        sightRangeSlider.setValue(50);
+        sightRangeSlider.setValue(100);
         hpDecaySlider.setValue(500);
         maxTicksSlider.setValue(0);
+        toggleFPSLimitCheckbox.setSelected(false);
+        multithreadingCheckbox.setSelected(true);
+        enableCorpsesCheckbox.setSelected(false);
+        drawSightLines.setSelected(false);
+        drawViewCones.setSelected(false);
         updateSettings();
     }
 
@@ -678,6 +709,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         options.put("creature_sight_range", (float) sightRangeSlider.getValue());
         options.put("creature_hp_decay", (float) hpDecaySlider.getValue() / 1000);
         options.put("max_ticks", (float) maxTicksSlider.getValue());
+        options.put("draw_view_cones",drawViewCones.isSelected()?1f:0);
+        options.put("draw_sight_lines",drawSightLines.isSelected()?1f:0);
         currentMaxTicks.setText(maxTicksSlider.getValue() + "");
         currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
         currentSightRange.setText(sightRangeSlider.getValue() + "");
@@ -790,6 +823,14 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         resetDefaultSettings();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void drawViewConesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_drawViewConesStateChanged
+        updateSettings();
+    }//GEN-LAST:event_drawViewConesStateChanged
+
+    private void drawSightLinesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_drawSightLinesStateChanged
+        updateSettings();
+    }//GEN-LAST:event_drawSightLinesStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
     private javax.swing.JSlider corpseDecaySlider;
@@ -803,6 +844,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JLabel currentSightRange;
     private javax.swing.JLabel currentTopSize;
     private javax.swing.JLabel currentWorldSize;
+    private javax.swing.JCheckBox drawSightLines;
+    private javax.swing.JCheckBox drawViewCones;
     private javax.swing.JCheckBox enableCorpsesCheckbox;
     private javax.swing.JMenuItem exitButton;
     private javax.swing.JSlider fpsLimitSlider;

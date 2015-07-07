@@ -269,9 +269,15 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <Component id="drawViewCones" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="drawSightLines" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -429,7 +435,12 @@
                               <Component id="maxTicksSlider" min="-2" max="-2" attributes="0"/>
                               <Component id="currentMaxTicks" min="-2" pref="26" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="44" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="drawViewCones" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="drawSightLines" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace pref="19" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="pauseButton" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -600,6 +611,7 @@
                   <Properties>
                     <Property name="maximum" type="int" value="1000"/>
                     <Property name="minimum" type="int" value="20"/>
+                    <Property name="value" type="int" value="100"/>
                   </Properties>
                   <Events>
                     <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="sightRangeSliderStateChanged"/>
@@ -654,6 +666,22 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="drawViewCones">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Draw view cones"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="drawViewConesStateChanged"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="drawSightLines">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Draw sight lines"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="drawSightLinesStateChanged"/>
                   </Events>
                 </Component>
               </SubComponents>

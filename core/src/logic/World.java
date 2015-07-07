@@ -376,6 +376,10 @@ public class World implements Runnable {
         return fps;
     }
 
+    public Map<String, Float> getOptions() {
+        return options;
+    }
+
     public Creature getSelectedCreature() {
         return selected;
     }

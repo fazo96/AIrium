@@ -164,18 +164,20 @@ public class Creature extends Element implements Runnable {
         double relX = Math.cos(dir), relY = Math.sin(dir);
         float c = 0;
         float eyeX = (float) (relX * getSize() * 0.6f), eyeY = (float) (relY * getSize() * 0.6f);
-        for (Sight sight : sights) {
-            if (sight != null) {
-                c = sight.getDistance() / sightRange * 2 + sightRange;
-            } else {
-            }
-            if (sight != null) {
-                if (sight.getElement() instanceof Creature) {
-                    s.setColor(c, 0, 0, 1);
-                } else if (sight.getElement() instanceof Vegetable) {
-                    s.setColor(0, c, 0, 1);
+        if (Game.get().getWorld().getOptions().getOrDefault("draw_sight_lines", 0f) > 0) {
+            for (Sight sight : sights) {
+                if (sight != null) {
+                    c = sight.getDistance() / sightRange * 2 + sightRange;
+                } else {
                 }
-                s.line(eyeX + getX(), getY() + eyeY, sight.getElement().getX(), sight.getElement().getY());
+                if (sight != null) {
+                    if (sight.getElement() instanceof Creature) {
+                        s.setColor(c, 0, 0, 1);
+                    } else if (sight.getElement() instanceof Vegetable) {
+                        s.setColor(0, c, 0, 1);
+                    }
+                    s.line(eyeX + getX(), getY() + eyeY, sight.getElement().getX(), sight.getElement().getY());
+                }
             }
         }
         if (sights[0] == null && sights[1] == null) {
@@ -187,8 +189,10 @@ public class Creature extends Element implements Runnable {
         //FOV
         float degrees = fov * 360f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
-        s.setColor(0.3f, 0.3f, 0.3f, 1);
-        s.arc((float) eyeX + getX(), (float) eyeY + getY(), sightRange, orient, degrees);
+        if (Game.get().getWorld().getOptions().getOrDefault("draw_view_cones", 0f) > 0) {
+            s.setColor(0.3f, 0.3f, 0.3f, 1);
+            s.arc((float) eyeX + getX(), (float) eyeY + getY(), sightRange, orient, degrees);
+        }
         if (hp < prevHp) {
             // Damage mark
             s.set(ShapeRenderer.ShapeType.Filled);
@@ -274,14 +278,16 @@ public class Creature extends Element implements Runnable {
                     // Check if attackable
                     if (beak > beak / 2 && tempDist < beak * 1.5f && tempAngle < fov / 2) {
                         // Attacking!
-                        hp++;
-                        fitness++;
+                        float damage = beak;
+                        hp += damage / 2;
+                        fitness += 2;
                         if (hp > max_hp) {
                             hp = max_hp;
                         }
                         killing = true;
                         Creature c = (Creature) e;
-                        c.setHp(c.getHp() - 0.2f);
+                        c.heal(-damage);
+                        //c.praise(-1);
                     }
                 }
                 //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
@@ -309,6 +315,14 @@ public class Creature extends Element implements Runnable {
                 }
             }
         }
+    }
+
+    private void heal(float amount) {
+        hp += amount;
+    }
+
+    private void praise(float amount) {
+        fitness += amount;
     }
 
     /**
