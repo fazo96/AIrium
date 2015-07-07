@@ -15,7 +15,8 @@ import logic.neural.Brain;
 public class Creature extends Element implements Runnable {
 
     public static int default_radius = 20, max_hp = 100;
-    public static float max_speed = 3, max_beak = default_radius / 4, fov, sightRange;
+    public static float max_speed = 3, max_beak = default_radius / 4, fov, sightRange, corpseDecayRate = 0, hpDecay = 0.5f;
+    public static boolean leaveCorpses = false;
 
     private Brain brain;
     private float dir, hp, prevHp, speed, fitness, rotSpeed, beak;
@@ -53,14 +54,16 @@ public class Creature extends Element implements Runnable {
     @Override
     public void update() {
         // apply hunger
-        hp -= 0.5f;
+        hp -= hpDecay;
         prevHp = hp;
         if (hp < 0) { // Dead
             Game.get().getWorld().getGraveyard().add(this);
-            Vegetable carcass = new Vegetable(getX(), getY());
-            carcass.setSize(getSize());
-            //carcass.setDecayRate(0.01f);
-            Game.get().getWorld().add(carcass);
+            if (leaveCorpses) {
+                Vegetable carcass = new Vegetable(getX(), getY());
+                carcass.setSize(getSize());
+                carcass.setDecayRate(corpseDecayRate);
+                Game.get().getWorld().add(carcass);
+            }
             return;
         }
         if (speed > max_speed) {
@@ -182,7 +185,7 @@ public class Creature extends Element implements Runnable {
         }
         s.circle(getX() + eyeX, getY() + eyeY, 3);
         //FOV
-        float degrees = fov * 180f / (float) Math.PI;
+        float degrees = fov * 360f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
         s.setColor(0.3f, 0.3f, 0.3f, 1);
         s.arc((float) eyeX + getX(), (float) eyeY + getY(), sightRange, orient, degrees);
@@ -269,7 +272,7 @@ public class Creature extends Element implements Runnable {
                     angle = relAngle - ndir;
                     dist = tempDist;
                     // Check if attackable
-                    if (beak > beak/2 && tempDist < beak * 1.5f && tempAngle < fov/2) {
+                    if (beak > beak / 2 && tempDist < beak * 1.5f && tempAngle < fov / 2) {
                         // Attacking!
                         hp++;
                         fitness++;
@@ -325,6 +328,8 @@ public class Creature extends Element implements Runnable {
         if (workerThread == null) {
             workerThread = new Thread(this);
             workerThread.start();
+        } else {
+            workerThread.interrupt();
         }
     }
 

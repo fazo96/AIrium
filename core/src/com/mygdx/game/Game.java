@@ -132,5 +132,6 @@ public class Game extends ApplicationAdapter {
 
     public void setPaused(boolean paused) {
         this.paused = paused;
+        if(world != null) world.fire(Listener.PAUSED_OR_RESUMED);
     }
 }

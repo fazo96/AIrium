@@ -42,6 +42,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         setLocationRelativeTo(null); // Center the window
         Log.addListener(this);
         options = new HashMap<String, Float>();
+        updateSettings();
         guiUpdater = new Thread() {
             @Override
             public void run() {
@@ -82,12 +83,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jScrollPane2 = new javax.swing.JScrollPane();
         creatureList = new javax.swing.JList();
         jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
         fpsLimitSlider = new javax.swing.JSlider();
         jLabel3 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        toggleFPSLimitCheckbox = new javax.swing.JCheckBox();
         currentFpsLimit = new javax.swing.JLabel();
-        jCheckBox2 = new javax.swing.JCheckBox();
+        multithreadingCheckbox = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
         nCreaturesSlider = new javax.swing.JSlider();
         currentNCreatures = new javax.swing.JLabel();
@@ -98,18 +98,38 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         worldSizeSlider = new javax.swing.JSlider();
         currentWorldSize = new javax.swing.JLabel();
         pauseButton = new javax.swing.JToggleButton();
+        enableCorpsesCheckbox = new javax.swing.JCheckBox();
+        jLabel2 = new javax.swing.JLabel();
+        corpseDecaySlider = new javax.swing.JSlider();
+        currentCorpseDecay = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        topSizeSlider = new javax.swing.JSlider();
+        currentTopSize = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        sightRangeSlider = new javax.swing.JSlider();
+        jLabel9 = new javax.swing.JLabel();
+        hpDecaySlider = new javax.swing.JSlider();
+        jLabel10 = new javax.swing.JLabel();
+        maxTicksSlider = new javax.swing.JSlider();
+        currentSightRange = new javax.swing.JLabel();
+        currentHpDecay = new javax.swing.JLabel();
+        currentMaxTicks = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        startButton = new javax.swing.JMenuItem();
         exitButton = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        startButton = new javax.swing.JMenuItem();
+        pauseMenuButton = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("AIrium");
-        setMinimumSize(new java.awt.Dimension(517, 365));
+        setMinimumSize(new java.awt.Dimension(530, 450));
+        setPreferredSize(new java.awt.Dimension(530, 450));
 
         logTextArea.setEditable(false);
         logTextArea.setColumns(20);
@@ -139,12 +159,12 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 519, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 525, Short.MAX_VALUE)
         );
         logPaneLayout.setVerticalGroup(
             logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(logPaneLayout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 340, Short.MAX_VALUE)
                 .addGap(10, 10, 10)
                 .addGroup(logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -155,10 +175,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         tabs.addTab("Log", logPane);
 
         creatureList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "No creatures" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        creatureList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         creatureList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 creatureListValueChanged(evt);
@@ -167,9 +188,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jScrollPane2.setViewportView(creatureList);
 
         tabs.addTab("Creatures", jScrollPane2);
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Warning: changing settings while the simulation is running could crash the program");
 
         fpsLimitSlider.setMinimum(1);
         fpsLimitSlider.setSnapToTicks(true);
@@ -183,15 +201,22 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         jLabel3.setText("FPS Limiter");
 
-        jCheckBox1.setText("Unlimit FPS");
-        jCheckBox1.addChangeListener(new javax.swing.event.ChangeListener() {
+        toggleFPSLimitCheckbox.setText("Unlimit FPS");
+        toggleFPSLimitCheckbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                jCheckBox1StateChanged(evt);
+                toggleFPSLimitCheckboxStateChanged(evt);
             }
         });
 
-        jCheckBox2.setText("Multithreading (Experimental)");
-        jCheckBox2.setEnabled(false);
+        currentFpsLimit.setText("60");
+
+        multithreadingCheckbox.setSelected(true);
+        multithreadingCheckbox.setText("Multithreading (Experimental)");
+        multithreadingCheckbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                multithreadingCheckboxStateChanged(evt);
+            }
+        });
 
         jLabel4.setText("Number of Creatures");
 
@@ -239,6 +264,79 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
         });
 
+        enableCorpsesCheckbox.setText("Creatures leave a corpse when they die");
+        enableCorpsesCheckbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                enableCorpsesCheckboxStateChanged(evt);
+            }
+        });
+
+        jLabel2.setText("Corpse decay rate");
+
+        corpseDecaySlider.setValue(0);
+        corpseDecaySlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                corpseDecaySliderStateChanged(evt);
+            }
+        });
+
+        currentCorpseDecay.setText("0");
+
+        jLabel6.setText("Number of Parents (Top Size)");
+
+        topSizeSlider.setMaximum(25);
+        topSizeSlider.setValue(0);
+        topSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                topSizeSliderStateChanged(evt);
+            }
+        });
+
+        currentTopSize.setText("0");
+
+        jLabel8.setText("Creature sight range");
+
+        sightRangeSlider.setMaximum(1000);
+        sightRangeSlider.setMinimum(20);
+        sightRangeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sightRangeSliderStateChanged(evt);
+            }
+        });
+
+        jLabel9.setText("Creature HP Decay");
+
+        hpDecaySlider.setMaximum(1000);
+        hpDecaySlider.setValue(500);
+        hpDecaySlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                hpDecaySliderStateChanged(evt);
+            }
+        });
+
+        jLabel10.setText("Max Generation Lifespan");
+
+        maxTicksSlider.setMaximum(100000);
+        maxTicksSlider.setValue(0);
+        maxTicksSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                maxTicksSliderStateChanged(evt);
+            }
+        });
+
+        currentSightRange.setText("100");
+
+        currentHpDecay.setText("0.5");
+
+        currentMaxTicks.setText("0 (Unlimited)");
+
+        jButton1.setText("Reset Defaults");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -246,21 +344,18 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fpsLimitSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(currentFpsLimit)
-                            .addComponent(currentNCreatures)))
+                        .addComponent(fpsLimitSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentFpsLimit))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentNCreatures))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -268,53 +363,117 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentNPlants))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCheckBox1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBox2))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentWorldSize))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(pauseButton)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(corpseDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentCorpseDecay))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(topSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentTopSize))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sightRangeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentSightRange))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(hpDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(pauseButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton1))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(toggleFPSLimitCheckbox)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(multithreadingCheckbox)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(enableCorpsesCheckbox)))
+                                .addGap(0, 24, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentHpDecay))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(maxTicksSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentMaxTicks)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(fpsLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(currentFpsLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(toggleFPSLimitCheckbox)
+                                    .addComponent(multithreadingCheckbox)
+                                    .addComponent(enableCorpsesCheckbox))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(currentNCreatures, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(nCreaturesSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(fpsLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(currentFpsLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBox1)
-                    .addComponent(jCheckBox2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(currentNCreatures, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(currentNPlants, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(nPlantsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(currentNPlants, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nPlantsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(worldSizeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentWorldSize, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(currentWorldSize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 108, Short.MAX_VALUE)
-                .addComponent(pauseButton)
+                    .addComponent(corpseDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentCorpseDecay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(topSizeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentTopSize, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sightRangeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentSightRange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(hpDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentHpDecay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(maxTicksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentMaxTicks, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pauseButton)
+                    .addComponent(jButton1))
                 .addContainerGap())
         );
 
@@ -341,15 +500,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         jMenu1.setText("File");
 
-        startButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
-        startButton.setText("Start");
-        startButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                startButtonActionPerformed(evt);
-            }
-        });
-        jMenu1.add(startButton);
-
         exitButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         exitButton.setText("Exit");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -360,6 +510,28 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jMenu1.add(exitButton);
 
         menuBar.add(jMenu1);
+
+        jMenu3.setText("Simulation");
+
+        startButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
+        startButton.setText("Start");
+        startButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startButtonActionPerformed(evt);
+            }
+        });
+        jMenu3.add(startButton);
+
+        pauseMenuButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_MASK));
+        pauseMenuButton.setText("Pause");
+        pauseMenuButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pauseMenuButtonActionPerformed(evt);
+            }
+        });
+        jMenu3.add(pauseMenuButton);
+
+        menuBar.add(jMenu3);
 
         jMenu2.setText("About");
 
@@ -400,20 +572,22 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
-        System.exit(0);
+        if (JOptionPane.showConfirmDialog(this, "Are you sure? The program will exit!") == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }//GEN-LAST:event_exitButtonActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         if (game != null) {
-            if (JOptionPane.showConfirmDialog(this, "Are you sure? The program will exit!") != JOptionPane.YES_OPTION) {
+            // Restart
+            if (JOptionPane.showConfirmDialog(this, "Are you sure? The simulation will be restarted!") != JOptionPane.YES_OPTION) {
                 return;
             }
-            game.dispose();
-            app.stop();
-            pauseButton.setEnabled(false);
-            startButton.setText("Start");
-            status.setText("Simulation Stopped.");
+            game.getWorld().restart();
+            game.setPaused(false);
+            updateGUI();
         } else {
+            // Start new
             LwjglApplicationConfiguration.disableAudio = true;
             LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
             config.height = 600;
@@ -421,7 +595,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             config.resizable = false;
             config.title = "AIrium Renderer";
             app = new LwjglApplication(game = new Game(options), config);
-            startButton.setText("Stop");
+            startButton.setText("Restart");
             pauseButton.setEnabled(true);
             game.getWorld().addListener(this);
             setCreatureList();
@@ -440,35 +614,73 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }
 
     public void updateGUI() {
+        if (game == null) {
+            return;
+        }
         status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
+        if (game.isPaused()) {
+            pauseButton.setSelected(true);
+            pauseMenuButton.setText("Resume");
+            pauseButton.setText("Resume");
+        } else {
+            pauseButton.setSelected(false);
+            pauseMenuButton.setText("Pause");
+            pauseButton.setText("Pause");
+        }
         setCreatureList();
     }
 
     private void setCreatureList() {
         String list[] = new String[game.getWorld().getCreatures().size()];
         for (int i = 0; i < list.length; i++) {
+            if (i >= game.getWorld().getCreatures().size()) {
+                return;
+            }
             list[i] = "Fitness: " + game.getWorld().getCreatures().get(i).getFitness();
         }
         creatureList.setListData(list);
     }
 
+    private void resetDefaultSettings() {
+        fpsLimitSlider.setValue(60);
+        nCreaturesSlider.setValue(25);
+        nPlantsSlider.setValue(700);
+        worldSizeSlider.setValue(2000);
+        corpseDecaySlider.setValue(0);
+        topSizeSlider.setValue(0);
+        sightRangeSlider.setValue(50);
+        hpDecaySlider.setValue(500);
+        maxTicksSlider.setValue(0);
+        updateSettings();
+    }
+
     private void updateSettings() {
-        if (fpsLimitSlider.getValueIsAdjusting()) {
-            return;
-        }
         currentFpsLimit.setText("" + fpsLimitSlider.getValue());
-        if (jCheckBox1.isSelected()) {
+        if (toggleFPSLimitCheckbox.isSelected()) {
             options.put("fps_limit", 0f);
         } else {
             options.put("fps_limit", (float) fpsLimitSlider.getValue());
         }
+        options.put("enable_multithreading", multithreadingCheckbox.isSelected() ? 1f : 0f);
         options.put("number_of_creatures", (float) nCreaturesSlider.getValue());
         options.put("number_of_plants", (float) nPlantsSlider.getValue());
+        options.put("corpse_decay_rate", corpseDecaySlider.getValue() / 1000f);
+        options.put("enable_corpses", enableCorpsesCheckbox.isSelected() ? 1f : 0f);
         currentNCreatures.setText(nCreaturesSlider.getValue() + "");
         currentNPlants.setText(nPlantsSlider.getValue() + "");
+        currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
         options.put("world_width", (float) worldSizeSlider.getValue());
         options.put("world_height", (float) worldSizeSlider.getValue());
         currentWorldSize.setText(worldSizeSlider.getValue() + "");
+        topSizeSlider.setMaximum(nCreaturesSlider.getValue());
+        currentTopSize.setText(topSizeSlider.getValue() + (topSizeSlider.getValue() <= 0 ? " (Auto)" : ""));
+        options.put("parents_count", (float) topSizeSlider.getValue());
+        options.put("creature_sight_range", (float) sightRangeSlider.getValue());
+        options.put("creature_hp_decay", (float) hpDecaySlider.getValue() / 1000);
+        options.put("max_ticks", (float) maxTicksSlider.getValue());
+        currentMaxTicks.setText(maxTicksSlider.getValue() + "");
+        currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
+        currentSightRange.setText(sightRangeSlider.getValue() + "");
         if (game != null) {
             game.getWorld().reloadOptions();
         }
@@ -483,39 +695,18 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }//GEN-LAST:event_logLevelBoxItemStateChanged
 
     private void creatureListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_creatureListValueChanged
-        try {
-            if (creatureList.getSelectedIndex() >= 0) {
-                Game.get().getWorld().selectCreature(Game.get().getWorld().getCreatures().get(creatureList.getSelectedIndex()));
+        if (game == null) {
+            creatureList.setSelectedIndex(-1);
+        } else {
+            try {
+                if (creatureList.getSelectedIndex() >= 0) {
+                    Game.get().getWorld().selectCreature(Game.get().getWorld().getCreatures().get(creatureList.getSelectedIndex()));
+                }
+            } catch (IndexOutOfBoundsException ex) {
+                JOptionPane.showMessageDialog(this, "This creature is not available");
             }
-        } catch (IndexOutOfBoundsException ex) {
-            JOptionPane.showMessageDialog(this, "This creature is not available");
         }
     }//GEN-LAST:event_creatureListValueChanged
-
-    private void fpsLimitSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fpsLimitSliderStateChanged
-        updateSettings();
-    }//GEN-LAST:event_fpsLimitSliderStateChanged
-
-    private void jCheckBox1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jCheckBox1StateChanged
-        updateSettings();
-    }//GEN-LAST:event_jCheckBox1StateChanged
-
-    private void nCreaturesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nCreaturesSliderStateChanged
-        updateSettings();
-    }//GEN-LAST:event_nCreaturesSliderStateChanged
-
-    private void nPlantsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nPlantsSliderStateChanged
-        updateSettings();
-    }//GEN-LAST:event_nPlantsSliderStateChanged
-
-    private void worldSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_worldSizeSliderStateChanged
-        updateSettings();
-    }//GEN-LAST:event_worldSizeSliderStateChanged
-
-    private void pauseButtonStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_pauseButtonStateChanged
-        game.setPaused(pauseButton.isSelected());
-        pauseButton.setText(pauseButton.isSelected() ? "Resume" : "Pause");
-    }//GEN-LAST:event_pauseButtonStateChanged
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
@@ -536,25 +727,100 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jMenuItem2ActionPerformed(evt);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void pauseMenuButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseMenuButtonActionPerformed
+        if (game == null) {
+            return;
+        }
+        game.setPaused(!game.isPaused());
+    }//GEN-LAST:event_pauseMenuButtonActionPerformed
+
+    private void topSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_topSizeSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_topSizeSliderStateChanged
+
+    private void corpseDecaySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_corpseDecaySliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_corpseDecaySliderStateChanged
+
+    private void enableCorpsesCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_enableCorpsesCheckboxStateChanged
+        updateSettings();
+    }//GEN-LAST:event_enableCorpsesCheckboxStateChanged
+
+    private void pauseButtonStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_pauseButtonStateChanged
+        game.setPaused(pauseButton.isSelected());
+    }//GEN-LAST:event_pauseButtonStateChanged
+
+    private void worldSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_worldSizeSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_worldSizeSliderStateChanged
+
+    private void nPlantsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nPlantsSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nPlantsSliderStateChanged
+
+    private void nCreaturesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nCreaturesSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nCreaturesSliderStateChanged
+
+    private void multithreadingCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multithreadingCheckboxStateChanged
+        updateSettings();
+    }//GEN-LAST:event_multithreadingCheckboxStateChanged
+
+    private void toggleFPSLimitCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_toggleFPSLimitCheckboxStateChanged
+        updateSettings();
+    }//GEN-LAST:event_toggleFPSLimitCheckboxStateChanged
+
+    private void fpsLimitSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fpsLimitSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_fpsLimitSliderStateChanged
+
+    private void sightRangeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sightRangeSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_sightRangeSliderStateChanged
+
+    private void hpDecaySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_hpDecaySliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_hpDecaySliderStateChanged
+
+    private void maxTicksSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxTicksSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_maxTicksSliderStateChanged
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        resetDefaultSettings();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
+    private javax.swing.JSlider corpseDecaySlider;
     private javax.swing.JList creatureList;
+    private javax.swing.JLabel currentCorpseDecay;
     private javax.swing.JLabel currentFpsLimit;
+    private javax.swing.JLabel currentHpDecay;
+    private javax.swing.JLabel currentMaxTicks;
     private javax.swing.JLabel currentNCreatures;
     private javax.swing.JLabel currentNPlants;
+    private javax.swing.JLabel currentSightRange;
+    private javax.swing.JLabel currentTopSize;
     private javax.swing.JLabel currentWorldSize;
+    private javax.swing.JCheckBox enableCorpsesCheckbox;
     private javax.swing.JMenuItem exitButton;
     private javax.swing.JSlider fpsLimitSlider;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JSlider hpDecaySlider;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
@@ -563,13 +829,19 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JComboBox logLevelBox;
     private javax.swing.JPanel logPane;
     private javax.swing.JTextArea logTextArea;
+    private javax.swing.JSlider maxTicksSlider;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JCheckBox multithreadingCheckbox;
     private javax.swing.JSlider nCreaturesSlider;
     private javax.swing.JSlider nPlantsSlider;
     private javax.swing.JToggleButton pauseButton;
+    private javax.swing.JMenuItem pauseMenuButton;
+    private javax.swing.JSlider sightRangeSlider;
     private javax.swing.JMenuItem startButton;
     private javax.swing.JLabel status;
     private javax.swing.JTabbedPane tabs;
+    private javax.swing.JCheckBox toggleFPSLimitCheckbox;
+    private javax.swing.JSlider topSizeSlider;
     private javax.swing.JSlider worldSizeSlider;
     // End of variables declaration//GEN-END:variables
 

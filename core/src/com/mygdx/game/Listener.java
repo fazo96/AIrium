@@ -11,7 +11,7 @@ package com.mygdx.game;
  */
 public interface Listener {
 
-    public static int FPS_CHANGED = 0, CREATURE_LIST_CHANGED = 1;
+    public static int FPS_CHANGED = 0, CREATURE_LIST_CHANGED = 1, PAUSED_OR_RESUMED = 2;
 
     public void on(int event);
 }

@@ -25,9 +25,10 @@ public class World implements Runnable {
 
     private int width, height, nPlants, creatPerGen;
     private int generation = 1;
-    private boolean multithreading, cmdLaunchNewGen = false;
+    private boolean multithreading, cmdLaunchNewGen = false, cmdRestart = false;
     private int fpsLimit, fps = 0;
     private Map<String, Float> options;
+    private long ticksSinceGenStart = 0, maximumTicksPerGen = 0;
     private Creature selected;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
@@ -94,6 +95,22 @@ public class World implements Runnable {
     }
 
     public void update() {
+        if (cmdRestart) {
+            elements.clear();
+            graveyard.clear();
+            creatures.clear();
+            plants.clear();
+            toAdd.clear();
+            deadPlants.clear();
+            newGen(true);
+            cmdRestart = false;
+        }
+        ticksSinceGenStart++;
+        if (maximumTicksPerGen > 0 && ticksSinceGenStart >= maximumTicksPerGen) {
+            // Force new gen
+            Log.log(Log.INFO, "Reached maximum generation time ("+maximumTicksPerGen+")");
+            newGen(false);
+        }
         for (Element e : toAdd) {
             elements.add(e);
             if (e instanceof Creature) {
@@ -125,8 +142,27 @@ public class World implements Runnable {
         while (plants.size() < nPlants) {
             spawnVegetable();
         }
-        for (Element e : elements) {
-            e.update();
+        if (multithreading) { // Multi-thread: use workers
+            for (Vegetable v : plants) {
+                v.update();
+            }
+            for (Creature c : creatures) {
+                c.startWorker();
+            }
+            Thread.yield();
+            int finishedCount = 0;
+            while (finishedCount < creatures.size()) {
+                finishedCount = 0;
+                for (Creature c : creatures) {
+                    if (c.isWorkerDone()) {
+                        finishedCount++;
+                    }
+                }
+            }
+        } else { // Single-thread
+            for (Element e : elements) {
+                e.update();
+            }
         }
     }
 
@@ -158,8 +194,10 @@ public class World implements Runnable {
             int topSize;
             if (graveyard.size() == 1) {
                 topSize = 1;
+            } else if (options.containsKey("parents_count") && options.get("parents_count") >= 1) {
+                topSize = (int) Math.max(2, Math.round(options.get("parents_count")));
             } else {
-                topSize = (int) Math.max(2,Math.round(graveyard.size() * 0.05f));
+                topSize = (int) Math.max(2, Math.round(graveyard.size() * 0.05f));
             }
             Creature[] top = new Creature[topSize];
             // Calculate avg fitness and prepare best agent list
@@ -173,7 +211,8 @@ public class World implements Runnable {
                 avgFitness += c.getFitness();
             }
             avgFitness = avgFitness / graveyard.size();
-            Log.log(Log.INFO, "Gen " + generation + " done. Avg fitness: " + avgFitness);
+            Log.log(Log.INFO, "Gen " + generation + " done. Ticks: "+ticksSinceGenStart+". Avg fitness: " + avgFitness);
+            ticksSinceGenStart = 0;
             // Generate children
             for (Creature c : graveyard) {
                 int first = (int) Math.floor(Math.random() * topSize);
@@ -201,14 +240,18 @@ public class World implements Runnable {
         width = Math.round(options.getOrDefault("world_width", 2000f));
         height = Math.round(options.getOrDefault("world_height", 2000f));
         fpsLimit = Math.round(options.getOrDefault("fps_limit", 60f));
+        maximumTicksPerGen = Math.round(options.getOrDefault("max_ticks", 0f));
         creatPerGen = Math.round(options.getOrDefault("number_of_creatures", (float) Math.min(Math.round(width * height / 20000), 50)));
         nPlants = Math.round(options.getOrDefault("number_of_plants", width * height / 5500f));
         multithreading = options.getOrDefault("enable_multithreading", -1f) > 0;
+        Creature.corpseDecayRate = options.getOrDefault("corpse_decay_rate", 0f);
+        Creature.leaveCorpses = options.getOrDefault("enable_corpses", 0f) > 0;
         Creature.default_radius = Math.round(options.getOrDefault("creature_radius", 20f));
         Creature.max_hp = Math.round(options.getOrDefault("creature_max_hp", 100f));
         Creature.max_speed = Math.round(options.getOrDefault("creature_max_speed", 3f));
         Creature.fov = Math.round(options.getOrDefault("creature_fov", (float) Math.PI / 2.5f));
         Creature.sightRange = Math.round(options.getOrDefault("creature_sight_range", 100f));
+        Creature.hpDecay = options.getOrDefault("creature_hp_decay", 0.5f);
     }
 
     private Element spawn(boolean isCreature, float[][][] brainMap) {
@@ -263,7 +306,7 @@ public class World implements Runnable {
         }
     }
 
-    private void fire(int eventCode) {
+    public void fire(int eventCode) {
         for (Listener f : listeners) {
             f.on(eventCode);
         }
@@ -347,6 +390,10 @@ public class World implements Runnable {
 
     public void setMultithreading(boolean multithreading) {
         this.multithreading = multithreading;
+    }
+
+    public void restart() {
+        cmdRestart = true;
     }
 
     public void launchNewGen() {
