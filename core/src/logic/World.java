@@ -30,6 +30,7 @@ public class World implements Runnable {
     private Map<String, Float> options;
     private long ticksSinceGenStart = 0, maximumTicksPerGen = 0;
     private Creature selected;
+    private Comparator creatureComp;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
     private final ArrayList<Creature> creatures;
@@ -53,6 +54,14 @@ public class World implements Runnable {
         graveyard = new ArrayList();
         listeners = new ArrayList();
         selected = null;
+        creatureComp = new Comparator<Creature>() {
+
+            @Override
+            public int compare(Creature t, Creature t1) {
+                // put the highest fitness first (sort in reverse)
+                return (int) (t1.getFitness() - t.getFitness());
+            }
+        };
         newGen(true);
     }
 
@@ -108,7 +117,7 @@ public class World implements Runnable {
         ticksSinceGenStart++;
         if (maximumTicksPerGen > 0 && ticksSinceGenStart >= maximumTicksPerGen) {
             // Force new gen
-            Log.log(Log.INFO, "Reached maximum generation time ("+maximumTicksPerGen+")");
+            Log.log(Log.INFO, "Reached maximum generation time (" + maximumTicksPerGen + ")");
             newGen(false);
         }
         for (Element e : toAdd) {
@@ -174,14 +183,6 @@ public class World implements Runnable {
             selected = null;
             Log.log(Log.INFO, "Cleared selection");
         }
-        Comparator creatureComp = new Comparator<Creature>() {
-
-            @Override
-            public int compare(Creature t, Creature t1) {
-                // put the highest fitness first (sort in reverse)
-                return (int) (t1.getFitness() - t.getFitness());
-            }
-        };
         if (graveyard.isEmpty() || restart) { // First gen
             generation = 1;
             Log.log(Log.INFO, "Starting from generation 1: spawning " + creatPerGen + " creatures.");
@@ -211,7 +212,7 @@ public class World implements Runnable {
                 avgFitness += c.getFitness();
             }
             avgFitness = avgFitness / graveyard.size();
-            Log.log(Log.INFO, "Gen " + generation + " done. Ticks: "+ticksSinceGenStart+". Avg fitness: " + avgFitness);
+            Log.log(Log.INFO, "Gen " + generation + " done. Ticks: " + ticksSinceGenStart + ". Avg fitness: " + avgFitness);
             ticksSinceGenStart = 0;
             // Generate children
             for (Creature c : graveyard) {
