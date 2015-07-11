@@ -2,16 +2,33 @@
 
 This project aims to build an interactive simple artificial life simulation that uses genetic algorithm and fitness evaluation to improve, over different generations, the performance of the agents.
 
+For now, agents are evaluated based on how much they eat. Using default settings you can see them evolve to be herbivores, but by tweaking it is possible to get carnivores or scavengers.
+
+### Screenshots and videos
+
+You can see some footage from [version 0.4](https://github.com/fazo96/AIrium/releases/tag/v0.4.0) in this [imgur album](http://imgur.com/a/27g9l)
+
+### Download
+
+Visis the [releases page](https://github.com/fazo96/AIrium/releases) to download the latest version. It was tested on Linux, OSX and Windows using the latest version of Java 8. On OSX there is a small bug in the GUI but you can fix it by resizing it to be bigger.
+
+### Planned features
+
+- More behavioral variety
+- More sensors for the creatures
+- Ability to import/export settings and creature brains to create more complex environments
+- Ability to save and load simulation states
+- More in the [issues page](https://github.com/fazo96/AIrium/issues)
+
 ### Controls
 
 - __+__ and __-__ control the zoom of the camera
 - __arrow keys__ allow you to move the camera
-- __P__ pauses the simulation
-- __L__ toggles the frame limiter, allowing the simulation to run as fast as possible
+- The __Configuration__ page in the GUI will let you tweak more!
 
 ## Development
 
-__AIrium is still a prototype. It works but the interface is non-existant, it's not well optimized and results may vary.__ To work on the project or try it out, install __Netbeans__ and follow _Libgdx_'s guide to set it up for Libgdx development (mobile platform are ignored for now so you won't need the Android SDK). It should be possible to work on the project without using Netbeans, but further explanation is out of the scope of this document (follow Libgdx's wiki).
+To work on the project or try it out, install __Netbeans__ and follow _Libgdx_'s guide to set it up for [Libgdx](http://libgdx.badlogicgames.com/) development (mobile platform are ignored for now so you won't need the Android SDK). It should be possible to work on the project without using Netbeans. You can find further explanation in [Libgdx](http://libgdx.badlogicgames.com/)'s wiki.
 
 ## License
 
