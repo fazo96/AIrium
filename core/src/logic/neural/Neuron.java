@@ -77,10 +77,14 @@ public class Neuron {
         return res;
     }
 
-    public float[] mutate(float mutationFactor) {
+    public float[] getMutatedWeights(float mutationProbability, float mutationFactor) {
         float[] mutatedWeights = new float[weights.length];
         for (int i = 0; i < weights.length; i++) {
-            mutatedWeights[i] = weights[i] + mutationFactor - mutationFactor / 2;
+            if (Math.random() <= mutationProbability) {
+                mutatedWeights[i] = weights[i] + (float) (Math.random() * mutationFactor) - mutationFactor / 2;
+            } else {
+                mutatedWeights[i] = weights[i];
+            }
         }
         return mutatedWeights;
     }

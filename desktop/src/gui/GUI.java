@@ -117,6 +117,18 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jButton1 = new javax.swing.JButton();
         drawViewCones = new javax.swing.JCheckBox();
         drawSightLines = new javax.swing.JCheckBox();
+        jLabel11 = new javax.swing.JLabel();
+        nMutatedBrainsSlider = new javax.swing.JSlider();
+        currentNMutatedBrains = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        nMutatedNeuronsSlider = new javax.swing.JSlider();
+        currentNMutatedNeurons = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        mutationFactorSlider = new javax.swing.JSlider();
+        currentMutationFactor = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        nMutatedConnectionsSlider = new javax.swing.JSlider();
+        currentNMutatedConnections = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -130,8 +142,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("AIrium");
-        setMinimumSize(new java.awt.Dimension(530, 450));
-        setPreferredSize(new java.awt.Dimension(530, 450));
+        setMinimumSize(new java.awt.Dimension(700, 700));
+        setPreferredSize(new java.awt.Dimension(700, 700));
 
         logTextArea.setEditable(false);
         logTextArea.setColumns(20);
@@ -161,12 +173,12 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 525, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 695, Short.MAX_VALUE)
         );
         logPaneLayout.setVerticalGroup(
             logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(logPaneLayout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 340, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
                 .addGap(10, 10, 10)
                 .addGroup(logPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -354,6 +366,50 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
         });
 
+        jLabel11.setText("Probability of children mutation");
+
+        nMutatedBrainsSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nMutatedBrainsSliderStateChanged(evt);
+            }
+        });
+
+        currentNMutatedBrains.setText("10%");
+
+        jLabel13.setText("Number of mutated neurons");
+
+        nMutatedNeuronsSlider.setValue(20);
+        nMutatedNeuronsSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nMutatedNeuronsSliderStateChanged(evt);
+            }
+        });
+
+        currentNMutatedNeurons.setText("jLabel14");
+
+        jLabel15.setText("Mutation Factor");
+
+        mutationFactorSlider.setMajorTickSpacing(1);
+        mutationFactorSlider.setMaximum(200);
+        mutationFactorSlider.setValue(100);
+        mutationFactorSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                mutationFactorSliderStateChanged(evt);
+            }
+        });
+
+        currentMutationFactor.setText("jLabel16");
+
+        jLabel12.setText("Number of mutated synapsis");
+
+        nMutatedConnectionsSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nMutatedConnectionsSliderStateChanged(evt);
+            }
+        });
+
+        currentNMutatedConnections.setText("jLabel14");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -361,11 +417,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(drawViewCones)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(drawSightLines)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -426,7 +477,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                                         .addComponent(multithreadingCheckbox)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(enableCorpsesCheckbox)))
-                                .addGap(0, 24, Short.MAX_VALUE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentHpDecay))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -434,7 +485,38 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(maxTicksSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(currentMaxTicks)))
+                        .addComponent(currentMaxTicks))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nMutatedBrainsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentNMutatedBrains))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nMutatedNeuronsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentNMutatedNeurons))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(mutationFactorSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentMutationFactor))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(currentNMutatedConnections))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(drawViewCones)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(drawSightLines)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -493,10 +575,30 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                     .addComponent(maxTicksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentMaxTicks, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(nMutatedBrainsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentNMutatedBrains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(nMutatedNeuronsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(currentNMutatedNeurons, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(currentNMutatedConnections, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mutationFactorSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(currentMutationFactor, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(drawViewCones)
                     .addComponent(drawSightLines))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pauseButton)
                     .addComponent(jButton1))
@@ -709,11 +811,19 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         options.put("creature_sight_range", (float) sightRangeSlider.getValue());
         options.put("creature_hp_decay", (float) hpDecaySlider.getValue() / 1000);
         options.put("max_ticks", (float) maxTicksSlider.getValue());
-        options.put("draw_view_cones",drawViewCones.isSelected()?1f:0);
-        options.put("draw_sight_lines",drawSightLines.isSelected()?1f:0);
+        options.put("draw_view_cones", drawViewCones.isSelected() ? 1f : 0);
+        options.put("draw_sight_lines", drawSightLines.isSelected() ? 1f : 0);
         currentMaxTicks.setText(maxTicksSlider.getValue() + "");
         currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
         currentSightRange.setText(sightRangeSlider.getValue() + "");
+        options.put("nMutatedBrains", (float) nMutatedBrainsSlider.getValue()/100);
+        currentNMutatedBrains.setText(String.format("%.2f", (float) nMutatedBrainsSlider.getValue()/100)+"%");
+        options.put("nMutatedNeurons", (float) nMutatedNeuronsSlider.getValue()/100);
+        currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue()/100)+"%");
+        options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue()/100);
+        currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue()/100)+"%");
+        options.put("mutationFactor", (float) mutationFactorSlider.getValue()/100);
+        currentMutationFactor.setText(String.format("%.2f", (float) mutationFactorSlider.getValue()/100));
         if (game != null) {
             game.getWorld().reloadOptions();
         }
@@ -831,6 +941,22 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         updateSettings();
     }//GEN-LAST:event_drawSightLinesStateChanged
 
+    private void nMutatedNeuronsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedNeuronsSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nMutatedNeuronsSliderStateChanged
+
+    private void mutationFactorSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_mutationFactorSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_mutationFactorSliderStateChanged
+
+    private void nMutatedBrainsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedBrainsSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nMutatedBrainsSliderStateChanged
+
+    private void nMutatedConnectionsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedConnectionsSliderStateChanged
+        updateSettings();
+    }//GEN-LAST:event_nMutatedConnectionsSliderStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
     private javax.swing.JSlider corpseDecaySlider;
@@ -839,7 +965,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JLabel currentFpsLimit;
     private javax.swing.JLabel currentHpDecay;
     private javax.swing.JLabel currentMaxTicks;
+    private javax.swing.JLabel currentMutationFactor;
     private javax.swing.JLabel currentNCreatures;
+    private javax.swing.JLabel currentNMutatedBrains;
+    private javax.swing.JLabel currentNMutatedConnections;
+    private javax.swing.JLabel currentNMutatedNeurons;
     private javax.swing.JLabel currentNPlants;
     private javax.swing.JLabel currentSightRange;
     private javax.swing.JLabel currentTopSize;
@@ -853,6 +983,10 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -875,7 +1009,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JSlider maxTicksSlider;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JCheckBox multithreadingCheckbox;
+    private javax.swing.JSlider mutationFactorSlider;
     private javax.swing.JSlider nCreaturesSlider;
+    private javax.swing.JSlider nMutatedBrainsSlider;
+    private javax.swing.JSlider nMutatedConnectionsSlider;
+    private javax.swing.JSlider nMutatedNeuronsSlider;
     private javax.swing.JSlider nPlantsSlider;
     private javax.swing.JToggleButton pauseButton;
     private javax.swing.JMenuItem pauseMenuButton;

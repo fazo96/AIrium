@@ -92,11 +92,16 @@ public class Game extends ApplicationAdapter {
         renderer.begin(ShapeRenderer.ShapeType.Line);
         try {
             for (Element e : world.getElements()) {
+                if (e == null) {
+                    // Yeah, the perks of multithreading I guess
+                    continue;
+                }
                 try {
                     e.render(renderer);
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                    // No idea why it happens, but it's rendering so meh
-                    //Log.log(Log.ERROR, ex+"");
+                    // Render only half the elements because the list gets
+                    // modified by another thread? Who cares, it's a simulation
+                    // not some videogame
                 }
             }
         } catch (ConcurrentModificationException ex) {
@@ -109,7 +114,7 @@ public class Game extends ApplicationAdapter {
             Creature c = world.getSelectedCreature();
             renderer.setColor(1, 1, 1, 1);
             // Draw selection rectangle
-            renderer.rect(c.getX() - c.getSize(), c.getY() - c.getSize(), c.getSize()*2, c.getSize()*2);
+            renderer.rect(c.getX() - c.getSize(), c.getY() - c.getSize(), c.getSize() * 2, c.getSize() * 2);
             // Draw brain
             overlayRenderer.begin();
             c.getBrain().render(overlayRenderer);
@@ -132,6 +137,8 @@ public class Game extends ApplicationAdapter {
 
     public void setPaused(boolean paused) {
         this.paused = paused;
-        if(world != null) world.fire(Listener.PAUSED_OR_RESUMED);
+        if (world != null) {
+            world.fire(Listener.PAUSED_OR_RESUMED);
+        }
     }
 }

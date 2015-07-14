@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 public class World implements Runnable {
 
     private int width, height, nPlants, creatPerGen;
+    private float nMutatedBrains = 0.2f, nMutatedNeurons = 0.5f, nMutatedConnections = 0.5f, mutationFactor = 1f;
     private int generation = 1;
     private boolean multithreading, cmdLaunchNewGen = false, cmdRestart = false;
     private int fpsLimit, fps = 0;
@@ -229,7 +230,9 @@ public class World implements Runnable {
                     Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Creature ne = spawnCreature(n);
-                ne.getBrain().mutate(0.05f); // mutate children
+                if (Math.random() <= nMutatedBrains) {
+                    ne.getBrain().mutate(nMutatedNeurons, nMutatedConnections, mutationFactor);
+                }
             }
             graveyard.clear();
             fire(Listener.CREATURE_LIST_CHANGED);
@@ -253,6 +256,10 @@ public class World implements Runnable {
         Creature.fov = Math.round(options.getOrDefault("creature_fov", (float) Math.PI / 2.5f));
         Creature.sightRange = Math.round(options.getOrDefault("creature_sight_range", 100f));
         Creature.hpDecay = options.getOrDefault("creature_hp_decay", 0.5f);
+        nMutatedBrains = options.getOrDefault("nMutatedBrains", 0.2f);
+        nMutatedNeurons = options.getOrDefault("nMutatedNeurons", 0.5f);
+        nMutatedConnections = options.getOrDefault("nMutatedConnections", 0.5f);
+        mutationFactor = options.getOrDefault("nMutationFactor", 1f);
     }
 
     private Element spawn(boolean isCreature, float[][][] brainMap) {

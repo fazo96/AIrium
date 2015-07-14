@@ -104,7 +104,7 @@ public class Brain {
                 // Draw neuron links
                 float[] links = neurons[i][j].getWeights();
                 for (int f = 0; f < links.length; f++) {
-                    s.setColor(links[f] < 0 ? links[f]/2 * -1 : 0, links[f] > 0 ? links[f]/2 : 0, 0, 1);
+                    s.setColor(links[f] < 0 ? links[f] / 2 * -1 : 0, links[f] > 0 ? links[f] / 2 : 0, 0, 1);
                     s.line(i * sepX + offset, j * sepY + offset, (i - 1) * sepX + offset, f * sepY + offset);
                 }
                 // Draw neuron
@@ -182,16 +182,22 @@ public class Brain {
      * Get a map of this brain's mind.. with a mutation
      *
      * @param mutationFactor the higher this number, the bigger the mutation
+     * @param connectionMutationProbability the probability that determines how
+     * many connections mutate in a neuron (from 0 to 1)
+     * @param mutationProbability the higher this number the higher the amount
+     * of mutated neurons (range: from 0 to 1)
      * @return a mutated brain map of this brain's mind
      */
-    public float[][][] getMutatedMap(float mutationFactor) {
+    public float[][][] getMutatedMap(float mutationProbability, float connectionMutationProbability, float mutationFactor) {
         float[][][] res = new float[neurons.length - 1][][];
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
             res[i - 1] = new float[neurons[i].length][];
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                res[i - 1][j] = neurons[i][j].mutate(mutationFactor);
+                if (Math.random() <= mutationProbability) {
+                    res[i - 1][j] = neurons[i][j].getMutatedWeights(connectionMutationProbability, mutationFactor);
+                }
             }
         }
         return res;
@@ -200,14 +206,20 @@ public class Brain {
     /**
      * Apply a mutation to this brain
      *
+     * @param connectionMutationProbability the probability that determines how
+     * many connections mutate in a neuron (from 0 to 1)
+     * @param mutationProbability the higher this number the higher the amount
+     * of mutated neurons (range: from 0 to 1)
      * @param mutationFactor the higher this number, the bigger the mutation
      */
-    public void mutate(float mutationFactor) {
+    public void mutate(float mutationProbability, float connectionMutationProbability, float mutationFactor) {
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                neurons[i][j].setWeights(neurons[i][j].mutate(mutationFactor));
+                if (Math.random() <= mutationProbability) {
+                    neurons[i][j].setWeights(neurons[i][j].getMutatedWeights(connectionMutationProbability, mutationFactor));
+                }
             }
         }
     }
