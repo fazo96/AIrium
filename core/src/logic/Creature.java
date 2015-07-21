@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import logic.neural.Brain;
 
 /**
- * A (hopefully) smart biological creature.
+ * A (hopefully) smart biological creature in the simulated world.
  *
  * @author fazo
  */
@@ -24,6 +24,12 @@ public class Creature extends Element implements Runnable {
     private Sight[] sights;
     private Thread workerThread;
 
+    /**
+     * Create a creature with a random mind at given position in space
+     *
+     * @param x
+     * @param y
+     */
     public Creature(float x, float y) {
         super(x, y, default_radius);
         dir = (float) (Math.random() * 2 * Math.PI);
@@ -157,13 +163,14 @@ public class Creature extends Element implements Runnable {
 
     @Override
     public void render(ShapeRenderer s) {
-        // Body
+        // Draw Body
         s.setColor(1 - (hp / max_hp), hp / max_hp, 0, 1);
         s.circle(getX(), getY(), getSize());
-        // Vision
+        // Prepare vision stuff
         double relX = Math.cos(dir), relY = Math.sin(dir);
         float c = 0;
         float eyeX = (float) (relX * getSize() * 0.6f), eyeY = (float) (relY * getSize() * 0.6f);
+        // Draw Sight Lines
         if (Game.get().getWorld().getOptions().getOrDefault("draw_sight_lines", 0f) > 0) {
             for (Sight sight : sights) {
                 if (sight != null) {
@@ -180,19 +187,21 @@ public class Creature extends Element implements Runnable {
                 }
             }
         }
+        // Draw eye
         if (sights[0] == null && sights[1] == null) {
             s.setColor(1, 1, 1, 1);
         } else {
             s.setColor(sights[1] == null ? 0 : 1, sights[0] == null ? 0 : 1, 0, 1);
         }
         s.circle(getX() + eyeX, getY() + eyeY, 3);
-        //FOV
+        // Draw FOV cone
         float degrees = fov * 360f / (float) Math.PI;
         float orient = dir * 180f / (float) Math.PI - degrees / 2;
         if (Game.get().getWorld().getOptions().getOrDefault("draw_view_cones", 0f) > 0) {
             s.setColor(0.3f, 0.3f, 0.3f, 1);
             s.arc((float) eyeX + getX(), (float) eyeY + getY(), sightRange, orient, degrees);
         }
+        // Draw damage/heal marks
         if (hp < prevHp) {
             // Damage mark
             s.set(ShapeRenderer.ShapeType.Filled);
@@ -205,11 +214,17 @@ public class Creature extends Element implements Runnable {
             s.circle(getX(), getY(), 5);
         }
         s.set(ShapeRenderer.ShapeType.Line);
-        // Beak
+        // Draw Beak
         s.setColor(beak / max_beak, 1 - beak / max_beak, 0, 1);
         s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / max_beak) + getX()), (float) (relY * getSize() * (1.5f + beak / max_beak) + getY()));
     }
 
+    /**
+     * Store Sight information (what the creature sees) and eat/attack if
+     * applicable
+     *
+     * @return the sight information retrieved
+     */
     public Sight[] interactWithWorld() {
         Sight[] newSights = new Sight[2];
         // Try to see plant
@@ -299,28 +314,21 @@ public class Creature extends Element implements Runnable {
         return newSights;
     }
 
-    public void eat() {
-        eating = false;
-        for (Element e : Game.get().getWorld().getPlants()) {
-            if (overlaps(e)) {
-                eating = true;
-                e.setSize(e.getSize() - 0.1f);
-                if (e.getSize() == 0) {
-                    e.setSize(0);
-                }
-                hp++;
-                fitness++;
-                if (hp > max_hp) {
-                    hp = max_hp;
-                }
-            }
-        }
-    }
-
+    /**
+     * Apply a modification to this creature's health. Can be negative.
+     *
+     * @param amount how much to heal/damage
+     */
     private void heal(float amount) {
         hp += amount;
     }
 
+    /**
+     * Praise this creature by increasing fitness. Can be negative to decrease
+     * fitness
+     *
+     * @param amount how much
+     */
     private void praise(float amount) {
         fitness += amount;
     }
@@ -340,9 +348,11 @@ public class Creature extends Element implements Runnable {
     public void startWorker() {
         workerDone = false;
         if (workerThread == null) {
+            // Create a new thread
             workerThread = new Thread(this);
             workerThread.start();
         } else {
+            // Interrupt current thread, throwing it out of sleep
             workerThread.interrupt();
         }
     }

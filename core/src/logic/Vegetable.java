@@ -1,15 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package logic;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
 
 /**
- *
+ * Represents a small plant-like vegetable with circular shape
  * @author fazo
  */
 public class Vegetable extends Element {

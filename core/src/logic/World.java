@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package logic;
 
 import com.mygdx.game.Game;
@@ -18,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This class represents an instance of a simulation, its world and its
+ * configuration
  *
  * @author fazo
  */
@@ -40,6 +37,12 @@ public class World implements Runnable {
     private final ArrayList<Vegetable> deadPlants;
     private final ArrayList<Listener> listeners;
 
+    /**
+     * Create a new World. Can be customized with given options.
+     *
+     * @param options customization options. Can be null. See the
+     * "reloadOptions" function for possible options
+     */
     public World(Map<String, Float> options) {
         if (options == null) {
             this.options = new HashMap<String, Float>();
@@ -240,6 +243,10 @@ public class World implements Runnable {
         }
     }
 
+    /**
+     * Applies current options. Uses default alternatives if options are not
+     * provided
+     */
     public void reloadOptions() {
         width = Math.round(options.getOrDefault("world_width", 2000f));
         height = Math.round(options.getOrDefault("world_height", 2000f));
@@ -262,6 +269,14 @@ public class World implements Runnable {
         mutationFactor = options.getOrDefault("nMutationFactor", 1f);
     }
 
+    /**
+     * Spawn a new random element in the world, at a random position.
+     *
+     * @param isCreature true if you want to spawn a creature
+     * @param brainMap the brain configuration. Used if spawning a creature. If
+     * null, a random mind will be created
+     * @return the spawned element
+     */
     private Element spawn(boolean isCreature, float[][][] brainMap) {
         int x, y, r;
         boolean overlaps = false;
@@ -301,6 +316,13 @@ public class World implements Runnable {
         }
     }
 
+    /**
+     * Sets currently select creature to the first creature that overlaps given
+     * coordinates
+     *
+     * @param x the x coordinate of the creature you want to select
+     * @param y the x coordinate of the creature you want to select
+     */
     public void selectCreatureAt(int x, int y) {
         selected = null; // Clear selection
         try {
@@ -314,6 +336,12 @@ public class World implements Runnable {
         }
     }
 
+    /**
+     * Fire an event
+     *
+     * @param eventCode the event code. Look at the Listener class for event
+     * codes.
+     */
     public void fire(int eventCode) {
         for (Listener f : listeners) {
             f.on(eventCode);

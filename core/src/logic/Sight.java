@@ -1,15 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package logic;
 
 /**
+ * Stores a sight of an element, as seen from a creature's eye
  *
  * @author fazo
  */
 public class Sight {
+
     private Element seen;
     private float distance, angle;
 
@@ -30,5 +27,5 @@ public class Sight {
     public float getAngle() {
         return angle;
     }
-    
+
 }

@@ -83,7 +83,7 @@ public class Brain {
     }
 
     /**
-     * Draw this brain's status.
+     * Draw this brain's status to the screen.
      *
      * @param s the ShapeRenderer to use for the drawing
      */
@@ -224,6 +224,17 @@ public class Brain {
         }
     }
 
+    /**
+     * Combine this brain with another one's map to get an offspring. The brains
+     * must have identical neuron configuration. There are huge amounts of
+     * combinations, so you can call multiple times to get different children
+     * from the same parents
+     *
+     * @param map the brain to "breed" with this one
+     * @return a child brain from the two brains
+     * @throws Exception if the brains don't have identical neuron and layer
+     * numbers
+     */
     public float[][][] breed(float[][][] map) throws Exception {
         float[][][] res = new float[neurons.length - 1][][];
         if (map.length != neurons.length - 1) {
@@ -237,9 +248,6 @@ public class Brain {
             }
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                // j = 8 not valid for neurons[i][j]. investigate why.
-                //System.out.println(i+" "+j+" | "+neurons[i].length+" "+res[i-1].length+" "+neurons[i][j].getWeights().length);
-                //System.out.println(neurons[i].length +" has to be > "+j);
                 res[i - 1][j] = new float[neurons[i][j].getWeights().length];
                 if (map[i - 1][j].length != neurons[i][j].getWeights().length) {
                     throw new Exception("incompatible brains");

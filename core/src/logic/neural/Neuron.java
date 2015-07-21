@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package logic.neural;
 
 import com.mygdx.game.Log;
@@ -10,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A neuron in some brain. See Brain class.
  *
  * @author fazo
  */
@@ -22,10 +18,27 @@ public class Neuron {
     private int layer;
     private Brain brain;
 
+    /**
+     * Create a neuron with given brain, bias, and at the given layer with 0
+     * being the input layer, with random weights
+     *
+     * @param layer the layer in which this neuron is positioned
+     * @param bias the bias of this neuron
+     * @param brain the brain which contains this neuron
+     */
     public Neuron(int layer, float bias, Brain brain) {
         this(layer, bias, brain, null);
     }
 
+    /**
+     * Create a neuron with given brain, bias, and at the given layer with 0
+     * being the input layer, with given weights
+     *
+     * @param layer the layer in which this neuron is positioned
+     * @param bias the bias of this neuron
+     * @param brain the brain which contains this neuron
+     * @param weights the weights to use to configure this neuron
+     */
     public Neuron(int layer, float bias, Brain brain, float[] weights) {
         this.brain = brain;
         this.layer = layer;
@@ -37,6 +50,9 @@ public class Neuron {
         cache = new NeuronCache(this.weights.length);
     }
 
+    /**
+     * Randomize the weights of this neuron
+     */
     private void scramble() {
         // init weights
         if (layer > 0) {
@@ -51,6 +67,14 @@ public class Neuron {
         }
     }
 
+    /**
+     * Compute the output of this neuron using the previous layer. Does nothing
+     * with input neurons. Uses a cache to store the output until it is
+     * invalidated by using the clearCache function. This function is recursive,
+     * meaning it will calculate all necessary neuron outputs to get this one.
+     *
+     * @return the output of this neuron.
+     */
     public float compute() {
         if (isInputNeuron) {
             return output;
@@ -67,16 +91,27 @@ public class Neuron {
                     // This should never happen
                     Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            } else {
+                Neuron n = brain.getNeurons()[layer - 1][i];
+                float v = n.compute() * weights[i];
+                a += v;
+                cache.put(i, v);
             }
-            Neuron n = brain.getNeurons()[layer - 1][i];
-            a += n.compute() * weights[i];
         }
         // sigmoid function
         float res = (float) (1 / (1 + Math.pow(Math.E, a * -1)));
+        cache.setCachedOutput(res);
         Log.log(Log.DEBUG, "Computed Value " + res + " for neuron");
         return res;
     }
 
+    /**
+     * Get a copy of the weights, with a mutation
+     *
+     * @param mutationProbability controls how many weights actually mutates
+     * @param mutationFactor controls how much weights mutate
+     * @return the new weights
+     */
     public float[] getMutatedWeights(float mutationProbability, float mutationFactor) {
         float[] mutatedWeights = new float[weights.length];
         for (int i = 0; i < weights.length; i++) {
@@ -90,27 +125,10 @@ public class Neuron {
     }
 
     /**
-     * Broken, doesn't work for some reason.
+     * Use this to manually set the output of input neurons
      *
-     * @return
+     * @param output the output you want to set
      */
-    public float[] getInputs() {
-        float inputs[] = new float[weights.length];
-        for (int i = 0; i < inputs.length; i++) {
-            if (cache.has(i)) {
-                try {
-                    inputs[i] = cache.get(i);
-                } catch (Exception ex) {
-                    // Shouldnt happen
-                    Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                inputs[i] = 0;
-            }
-        }
-        return inputs;
-    }
-
     public void setOutput(float output) {
         isInputNeuron = true;
         this.output = output;
@@ -140,6 +158,11 @@ public class Neuron {
         return weights;
     }
 
+    /**
+     * Change the neuron weights
+     *
+     * @param weights the new weights to put
+     */
     public void setWeights(float[] weights) {
         this.weights = weights;
         // Changing the neuron makes the cache invalid
