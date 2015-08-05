@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -20,10 +21,60 @@ public class Game extends ApplicationAdapter {
     private float cameraSpeed = 15;
     private BitmapFont font;
     private boolean paused = false;
+    private InputProcessor input;
 
     @Override
     public void create() {
         game = this;
+        input = new InputProcessor() {
+
+            @Override
+            public boolean keyDown(int i) {
+                return true;
+            }
+
+            @Override
+            public boolean keyUp(int i) {
+                return true;
+            }
+
+            @Override
+            public boolean keyTyped(char c) {
+                return true;
+            }
+
+            @Override
+            public boolean touchDown(int i, int i1, int i2, int i3) {
+                return true;
+            }
+
+            @Override
+            public boolean touchUp(int i, int i1, int i2, int i3) {
+                return true;
+            }
+
+            @Override
+            public boolean touchDragged(int i, int i1, int i2) {
+                renderer.translate(Gdx.input.getDeltaX(), -Gdx.input.getDeltaY(), 0);
+                return true;
+            }
+
+            @Override
+            public boolean mouseMoved(int i, int i1) {
+                return true;
+            }
+
+            @Override
+            public boolean scrolled(int i) {
+                if (i>0) {
+                    renderer.scale(0.5f, 0.5f, 1);
+                } else {
+                    renderer.scale(1.5f, 1.5f, 1);
+                }
+                return true;
+            }
+        };
+        Gdx.input.setInputProcessor(input);
         renderer = new ShapeRenderer();
         renderer.setAutoShapeType(true);
         overlayRenderer = new ShapeRenderer();
@@ -45,47 +96,6 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void render() {
-        // Controls
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            world.launchNewGen();
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            renderer.translate(-cameraSpeed, 0, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            renderer.translate(cameraSpeed, 0, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            renderer.translate(0, -cameraSpeed, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            renderer.translate(0, cameraSpeed, 0);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS)) {
-            renderer.scale(0.5f, 0.5f, 1);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
-            renderer.scale(1.5f, 1.5f, 1);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            paused = !paused;
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            if (world.getFpsLimit() == 60) {
-                world.setFpsLimit(0);
-            } else {
-                world.setFpsLimit(60);
-            }
-        }
-        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            renderer.translate(Gdx.input.getDeltaX(), Gdx.input.getDeltaY() * -1, 0);
-        }
-        /*
-         // Broken for now
-         if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
-         // TODO: project coordinates to world
-         world.selectCreatureAt(Gdx.input.getX(), Gdx.input.getY());
-         }*/
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

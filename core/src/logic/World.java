@@ -348,15 +348,15 @@ public class World implements Runnable {
         }
     }
 
-    private void spawnVegetable() {
+    public void spawnVegetable() {
         spawn(false, null);
     }
 
-    private Creature spawnCreature() {
+    public Creature spawnCreature() {
         return (Creature) spawn(true, null);
     }
 
-    private Creature spawnCreature(float[][][] b) {
+    public Creature spawnCreature(float[][][] b) {
         return (Creature) spawn(true, b);
     }
 

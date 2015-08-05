@@ -28,6 +28,7 @@ public class Log {
             for (LogListener l : logListeners) {
                 l.onLog(level, msg);
             }
+            System.out.println(msg);
         }
     }
 

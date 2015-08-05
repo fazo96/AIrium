@@ -35,27 +35,12 @@ public class Brain {
     }
 
     /**
-     * Create a new brain using given brain map (mind)
-     *
-     * @param brainMap the brain map (mind) to use
-     */
-    public Brain(float[][][] brainMap) {
-        neurons = new Neuron[brainMap.length][];
-        for (int i = 0; i < brainMap.length; i++) { // for each layer
-            neurons[i] = new Neuron[brainMap[i].length];
-            for (int j = 0; j < brainMap[i].length; j++) { // for each neuron
-                neurons[i][j] = new Neuron(i, bias, this, brainMap[i][j]);
-            }
-        }
-    }
-
-    /**
      * Apply a new brain map (mind) to this brain
      *
      * @param brainMap the new brain map to apply
      */
     public void remap(float[][][] brainMap) {
-        for (int i = 0; i < brainMap.length; i++) { // for each layer
+        for (int i = 0; i < brainMap.length; i++) { // for each layer (skip input)
             for (int j = 0; j < brainMap[i].length; j++) { // for each neuron
                 // skip input layer
                 if (neurons[i + 1][j] == null) {
@@ -103,9 +88,11 @@ public class Brain {
                 float nr = neurons[i][j].compute();
                 // Draw neuron links
                 float[] links = neurons[i][j].getWeights();
-                for (int f = 0; f < links.length; f++) {
-                    s.setColor(links[f] < 0 ? links[f] / 2 * -1 : 0, links[f] > 0 ? links[f] / 2 : 0, 0, 1);
-                    s.line(i * sepX + offset, j * sepY + offset, (i - 1) * sepX + offset, f * sepY + offset);
+                if (links != null) {
+                    for (int f = 0; f < links.length; f++) {
+                        s.setColor(links[f] < 0 ? links[f] / 2 * -1 : 0, links[f] > 0 ? links[f] / 2 : 0, 0, 1);
+                        s.line(i * sepX + offset, j * sepY + offset, (i - 1) * sepX + offset, f * sepY + offset);
+                    }
                 }
                 // Draw neuron
                 s.setColor(1 - nr, nr, 0, 1);

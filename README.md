@@ -22,9 +22,8 @@ Visis the [releases page](https://github.com/fazo96/AIrium/releases) to download
 
 ### Controls
 
-- __+__ and __-__ control the zoom of the camera
-- __arrow keys__ allow you to move the camera
-- The __Configuration__ page in the GUI will let you tweak more!
+- The __Configuration__ page in the GUI will let you tweak many parameters and pause the simulation
+- You can drag with the mouse to move the camera and zoom with the mouse wheel
 
 ## Development
 

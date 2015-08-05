@@ -76,6 +76,7 @@ public class Neuron {
      * @return the output of this neuron.
      */
     public float compute() {
+        if(weights == null || weights.length == 0) isInputNeuron = true;
         if (isInputNeuron) {
             return output;
         }
