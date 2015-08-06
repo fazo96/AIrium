@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 import logic.Creature;
 
 /**
@@ -517,18 +518,16 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentMutationFactor))
                     .addGroup(settingsPanelLayout.createSequentialGroup()
-                        .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(settingsPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel12)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(currentNMutatedConnections))
-                            .addGroup(settingsPanelLayout.createSequentialGroup()
-                                .addComponent(drawViewCones)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(drawSightLines)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(drawViewCones)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(drawSightLines)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentNMutatedConnections, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         settingsPanelLayout.setVerticalGroup(
@@ -844,7 +843,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             if (i >= game.getWorld().getCreatures().size()) {
                 return;
             }
-            list[i] = "Fitness: " + game.getWorld().getCreatures().get(i).getFitness();
+            list[i] = game.getWorld().getCreatures().get(i).getBrain().getName()
+                    + " - Fitness: "
+                    + game.getWorld().getCreatures().get(i).getFitness();
             if (game.getWorld().getCreatures().get(i) == game.getWorld().getSelectedCreature()) {
                 selected = i;
             }
@@ -865,6 +866,10 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         sightRangeSlider.setValue(100);
         hpDecaySlider.setValue(500);
         maxTicksSlider.setValue(0);
+        nMutatedBrainsSlider.setValue(50);
+        nMutatedNeuronsSlider.setValue(20);
+        nMutatedConnectionsSlider.setValue(50);
+        mutationFactorSlider.setValue(100);
         toggleFPSLimitCheckbox.setSelected(false);
         multithreadingCheckbox.setSelected(true);
         enableCorpsesCheckbox.setSelected(false);
@@ -1029,10 +1034,16 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private void nMutatedConnectionsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedConnectionsSliderStateChanged
         updateSettings();
     }//GEN-LAST:event_nMutatedConnectionsSliderStateChanged
-
     private File saveDialog() {
+        return saveDialog(null);
+    }
+
+    private File saveDialog(String defaultName) {
         JFileChooser fc = new JFileChooser();
         File f = null;
+        if (defaultName != null) {
+            fc.setSelectedFile(new File(defaultName));
+        }
         if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             f = fc.getSelectedFile();
         }
@@ -1071,7 +1082,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             JOptionPane.showMessageDialog(this, "Please select a creature first");
             return;
         }
-        File f = saveDialog();
+        File f = saveDialog(game.getWorld().getSelectedCreature().getBrain().getName()+".brain");
         if (f == null) {
             return;
         }
@@ -1099,7 +1110,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             game.setPaused(true);
         }
         updateGUI();
-        File f = saveDialog();
+        File f = saveDialog("AIrium_settings.ini");
         if (f == null) {
             return;
         }

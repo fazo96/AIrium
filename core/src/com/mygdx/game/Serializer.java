@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Hangles File I/O for AIrium components.
@@ -14,6 +15,27 @@ import java.util.Map;
  * @author fazo
  */
 public class Serializer {
+
+    private static final String[] sillabe = {"ba", "de", "ka", "mo", "shi", "du", "ro", "te", "mi", "lo", "pa"};
+
+    public static String nameBrain(float[][][] brainMap) {
+        // Compute a unique representation of the brainmap
+        long a = 0;
+        for (int i = 0; i < brainMap.length; i++) {
+            for (int j = 0; j < brainMap[i].length; j++) {
+                for (int z = 0; z < brainMap[i][j].length; z++) {
+                    a += brainMap[i][j][z] * i * j * z;
+                }
+            }
+        }
+        Random gen = new Random(a);
+        String name = "";
+        int length = Math.abs(gen.nextInt()) % 5 + 2;
+        for (int i = 0; i < length; i++){
+            name += sillabe[Math.abs(gen.nextInt()) % sillabe.length];
+        }
+        return name;
+    }
 
     public static void saveToFile(File f, String content) {
         PrintWriter fw = null;
@@ -53,7 +75,7 @@ public class Serializer {
         return a;
     }
 
-    public static Map<String,Float> readSettings(String fileContent) {
+    public static Map<String, Float> readSettings(String fileContent) {
         int line = 0;
         Map<String, Float> m = new HashMap<String, Float>();
         for (String s : fileContent.split("\n")) {

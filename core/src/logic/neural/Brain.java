@@ -2,6 +2,7 @@ package logic.neural;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Log;
+import com.mygdx.game.Serializer;
 
 /**
  * Represents a virtual brain
@@ -12,6 +13,7 @@ public class Brain {
 
     public static final float bias = 0.5f;
     private Neuron[][] neurons;
+    private String name;
 
     /**
      * Create a new brain with a random map (mind) with given number of neurons
@@ -50,6 +52,7 @@ public class Brain {
                 }
             }
         }
+        recomputeName();
     }
 
     /**
@@ -65,6 +68,7 @@ public class Brain {
                 Log.log(Log.DEBUG, "Adding Layer " + (i + 1) + " Neuron " + (j + 1));
             }
         }
+        recomputeName();
     }
 
     /**
@@ -265,6 +269,10 @@ public class Brain {
         }
     }
 
+    private void recomputeName(){
+        name = Serializer.nameBrain(getMap());
+    }
+    
     /**
      * Returns an array with pointers to all this brain's neurons.
      *
@@ -273,4 +281,9 @@ public class Brain {
     public Neuron[][] getNeurons() {
         return neurons;
     }
+
+    public String getName() {
+        return name;
+    }
+    
 }
