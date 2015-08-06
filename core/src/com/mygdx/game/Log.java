@@ -22,13 +22,19 @@ public class Log {
 
     public static void log(int level, String msg) {
         if (level <= logLevel) {
+            String s = "";
             if (logListeners == null) {
                 logListeners = new ArrayList<LogListener>();
             }
-            for (LogListener l : logListeners) {
-                l.onLog(level, msg);
+            if (level == 0) {
+                s = "[ERROR] ";
+            } else if (level == 2) {
+                s = "[DEBUG] ";
             }
-            System.out.println(msg);
+            for (LogListener l : logListeners) {
+                l.onLog(level, s + msg);
+            }
+            System.out.println(s + msg);
         }
     }
 
@@ -41,6 +47,7 @@ public class Log {
     }
 
     public interface LogListener {
+
         public abstract void onLog(int level, String msg);
     }
 

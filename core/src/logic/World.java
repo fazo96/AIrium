@@ -343,6 +343,7 @@ public class World implements Runnable {
      * codes.
      */
     public void fire(int eventCode) {
+        Log.log(Log.DEBUG, "Firing Event. Code: " + eventCode);
         for (Listener f : listeners) {
             f.on(eventCode);
         }
@@ -430,6 +431,11 @@ public class World implements Runnable {
 
     public void setMultithreading(boolean multithreading) {
         this.multithreading = multithreading;
+    }
+
+    public void replaceOptions(Map<String, Float> options) {
+        this.options = options;
+        reloadOptions();
     }
 
     public void restart() {

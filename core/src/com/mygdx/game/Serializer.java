@@ -2,14 +2,11 @@ package com.mygdx.game;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Hangles File I/O for AIrium components.
@@ -46,16 +43,19 @@ public class Serializer {
 
     public static String serializeSettings(Map<String, Float> options) {
         String a = "# Settings file for use with AIrium.\n"
-                + "# More information at http://github.com/fazo96/AIrium";
+                + "# More information at http://github.com/fazo96/AIrium\n";
         for (Object o : options.entrySet().toArray()) {
             Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
-            a += e.getKey() + " = " + e.getValue() + "\n";
+            if (!e.getKey().equals("fps_limit")) { // dont save this one
+                a += e.getKey() + " = " + e.getValue() + "\n";
+            }
         }
         return a;
     }
 
-    public static void readSettings(String fileContent, Map<String, Float> m) {
+    public static Map<String,Float> readSettings(String fileContent) {
         int line = 0;
+        Map<String, Float> m = new HashMap<String, Float>();
         for (String s : fileContent.split("\n")) {
             line++;
             if (s.startsWith("#")) {
@@ -67,12 +67,13 @@ public class Serializer {
                 if (ss.length != 2) {
                     throw new Exception("Invalid string at line " + line);
                 }
-                Log.log(Log.DEBUG,"Loading setting \""+ss[0].trim()+"\" with value \""+Float.parseFloat(ss[1].trim())+"\"");
+                Log.log(Log.DEBUG, "Loading setting \"" + ss[0].trim() + "\" with value \"" + Float.parseFloat(ss[1].trim()) + "\"");
                 m.put(ss[0].trim(), Float.parseFloat(ss[1].trim()));
             } catch (Exception e) {
                 Log.log(Log.ERROR, e.getMessage());
             }
         }
+        return m;
     }
 
     public static String serializeBrain(float brainMap[][][]) {

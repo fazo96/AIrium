@@ -36,6 +36,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private boolean shouldUpdateGUI = false;
     private final Thread guiUpdater;
     private Map<String, Float> options;
+    private boolean updatingSliders = false;
 
     /**
      * Creates new form GUI
@@ -876,42 +877,40 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
      * Adjusts settings using values from the UI
      */
     private void updateSettings() {
-        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
-        if (toggleFPSLimitCheckbox.isSelected()) {
-            options.put("fps_limit", 0f);
-        } else {
-            options.put("fps_limit", (float) fpsLimitSlider.getValue());
+        if (!updatingSliders) {
+            options.put("fps_limit", toggleFPSLimitCheckbox.isSelected() ? 0 : (float) fpsLimitSlider.getValue());
+            options.put("enable_multithreading", multithreadingCheckbox.isSelected() ? 1f : 0f);
+            options.put("number_of_creatures", (float) nCreaturesSlider.getValue());
+            options.put("number_of_plants", (float) nPlantsSlider.getValue());
+            options.put("corpse_decay_rate", corpseDecaySlider.getValue() / 1000f);
+            options.put("enable_corpses", enableCorpsesCheckbox.isSelected() ? 1f : 0f);
+            options.put("world_width", (float) worldSizeSlider.getValue());
+            options.put("world_height", (float) worldSizeSlider.getValue());
+            topSizeSlider.setMaximum(nCreaturesSlider.getValue());
+            options.put("parents_count", (float) topSizeSlider.getValue());
+            options.put("creature_sight_range", (float) sightRangeSlider.getValue());
+            options.put("creature_hp_decay", (float) hpDecaySlider.getValue() / 1000);
+            options.put("max_ticks", (float) maxTicksSlider.getValue());
+            options.put("draw_view_cones", drawViewCones.isSelected() ? 1f : 0);
+            options.put("draw_sight_lines", drawSightLines.isSelected() ? 1f : 0);
+            options.put("nMutatedBrains", (float) nMutatedBrainsSlider.getValue() / 100);
+            options.put("nMutatedNeurons", (float) nMutatedNeuronsSlider.getValue() / 100);
+            options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue() / 100);
+            options.put("mutationFactor", (float) mutationFactorSlider.getValue() / 100);
         }
-        options.put("enable_multithreading", multithreadingCheckbox.isSelected() ? 1f : 0f);
-        options.put("number_of_creatures", (float) nCreaturesSlider.getValue());
-        options.put("number_of_plants", (float) nPlantsSlider.getValue());
-        options.put("corpse_decay_rate", corpseDecaySlider.getValue() / 1000f);
-        options.put("enable_corpses", enableCorpsesCheckbox.isSelected() ? 1f : 0f);
-        currentNCreatures.setText(nCreaturesSlider.getValue() + "");
-        currentNPlants.setText(nPlantsSlider.getValue() + "");
-        currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
-        options.put("world_width", (float) worldSizeSlider.getValue());
-        options.put("world_height", (float) worldSizeSlider.getValue());
+        currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
+        currentSightRange.setText(sightRangeSlider.getValue() + "");
+        currentNMutatedBrains.setText(String.format("%.2f", (float) nMutatedBrainsSlider.getValue() / 100) + "%");
         currentWorldSize.setText(worldSizeSlider.getValue() + "");
-        topSizeSlider.setMaximum(nCreaturesSlider.getValue());
         currentTopSize.setText(topSizeSlider.getValue() + (topSizeSlider.getValue() <= 0 ? " (Auto)" : ""));
-        options.put("parents_count", (float) topSizeSlider.getValue());
-        options.put("creature_sight_range", (float) sightRangeSlider.getValue());
-        options.put("creature_hp_decay", (float) hpDecaySlider.getValue() / 1000);
-        options.put("max_ticks", (float) maxTicksSlider.getValue());
-        options.put("draw_view_cones", drawViewCones.isSelected() ? 1f : 0);
-        options.put("draw_sight_lines", drawSightLines.isSelected() ? 1f : 0);
         currentMaxTicks.setText(maxTicksSlider.getValue() + "");
         currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
-        currentSightRange.setText(sightRangeSlider.getValue() + "");
-        options.put("nMutatedBrains", (float) nMutatedBrainsSlider.getValue() / 100);
-        currentNMutatedBrains.setText(String.format("%.2f", (float) nMutatedBrainsSlider.getValue() / 100) + "%");
-        options.put("nMutatedNeurons", (float) nMutatedNeuronsSlider.getValue() / 100);
-        currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
-        options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue() / 100);
-        currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue() / 100) + "%");
-        options.put("mutationFactor", (float) mutationFactorSlider.getValue() / 100);
         currentMutationFactor.setText(String.format("%.2f", (float) mutationFactorSlider.getValue() / 100));
+        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
+        currentNCreatures.setText(nCreaturesSlider.getValue() + "");
+        currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue() / 100) + "%");
+        currentNPlants.setText(nPlantsSlider.getValue() + "");
+        currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
         if (game != null) {
             game.getWorld().reloadOptions();
         }
@@ -1077,6 +1076,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             return;
         }
         Serializer.saveToFile(f, Serializer.serializeBrain(game.getWorld().getSelectedCreature().getBrain().getMap()));
+        JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_saveBrainBtnActionPerformed
 
     private void loadBrainBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadBrainBtnActionPerformed
@@ -1085,6 +1085,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         updateGUI();
         File f = loadDialog();
+        if (f == null) {
+            return;
+        }
         float map[][][] = Serializer.loadBrain(Serializer.loadFromFile(f));
         Creature c = (Creature) game.getWorld().spawnCreature(map);
         game.getWorld().selectCreature(c);
@@ -1102,6 +1105,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         String settings = Serializer.serializeSettings(options);
         Serializer.saveToFile(f, settings);
+        JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_saveSettingsBtnActionPerformed
 
     private void loadSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSettingsBtnActionPerformed
@@ -1113,32 +1117,37 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         if (f == null) {
             return;
         }
-        Serializer.readSettings(Serializer.loadFromFile(f), options);
+        options.putAll(Serializer.readSettings(Serializer.loadFromFile(f)));
+        /*if (game != null) {
+         game.getWorld().replaceOptions(options);
+         }*/
         updateSettingsUI();
+        JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_loadSettingsBtnActionPerformed
     /**
      * Reads settings and adjusts UI sliders.
      */
     private void updateSettingsUI() {
-        fpsLimitSlider.setValue(options.get("fps_limit").intValue());
+        updatingSliders = true;
+        //fpsLimitSlider.setValue(Math.round(options.get("fps_limit")));
         multithreadingCheckbox.setSelected(options.get("enable_multithreading") > 0f);
-        nCreaturesSlider.setValue(options.get("number_of_creatures").intValue());
+        nCreaturesSlider.setValue(Math.round(options.get("number_of_creatures")));
         topSizeSlider.setMaximum(nCreaturesSlider.getValue());
-        nPlantsSlider.setValue(options.get("number_of_plants").intValue());
-        corpseDecaySlider.setValue((int) (options.get("corpse_decay_rate") * 1000));
+        topSizeSlider.setValue(Math.round(options.get("parents_count")));
+        nPlantsSlider.setValue(Math.round(options.get("number_of_plants")));
+        corpseDecaySlider.setValue(Math.round(options.get("corpse_decay_rate") * 1000));
         enableCorpsesCheckbox.setSelected(options.get("enable_corpses") > 0f);
-        worldSizeSlider.setValue(options.get("world_height").intValue());
-        topSizeSlider.setValue(options.get("parents_count").intValue());
-        sightRangeSlider.setValue(options.get("creature_sight_range").intValue());
-        hpDecaySlider.setValue((int) (options.get("creature_hp_decay") * 1000));
-        maxTicksSlider.setValue(options.get("max_ticks").intValue());
+        worldSizeSlider.setValue(Math.round(options.get("world_height")));
+        sightRangeSlider.setValue(Math.round(options.get("creature_sight_range")));
+        hpDecaySlider.setValue(Math.round(options.get("creature_hp_decay") * 1000));
+        maxTicksSlider.setValue(Math.round(options.get("max_ticks")));
         drawViewCones.setSelected(options.get("draw_view_cones") > 0f);
         drawSightLines.setSelected(options.get("draw_sight_lines") > 0f);
-        nMutatedBrainsSlider.setValue((int) (options.get("nMutatedBrains").intValue() * 100));
-        nMutatedNeuronsSlider.setValue((int) (options.get("nMutatedNeurons").intValue() * 100));
-        nMutatedConnectionsSlider.setValue((int) (options.get("nMutatedConnections").intValue() * 100));
-        mutationFactorSlider.setValue((int) (options.get("mutationFactor").intValue() * 100));
-        updateSettings();
+        nMutatedBrainsSlider.setValue(Math.round(options.get("nMutatedBrains") * 100));
+        nMutatedNeuronsSlider.setValue(Math.round(options.get("nMutatedNeurons") * 100));
+        nMutatedConnectionsSlider.setValue(Math.round(options.get("nMutatedConnections") * 100));
+        mutationFactorSlider.setValue(Math.round(options.get("mutationFactor") * 100));
+        updatingSliders = false;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
