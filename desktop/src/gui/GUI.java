@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.stage.FileChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import logic.Creature;
@@ -35,7 +34,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private Game game;
     private LwjglApplication app;
     private boolean shouldUpdateGUI = false;
-    private Thread guiUpdater;
+    private final Thread guiUpdater;
     private Map<String, Float> options;
 
     /**
@@ -85,7 +84,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         logTextArea = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         logLevelBox = new javax.swing.JComboBox();
-        jPanel1 = new javax.swing.JPanel();
+        settingsPanel = new javax.swing.JPanel();
         fpsLimitSlider = new javax.swing.JSlider();
         jLabel3 = new javax.swing.JLabel();
         toggleFPSLimitCheckbox = new javax.swing.JCheckBox();
@@ -132,7 +131,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         jLabel12 = new javax.swing.JLabel();
         nMutatedConnectionsSlider = new javax.swing.JSlider();
         currentNMutatedConnections = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
+        saveSettingsBtn = new javax.swing.JButton();
+        loadSettingsBtn = new javax.swing.JButton();
+        creaturesPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         creatureList = new javax.swing.JList();
         saveBrainBtn = new javax.swing.JButton();
@@ -402,68 +403,86 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         currentNMutatedConnections.setText("jLabel14");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        saveSettingsBtn.setText("Save Settings");
+        saveSettingsBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveSettingsBtnActionPerformed(evt);
+            }
+        });
+
+        loadSettingsBtn.setText("Load Settings");
+        loadSettingsBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadSettingsBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout settingsPanelLayout = new javax.swing.GroupLayout(settingsPanel);
+        settingsPanel.setLayout(settingsPanelLayout);
+        settingsPanelLayout.setHorizontalGroup(
+            settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(settingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(fpsLimitSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentFpsLimit))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(nCreaturesSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentNCreatures))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(nPlantsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentNPlants))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(worldSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentWorldSize))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(corpseDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentCorpseDecay))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(topSizeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentTopSize))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sightRangeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentSightRange))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
+                        .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(settingsPanelLayout.createSequentialGroup()
                                 .addComponent(jLabel9)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(hpDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(settingsPanelLayout.createSequentialGroup()
+                                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(settingsPanelLayout.createSequentialGroup()
                                         .addComponent(pauseButton)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton1))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jButton1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(saveSettingsBtn)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(loadSettingsBtn))
+                                    .addGroup(settingsPanelLayout.createSequentialGroup()
                                         .addComponent(toggleFPSLimitCheckbox)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(multithreadingCheckbox)
@@ -472,58 +491,58 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentHpDecay))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(maxTicksSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentMaxTicks))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel11)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(nMutatedBrainsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentNMutatedBrains))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(nMutatedNeuronsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentNMutatedNeurons))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
                         .addComponent(jLabel15)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(mutationFactorSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(currentMutationFactor))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
+                        .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(settingsPanelLayout.createSequentialGroup()
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(currentNMutatedConnections))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(settingsPanelLayout.createSequentialGroup()
                                 .addComponent(drawViewCones)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(drawSightLines)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        settingsPanelLayout.setVerticalGroup(
+            settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(settingsPanelLayout.createSequentialGroup()
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(settingsPanelLayout.createSequentialGroup()
+                        .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(fpsLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(currentFpsLimit, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(settingsPanelLayout.createSequentialGroup()
+                                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(toggleFPSLimitCheckbox)
                                     .addComponent(multithreadingCheckbox)
                                     .addComponent(enableCorpsesCheckbox))
@@ -532,72 +551,74 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                             .addComponent(currentNCreatures, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(nCreaturesSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(currentNPlants, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nPlantsSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(worldSizeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentWorldSize, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(corpseDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(currentCorpseDecay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(topSizeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentTopSize, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(sightRangeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(currentSightRange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(hpDecaySlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(currentHpDecay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(maxTicksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentMaxTicks, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(nMutatedBrainsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(currentNMutatedBrains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(nMutatedNeuronsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(currentNMutatedNeurons, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(currentNMutatedConnections, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(nMutatedConnectionsSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(mutationFactorSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(currentMutationFactor, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(drawViewCones)
                     .addComponent(drawSightLines))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(settingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pauseButton)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1)
+                    .addComponent(saveSettingsBtn)
+                    .addComponent(loadSettingsBtn))
                 .addContainerGap())
         );
 
-        tabs.addTab("Settings", jPanel1);
+        tabs.addTab("Settings", settingsPanel);
 
         creatureList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "No creatures" };
@@ -612,44 +633,44 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         });
         jScrollPane2.setViewportView(creatureList);
 
-        saveBrainBtn.setText("Save");
+        saveBrainBtn.setText("Save Creature");
         saveBrainBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveBrainBtnActionPerformed(evt);
             }
         });
 
-        loadBrainBtn.setText("Load");
+        loadBrainBtn.setText("Load Creature");
         loadBrainBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loadBrainBtnActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout creaturesPanelLayout = new javax.swing.GroupLayout(creaturesPanel);
+        creaturesPanel.setLayout(creaturesPanelLayout);
+        creaturesPanelLayout.setHorizontalGroup(
+            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane2)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+            .addGroup(creaturesPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(saveBrainBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(loadBrainBtn)
-                .addContainerGap(587, Short.MAX_VALUE))
+                .addContainerGap(477, Short.MAX_VALUE))
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        creaturesPanelLayout.setVerticalGroup(
+            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(creaturesPanelLayout.createSequentialGroup()
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(saveBrainBtn)
                     .addComponent(loadBrainBtn))
                 .addContainerGap())
         );
 
-        tabs.addTab("Creatures", jPanel3);
+        tabs.addTab("Creatures", creaturesPanel);
 
         status.setText("Simulation stopped");
 
@@ -757,7 +778,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
             game.getWorld().restart();
             game.setPaused(false);
-            updateGUI();
         } else {
             // Start new
             LwjglApplicationConfiguration.disableAudio = true;
@@ -772,9 +792,14 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             game.getWorld().addListener(this);
             setCreatureList();
         }
+        updateGUI();
     }//GEN-LAST:event_startButtonActionPerformed
+
     @Override
     public void onLog(int level, String msg) {
+        if (level == Log.ERROR) {
+            JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
+        }
         logTextArea.append(msg + "\n");
         setScrollBarToTheBottom();
     }
@@ -785,10 +810,19 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         guiUpdater.interrupt();
     }
 
+    public void enableControlButtons(boolean yn) {
+        pauseButton.setEnabled(yn);
+        pauseMenuButton.setEnabled(yn);
+        saveBrainBtn.setEnabled(yn);
+        loadBrainBtn.setEnabled(yn);
+    }
+
     public void updateGUI() {
         if (game == null) {
+            enableControlButtons(false);
             return;
         }
+        enableControlButtons(true);
         status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
         if (game.isPaused()) {
             pauseButton.setSelected(true);
@@ -804,13 +838,20 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     private void setCreatureList() {
         String list[] = new String[game.getWorld().getCreatures().size()];
+        int selected = -1;
         for (int i = 0; i < list.length; i++) {
             if (i >= game.getWorld().getCreatures().size()) {
                 return;
             }
             list[i] = "Fitness: " + game.getWorld().getCreatures().get(i).getFitness();
+            if (game.getWorld().getCreatures().get(i) == game.getWorld().getSelectedCreature()) {
+                selected = i;
+            }
         }
         creatureList.setListData(list);
+        if (selected >= 0) {
+            creatureList.setSelectedIndex(selected);
+        }
     }
 
     private void resetDefaultSettings() {
@@ -831,6 +872,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         updateSettings();
     }
 
+    /**
+     * Adjusts settings using values from the UI
+     */
     private void updateSettings() {
         currentFpsLimit.setText("" + fpsLimitSlider.getValue());
         if (toggleFPSLimitCheckbox.isSelected()) {
@@ -987,6 +1031,24 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         updateSettings();
     }//GEN-LAST:event_nMutatedConnectionsSliderStateChanged
 
+    private File saveDialog() {
+        JFileChooser fc = new JFileChooser();
+        File f = null;
+        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            f = fc.getSelectedFile();
+        }
+        return f;
+    }
+
+    private File loadDialog() {
+        JFileChooser fc = new JFileChooser();
+        File f = null;
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            f = fc.getSelectedFile();
+        }
+        return f;
+    }
+
     private void creatureListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_creatureListValueChanged
         if (game == null) {
             creatureList.setSelectedIndex(-1);
@@ -1002,38 +1064,88 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }//GEN-LAST:event_creatureListValueChanged
 
     private void saveBrainBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBrainBtnActionPerformed
-        game.setPaused(true);
+        if (game != null) {
+            game.setPaused(true);
+        }
         updateGUI();
         if (game.getWorld().getSelectedCreature() == null) {
             JOptionPane.showMessageDialog(this, "Please select a creature first");
             return;
         }
-        JFileChooser fc = new JFileChooser();
-        File f = null;
-        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            f = fc.getSelectedFile();
-        } else return;
+        File f = saveDialog();
+        if (f == null) {
+            return;
+        }
         Serializer.saveToFile(f, Serializer.serializeBrain(game.getWorld().getSelectedCreature().getBrain().getMap()));
     }//GEN-LAST:event_saveBrainBtnActionPerformed
 
     private void loadBrainBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadBrainBtnActionPerformed
-        game.setPaused(true);
+        if (game != null) {
+            game.setPaused(true);
+        }
         updateGUI();
-        JFileChooser fc = new JFileChooser();
-        File f = null;
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            f = fc.getSelectedFile();
-        } else return;
+        File f = loadDialog();
         float map[][][] = Serializer.loadBrain(Serializer.loadFromFile(f));
         Creature c = (Creature) game.getWorld().spawnCreature(map);
         game.getWorld().selectCreature(c);
         updateGUI();
     }//GEN-LAST:event_loadBrainBtnActionPerformed
 
+    private void saveSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsBtnActionPerformed
+        if (game != null) {
+            game.setPaused(true);
+        }
+        updateGUI();
+        File f = saveDialog();
+        if (f == null) {
+            return;
+        }
+        String settings = Serializer.serializeSettings(options);
+        Serializer.saveToFile(f, settings);
+    }//GEN-LAST:event_saveSettingsBtnActionPerformed
+
+    private void loadSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSettingsBtnActionPerformed
+        if (game != null) {
+            game.setPaused(true);
+        }
+        updateGUI();
+        File f = loadDialog();
+        if (f == null) {
+            return;
+        }
+        Serializer.readSettings(Serializer.loadFromFile(f), options);
+        updateSettingsUI();
+    }//GEN-LAST:event_loadSettingsBtnActionPerformed
+    /**
+     * Reads settings and adjusts UI sliders.
+     */
+    private void updateSettingsUI() {
+        fpsLimitSlider.setValue(options.get("fps_limit").intValue());
+        multithreadingCheckbox.setSelected(options.get("enable_multithreading") > 0f);
+        nCreaturesSlider.setValue(options.get("number_of_creatures").intValue());
+        topSizeSlider.setMaximum(nCreaturesSlider.getValue());
+        nPlantsSlider.setValue(options.get("number_of_plants").intValue());
+        corpseDecaySlider.setValue((int) (options.get("corpse_decay_rate") * 1000));
+        enableCorpsesCheckbox.setSelected(options.get("enable_corpses") > 0f);
+        worldSizeSlider.setValue(options.get("world_height").intValue());
+        topSizeSlider.setValue(options.get("parents_count").intValue());
+        sightRangeSlider.setValue(options.get("creature_sight_range").intValue());
+        hpDecaySlider.setValue((int) (options.get("creature_hp_decay") * 1000));
+        maxTicksSlider.setValue(options.get("max_ticks").intValue());
+        drawViewCones.setSelected(options.get("draw_view_cones") > 0f);
+        drawSightLines.setSelected(options.get("draw_sight_lines") > 0f);
+        nMutatedBrainsSlider.setValue((int) (options.get("nMutatedBrains").intValue() * 100));
+        nMutatedNeuronsSlider.setValue((int) (options.get("nMutatedNeurons").intValue() * 100));
+        nMutatedConnectionsSlider.setValue((int) (options.get("nMutatedConnections").intValue() * 100));
+        mutationFactorSlider.setValue((int) (options.get("mutationFactor").intValue() * 100));
+        updateSettings();
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel container;
     private javax.swing.JSlider corpseDecaySlider;
     private javax.swing.JList creatureList;
+    private javax.swing.JPanel creaturesPanel;
     private javax.swing.JLabel currentCorpseDecay;
     private javax.swing.JLabel currentFpsLimit;
     private javax.swing.JLabel currentHpDecay;
@@ -1073,11 +1185,10 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton loadBrainBtn;
+    private javax.swing.JButton loadSettingsBtn;
     private javax.swing.JComboBox logLevelBox;
     private javax.swing.JPanel logPane;
     private javax.swing.JTextArea logTextArea;
@@ -1093,6 +1204,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JToggleButton pauseButton;
     private javax.swing.JMenuItem pauseMenuButton;
     private javax.swing.JButton saveBrainBtn;
+    private javax.swing.JButton saveSettingsBtn;
+    private javax.swing.JPanel settingsPanel;
     private javax.swing.JSlider sightRangeSlider;
     private javax.swing.JMenuItem startButton;
     private javax.swing.JLabel status;

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,19 +35,50 @@ public class Serializer {
         try {
             BufferedReader bf = new BufferedReader(new FileReader(f));
             while ((s = bf.readLine()) != null) {
-                a += s+"\n";
+                a += s + "\n";
             }
         } catch (Exception e) {
             Log.log(Log.ERROR, e.getMessage());
-            System.out.println(e+"");
+            System.out.println(e + "");
         }
         return a;
+    }
+
+    public static String serializeSettings(Map<String, Float> options) {
+        String a = "# Settings file for use with AIrium.\n"
+                + "# More information at http://github.com/fazo96/AIrium";
+        for (Object o : options.entrySet().toArray()) {
+            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            a += e.getKey() + " = " + e.getValue() + "\n";
+        }
+        return a;
+    }
+
+    public static void readSettings(String fileContent, Map<String, Float> m) {
+        int line = 0;
+        for (String s : fileContent.split("\n")) {
+            line++;
+            if (s.startsWith("#")) {
+                // Skip comment
+                continue;
+            }
+            String[] ss = s.trim().split(" = ");
+            try {
+                if (ss.length != 2) {
+                    throw new Exception("Invalid string at line " + line);
+                }
+                Log.log(Log.DEBUG,"Loading setting \""+ss[0].trim()+"\" with value \""+Float.parseFloat(ss[1].trim())+"\"");
+                m.put(ss[0].trim(), Float.parseFloat(ss[1].trim()));
+            } catch (Exception e) {
+                Log.log(Log.ERROR, e.getMessage());
+            }
+        }
     }
 
     public static String serializeBrain(float brainMap[][][]) {
         String s = "# Neural Map for use with AIrium.\n"
                 + "# More information at http://github.com/fazo96/AIrium\n"
-                + "Layers: " + (brainMap.length+1);
+                + "Layers: " + (brainMap.length + 1);
         s += "\nInput Neurons: " + brainMap[0][0].length;
         s += "\n# Layer 1 Skipped because it's the input layer.";
         // layers (input layer not included in brain map)
@@ -64,7 +96,7 @@ public class Serializer {
 
     public static float[][][] loadBrain(String s) {
         float brainMap[][][] = null;
-        Log.log(Log.INFO,"Loading brain from String with "+s.split("\n").length+" lines:\n"+s);
+        Log.log(Log.INFO, "Loading brain from String with " + s.split("\n").length + " lines");
         for (String l : s.split("\n")) {
             l = l.trim();
             if (l.isEmpty() || l.startsWith("#")) {
@@ -91,8 +123,8 @@ public class Serializer {
                 int neuron = Integer.parseInt(ll[5]) - 1;
                 int nWeights = ll.length - 7;
                 brainMap[layer][neuron] = new float[nWeights];
-                if(layer == 0){
-                    Log.log(Log.INFO, "This weightmap is for brains with "+(nWeights)+" input neurons.");
+                if (layer == 0) {
+                    Log.log(Log.DEBUG, "This weightmap is for brains with " + (nWeights) + " input neurons.");
                 } else if (nWeights != brainMap[layer - 1].length) {
                     Log.log(Log.ERROR, "WRONG WEIGHT NUMBER: prev layer has "
                             + brainMap[layer - 1].length + " neurons, but only "
@@ -101,11 +133,12 @@ public class Serializer {
                 }
                 for (int i = 7; i < ll.length; i++) {
                     brainMap[layer][neuron][i - 7] = Float.parseFloat(ll[i]);
-                    Log.log(Log.INFO,"Loading L"+layer+"N"+neuron+"W"+(i-7)+" = "+brainMap[layer][neuron][i-7]);
+                    Log.log(Log.DEBUG, "Loading L" + layer + "N" + neuron + "W" + (i - 7) + " = " + brainMap[layer][neuron][i - 7]);
                 }
-                Log.log(Log.INFO, "Loaded " + (nWeights) + " Weights for Layer " + layer + " Neuron " + neuron);
+                Log.log(Log.DEBUG, "Loaded " + (nWeights) + " Weights for Layer " + layer + " Neuron " + neuron);
             }
         }
+        Log.log(Log.INFO, "Loading complete.");
         return brainMap;
     }
 }
