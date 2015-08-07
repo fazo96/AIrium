@@ -1082,7 +1082,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             JOptionPane.showMessageDialog(this, "Please select a creature first");
             return;
         }
-        File f = saveDialog(game.getWorld().getSelectedCreature().getBrain().getName()+".brain");
+        File f = saveDialog(game.getWorld().getSelectedCreature().getBrain().getName() + ".brain");
         if (f == null) {
             return;
         }
@@ -1116,7 +1116,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         String settings = Serializer.serializeSettings(options);
         Serializer.saveToFile(f, settings);
-        JOptionPane.showMessageDialog(this, "Done");
+        //JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_saveSettingsBtnActionPerformed
 
     private void loadSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadSettingsBtnActionPerformed
@@ -1129,11 +1129,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             return;
         }
         options.putAll(Serializer.readSettings(Serializer.loadFromFile(f)));
-        /*if (game != null) {
-         game.getWorld().replaceOptions(options);
-         }*/
         updateSettingsUI();
-        JOptionPane.showMessageDialog(this, "Done");
+        if (game != null && game.getWorld() != null) {
+            game.getWorld().reloadOptions();
+        }
+        //JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_loadSettingsBtnActionPerformed
     /**
      * Reads settings and adjusts UI sliders.
