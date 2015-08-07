@@ -784,8 +784,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
             config.height = 600;
             config.width = 800;
-            config.resizable = false;
+            config.resizable = true;
             config.title = "AIrium Renderer";
+            config.allowSoftwareMode = true;
             app = new LwjglApplication(game = new Game(options), config);
             startButton.setText("Restart");
             pauseButton.setEnabled(true);

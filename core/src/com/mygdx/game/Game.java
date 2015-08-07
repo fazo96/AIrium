@@ -2,10 +2,9 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -19,7 +18,7 @@ public class Game extends ApplicationAdapter {
     ShapeRenderer renderer, overlayRenderer;
     private World world;
     private float cameraSpeed = 15;
-    private BitmapFont font;
+    private OrthographicCamera camera;
     private boolean paused = false;
     private InputProcessor input;
 
@@ -55,7 +54,9 @@ public class Game extends ApplicationAdapter {
 
             @Override
             public boolean touchDragged(int i, int i1, int i2) {
-                renderer.translate(Gdx.input.getDeltaX(), -Gdx.input.getDeltaY(), 0);
+                //renderer.translate(Gdx.input.getDeltaX(), -Gdx.input.getDeltaY(), 0);
+                camera.translate(-Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
+                camera.update();
                 return true;
             }
 
@@ -66,11 +67,15 @@ public class Game extends ApplicationAdapter {
 
             @Override
             public boolean scrolled(int i) {
+                /*
                 if (i>0) {
                     renderer.scale(0.9f, 0.9f, 1);
                 } else {
                     renderer.scale(1.1f, 1.1f, 1);
                 }
+                */
+                camera.zoom += i;
+                camera.update();
                 return true;
             }
         };
@@ -79,7 +84,9 @@ public class Game extends ApplicationAdapter {
         renderer.setAutoShapeType(true);
         overlayRenderer = new ShapeRenderer();
         overlayRenderer.setAutoShapeType(true);
-        font = new BitmapFont();
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false);
+        camera.update();
         Thread worldThread = new Thread(world);
         worldThread.setName("Worker");
         worldThread.setPriority(Thread.MAX_PRIORITY);
@@ -95,10 +102,17 @@ public class Game extends ApplicationAdapter {
     }
 
     @Override
+    public void resize(int width, int height){
+        camera.setToOrtho(false, width, height);
+        camera.update();
+    }
+    
+    @Override
     public void render() {
         // Draw
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        renderer.setProjectionMatrix(camera.combined);
         renderer.begin(ShapeRenderer.ShapeType.Line);
         try {
             for (Element e : world.getElements()) {
