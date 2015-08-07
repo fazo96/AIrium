@@ -99,11 +99,12 @@ public class Game extends ApplicationAdapter {
     }
 
     public Game() {
-        this(null);
+        this(new World(null));
     }
-
-    public Game(Map<String, Float> options) {
-        world = new World(options);
+    
+    public Game(World world){
+        this.world = world;
+        world.start();
     }
 
     @Override

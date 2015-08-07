@@ -27,6 +27,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import logic.Creature;
+import logic.World;
 
 /**
  *
@@ -35,6 +36,7 @@ import logic.Creature;
 public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
     private Game game;
+    private World world;
     private LwjglApplication app;
     private boolean shouldUpdateGUI = false;
     private final Thread guiUpdater;
@@ -50,12 +52,15 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         setLocationRelativeTo(null); // Center the window
         Log.addListener(this);
         options = new HashMap<String, Float>();
+        world = new World(options);
         updateSettings();
         settingsTable.getModel().addTableModelListener(new TableModelListener() {
 
             @Override
             public void tableChanged(TableModelEvent e) {
-                if(updatingTable) return;
+                if (updatingTable) {
+                    return;
+                }
                 saveTableChanges();
                 updateSettingsUI();
             }
@@ -845,7 +850,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             if (JOptionPane.showConfirmDialog(this, "Are you sure? The simulation will be restarted!") != JOptionPane.YES_OPTION) {
                 return;
             }
-            game.getWorld().restart();
+            world.restart();
             game.setPaused(false);
         } else {
             // Start new
@@ -856,10 +861,10 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             config.resizable = true;
             config.title = "AIrium Renderer";
             config.allowSoftwareMode = true;
-            app = new LwjglApplication(game = new Game(options), config);
+            app = new LwjglApplication(game = new Game(world), config);
             startButton.setText("Restart");
             pauseButton.setEnabled(true);
-            game.getWorld().addListener(this);
+            world.addListener(this);
             setCreatureList();
         }
         updateGUI();
@@ -893,7 +898,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             return;
         }
         enableControlButtons(true);
-        status.setText("Generation: " + game.getWorld().getGeneration() + " FPS: " + game.getWorld().getFps());
+        status.setText("Generation: " + world.getGeneration() + " FPS: " + world.getFps());
         if (game.isPaused()) {
             pauseButton.setSelected(true);
             pauseMenuButton.setText("Resume");
@@ -907,16 +912,16 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }
 
     private void setCreatureList() {
-        String list[] = new String[game.getWorld().getCreatures().size()];
+        String list[] = new String[world.getCreatures().size()];
         int selected = -1;
         for (int i = 0; i < list.length; i++) {
-            if (i >= game.getWorld().getCreatures().size()) {
+            if (i >= world.getCreatures().size()) {
                 return;
             }
-            list[i] = game.getWorld().getCreatures().get(i).getBrain().getName()
+            list[i] = world.getCreatures().get(i).getBrain().getName()
                     + " - Fitness: "
-                    + game.getWorld().getCreatures().get(i).getFitness();
-            if (game.getWorld().getCreatures().get(i) == game.getWorld().getSelectedCreature()) {
+                    + world.getCreatures().get(i).getFitness();
+            if (world.getCreatures().get(i) == world.getSelectedCreature()) {
                 selected = i;
             }
         }
@@ -929,6 +934,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }
 
     private void resetDefaultSettings() {
+        updatingSliders = true;
         fpsLimitSlider.setValue(60);
         nCreaturesSlider.setValue(25);
         nPlantsSlider.setValue(700);
@@ -947,6 +953,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         enableCorpsesCheckbox.setSelected(false);
         drawSightLines.setSelected(false);
         drawViewCones.setSelected(false);
+        updatingSliders = false;
         updateSettings();
     }
 
@@ -974,6 +981,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             options.put("nMutatedNeurons", (float) nMutatedNeuronsSlider.getValue() / 100);
             options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue() / 100);
             options.put("mutationFactor", (float) mutationFactorSlider.getValue() / 100);
+            world.reloadOptions();
             updateSettingsTable();
         }
         currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
@@ -989,9 +997,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue() / 100) + "%");
         currentNPlants.setText(nPlantsSlider.getValue() + "");
         currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
-        if (game != null) {
-            game.getWorld().reloadOptions();
-        }
     }
 
     public void setScrollBarToTheBottom() {
@@ -1151,15 +1156,15 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             game.setPaused(true);
         }
         updateGUI();
-        if (game.getWorld().getSelectedCreature() == null) {
+        if (world.getSelectedCreature() == null) {
             JOptionPane.showMessageDialog(this, "Please select a creature first");
             return;
         }
-        File f = saveDialog(game.getWorld().getSelectedCreature().getBrain().getName() + ".brain");
+        File f = saveDialog(world.getSelectedCreature().getBrain().getName() + ".brain");
         if (f == null) {
             return;
         }
-        Serializer.saveToFile(f, Serializer.serializeBrain(game.getWorld().getSelectedCreature().getBrain().getMap()));
+        Serializer.saveToFile(f, Serializer.serializeBrain(world.getSelectedCreature().getBrain().getMap()));
         JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_saveBrainBtnActionPerformed
 
@@ -1173,8 +1178,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             return;
         }
         float map[][][] = Serializer.loadBrain(Serializer.loadFromFile(f));
-        Creature c = (Creature) game.getWorld().spawnCreature(map);
-        game.getWorld().selectCreature(c);
+        Creature c = (Creature) world.spawnCreature(map);
+        world.selectCreature(c);
         updateGUI();
     }//GEN-LAST:event_loadBrainBtnActionPerformed
 
@@ -1203,15 +1208,15 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         options.putAll(Serializer.readSettings(Serializer.loadFromFile(f)));
         updateSettingsUI();
-        if (game != null && game.getWorld() != null) {
-            game.getWorld().reloadOptions();
+        if (game != null && world != null) {
+            world.reloadOptions();
         }
         //JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_loadSettingsBtnActionPerformed
 
     private void clearSelectedCreatureBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSelectedCreatureBtnActionPerformed
-        if (game != null && game.getWorld() != null) {
-            game.getWorld().selectCreature(null);
+        if (game != null && world != null) {
+            world.selectCreature(null);
             creatureList.clearSelection();
         }
     }//GEN-LAST:event_clearSelectedCreatureBtnActionPerformed

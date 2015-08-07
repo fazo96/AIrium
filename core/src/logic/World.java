@@ -66,6 +66,9 @@ public class World implements Runnable {
                 return (int) (t1.getFitness() - t.getFitness());
             }
         };
+    }
+    
+    public void start(){
         newGen(true);
     }
 
@@ -263,6 +266,10 @@ public class World implements Runnable {
         Creature.fov = Math.round(options.getOrDefault("creature_fov", (float) Math.PI / 2.5f));
         Creature.sightRange = Math.round(options.getOrDefault("creature_sight_range", 100f));
         Creature.hpDecay = options.getOrDefault("creature_hp_decay", 0.5f);
+        Creature.hpForAttacking = options.getOrDefault("creature_hp_for_attacking", 1f);
+        Creature.hpForEatingPlants = options.getOrDefault("creature_hp_for_eating_plants", 1f);
+        Creature.pointsForAttacking = options.getOrDefault("creature_points_for_attacking", 2f);
+        Creature.pointsForEatingPlants = options.getOrDefault("creature_points_for_eating_plants", 1f);
         nMutatedBrains = options.getOrDefault("nMutatedBrains", 0.2f);
         nMutatedNeurons = options.getOrDefault("nMutatedNeurons", 0.5f);
         nMutatedConnections = options.getOrDefault("nMutatedConnections", 0.5f);
