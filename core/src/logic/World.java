@@ -324,7 +324,7 @@ public class World implements Runnable {
      * @param y the x coordinate of the creature you want to select
      */
     public void selectCreatureAt(int x, int y) {
-        selected = null; // Clear selection
+        //selected = null; // Clear selection
         try {
             for (Creature c : creatures) {
                 if (c.overlaps(x, y)) {
@@ -333,6 +333,7 @@ public class World implements Runnable {
                 }
             }
         } catch (ConcurrentModificationException ex) {
+            Log.log(Log.DEBUG, "Failed creature click selection");
         }
     }
 

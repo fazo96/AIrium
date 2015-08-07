@@ -814,7 +814,9 @@
                           <Component id="saveBrainBtn" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="loadBrainBtn" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="477" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="clearSelectedCreatureBtn" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="334" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -826,6 +828,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="saveBrainBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="loadBrainBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="clearSelectedCreatureBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -869,6 +872,14 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadBrainBtnActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="clearSelectedCreatureBtn">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Clear Selection"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearSelectedCreatureBtnActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

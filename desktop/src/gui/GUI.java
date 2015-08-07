@@ -140,6 +140,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         creatureList = new javax.swing.JList();
         saveBrainBtn = new javax.swing.JButton();
         loadBrainBtn = new javax.swing.JButton();
+        clearSelectedCreatureBtn = new javax.swing.JButton();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -647,6 +648,13 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
         });
 
+        clearSelectedCreatureBtn.setText("Clear Selection");
+        clearSelectedCreatureBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearSelectedCreatureBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout creaturesPanelLayout = new javax.swing.GroupLayout(creaturesPanel);
         creaturesPanel.setLayout(creaturesPanelLayout);
         creaturesPanelLayout.setHorizontalGroup(
@@ -657,7 +665,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                 .addComponent(saveBrainBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(loadBrainBtn)
-                .addContainerGap(477, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clearSelectedCreatureBtn)
+                .addContainerGap(334, Short.MAX_VALUE))
         );
         creaturesPanelLayout.setVerticalGroup(
             creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -666,7 +676,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(saveBrainBtn)
-                    .addComponent(loadBrainBtn))
+                    .addComponent(loadBrainBtn)
+                    .addComponent(clearSelectedCreatureBtn))
                 .addContainerGap())
         );
 
@@ -854,7 +865,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         creatureList.setListData(list);
         if (selected >= 0) {
             creatureList.setSelectedIndex(selected);
-        }
+        } else creatureList.clearSelection();
     }
 
     private void resetDefaultSettings() {
@@ -1136,6 +1147,13 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         //JOptionPane.showMessageDialog(this, "Done");
     }//GEN-LAST:event_loadSettingsBtnActionPerformed
+
+    private void clearSelectedCreatureBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSelectedCreatureBtnActionPerformed
+        if (game != null && game.getWorld() != null) {
+            game.getWorld().selectCreature(null);
+            creatureList.clearSelection();
+        }
+    }//GEN-LAST:event_clearSelectedCreatureBtnActionPerformed
     /**
      * Reads settings and adjusts UI sliders.
      */
@@ -1163,6 +1181,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton clearSelectedCreatureBtn;
     private javax.swing.JPanel container;
     private javax.swing.JSlider corpseDecaySlider;
     private javax.swing.JList creatureList;

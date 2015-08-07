@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
 import logic.Creature;
@@ -17,7 +18,6 @@ public class Game extends ApplicationAdapter {
     private static Game game;
     ShapeRenderer renderer, overlayRenderer;
     private World world;
-    private float cameraSpeed = 15;
     private OrthographicCamera camera;
     private boolean paused = false;
     private InputProcessor input;
@@ -43,7 +43,9 @@ public class Game extends ApplicationAdapter {
             }
 
             @Override
-            public boolean touchDown(int i, int i1, int i2, int i3) {
+            public boolean touchDown(int x, int y, int button, int pointer) {
+                Vector3 v = camera.unproject(new Vector3(x, y, 0));
+                world.selectCreatureAt(Math.round(v.x), Math.round(v.y));
                 return true;
             }
 
@@ -55,7 +57,7 @@ public class Game extends ApplicationAdapter {
             @Override
             public boolean touchDragged(int i, int i1, int i2) {
                 //renderer.translate(Gdx.input.getDeltaX(), -Gdx.input.getDeltaY(), 0);
-                camera.translate(-Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
+                camera.translate(-Gdx.input.getDeltaX()*camera.zoom, Gdx.input.getDeltaY()*camera.zoom);
                 camera.update();
                 return true;
             }
@@ -75,7 +77,10 @@ public class Game extends ApplicationAdapter {
                 }
                 */
                 camera.zoom += i;
+                if(camera.zoom < 1f) camera.zoom = 1f;
+                else if(camera.zoom > 10) camera.zoom = 10;
                 camera.update();
+                Log.log(Log.DEBUG, "Camera zoom: "+camera.zoom+" Delta: "+i);
                 return true;
             }
         };
