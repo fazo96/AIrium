@@ -67,9 +67,9 @@ public class Game extends ApplicationAdapter {
             @Override
             public boolean scrolled(int i) {
                 if (i>0) {
-                    renderer.scale(0.5f, 0.5f, 1);
+                    renderer.scale(0.9f, 0.9f, 1);
                 } else {
-                    renderer.scale(1.5f, 1.5f, 1);
+                    renderer.scale(1.1f, 1.1f, 1);
                 }
                 return true;
             }

@@ -20,7 +20,7 @@ public class Creature extends Element implements Runnable {
 
     private Brain brain;
     private float dir, hp, prevHp, speed, fitness, rotSpeed, beak;
-    private boolean eating = false, killing = false, workerDone = false;
+    private boolean eating = false, killing = false, workerDone = false, killWorker = false;
     private Sight[] sights;
     private Thread workerThread;
 
@@ -54,6 +54,7 @@ public class Creature extends Element implements Runnable {
                 update();
                 workerDone = true;
             }
+            if(killWorker) break;
         }
     }
 
@@ -70,6 +71,7 @@ public class Creature extends Element implements Runnable {
                 carcass.setDecayRate(corpseDecayRate);
                 Game.get().getWorld().add(carcass);
             }
+            killWorker = true;
             return;
         }
         if (speed > max_speed) {
