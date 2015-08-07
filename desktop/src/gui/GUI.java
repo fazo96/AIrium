@@ -23,7 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import logic.Creature;
 
 /**
@@ -37,7 +39,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private boolean shouldUpdateGUI = false;
     private final Thread guiUpdater;
     private Map<String, Float> options;
-    private boolean updatingSliders = false;
+    private boolean updatingSliders = false, updatingTable = false;
 
     /**
      * Creates new form GUI
@@ -49,6 +51,15 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         Log.addListener(this);
         options = new HashMap<String, Float>();
         updateSettings();
+        settingsTable.getModel().addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if(updatingTable) return;
+                saveTableChanges();
+                updateSettingsUI();
+            }
+        });
         guiUpdater = new Thread() {
             @Override
             public void run() {
@@ -86,6 +97,12 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         logTextArea = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         logLevelBox = new javax.swing.JComboBox();
+        creaturesPanel = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        creatureList = new javax.swing.JList();
+        saveBrainBtn = new javax.swing.JButton();
+        loadBrainBtn = new javax.swing.JButton();
+        clearSelectedCreatureBtn = new javax.swing.JButton();
         settingsPanel = new javax.swing.JPanel();
         fpsLimitSlider = new javax.swing.JSlider();
         jLabel3 = new javax.swing.JLabel();
@@ -135,12 +152,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         currentNMutatedConnections = new javax.swing.JLabel();
         saveSettingsBtn = new javax.swing.JButton();
         loadSettingsBtn = new javax.swing.JButton();
-        creaturesPanel = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        creatureList = new javax.swing.JList();
-        saveBrainBtn = new javax.swing.JButton();
-        loadBrainBtn = new javax.swing.JButton();
-        clearSelectedCreatureBtn = new javax.swing.JButton();
+        advSettingsPanel = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        settingsTable = new javax.swing.JTable();
         status = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -198,6 +212,68 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         );
 
         tabs.addTab("Log", logPane);
+
+        creatureList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "No creatures" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        creatureList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        creatureList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                creatureListValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(creatureList);
+
+        saveBrainBtn.setText("Save Creature");
+        saveBrainBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBrainBtnActionPerformed(evt);
+            }
+        });
+
+        loadBrainBtn.setText("Load Creature");
+        loadBrainBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadBrainBtnActionPerformed(evt);
+            }
+        });
+
+        clearSelectedCreatureBtn.setText("Clear Selection");
+        clearSelectedCreatureBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearSelectedCreatureBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout creaturesPanelLayout = new javax.swing.GroupLayout(creaturesPanel);
+        creaturesPanel.setLayout(creaturesPanelLayout);
+        creaturesPanelLayout.setHorizontalGroup(
+            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2)
+            .addGroup(creaturesPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(saveBrainBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(loadBrainBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clearSelectedCreatureBtn)
+                .addContainerGap(334, Short.MAX_VALUE))
+        );
+        creaturesPanelLayout.setVerticalGroup(
+            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(creaturesPanelLayout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(saveBrainBtn)
+                    .addComponent(loadBrainBtn)
+                    .addComponent(clearSelectedCreatureBtn))
+                .addContainerGap())
+        );
+
+        tabs.addTab("Creatures", creaturesPanel);
 
         fpsLimitSlider.setMinimum(1);
         fpsLimitSlider.setSnapToTicks(true);
@@ -621,67 +697,49 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
 
         tabs.addTab("Settings", settingsPanel);
 
-        creatureList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "No creatures" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        creatureList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        creatureList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                creatureListValueChanged(evt);
+        settingsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Name", "Value"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, true
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(creatureList);
+        settingsTable.setColumnSelectionAllowed(true);
+        jScrollPane3.setViewportView(settingsTable);
+        settingsTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        if (settingsTable.getColumnModel().getColumnCount() > 0) {
+            settingsTable.getColumnModel().getColumn(0).setResizable(false);
+            settingsTable.getColumnModel().getColumn(1).setResizable(false);
+        }
 
-        saveBrainBtn.setText("Save Creature");
-        saveBrainBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveBrainBtnActionPerformed(evt);
-            }
-        });
-
-        loadBrainBtn.setText("Load Creature");
-        loadBrainBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadBrainBtnActionPerformed(evt);
-            }
-        });
-
-        clearSelectedCreatureBtn.setText("Clear Selection");
-        clearSelectedCreatureBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearSelectedCreatureBtnActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout creaturesPanelLayout = new javax.swing.GroupLayout(creaturesPanel);
-        creaturesPanel.setLayout(creaturesPanelLayout);
-        creaturesPanelLayout.setHorizontalGroup(
-            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
-            .addGroup(creaturesPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(saveBrainBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(loadBrainBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(clearSelectedCreatureBtn)
-                .addContainerGap(334, Short.MAX_VALUE))
+        javax.swing.GroupLayout advSettingsPanelLayout = new javax.swing.GroupLayout(advSettingsPanel);
+        advSettingsPanel.setLayout(advSettingsPanelLayout);
+        advSettingsPanelLayout.setHorizontalGroup(
+            advSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 749, Short.MAX_VALUE)
         );
-        creaturesPanelLayout.setVerticalGroup(
-            creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(creaturesPanelLayout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(creaturesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(saveBrainBtn)
-                    .addComponent(loadBrainBtn)
-                    .addComponent(clearSelectedCreatureBtn))
-                .addContainerGap())
+        advSettingsPanelLayout.setVerticalGroup(
+            advSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 610, Short.MAX_VALUE)
         );
 
-        tabs.addTab("Creatures", creaturesPanel);
+        tabs.addTab("Advanced Settings", advSettingsPanel);
 
         status.setText("Simulation stopped");
 
@@ -865,7 +923,9 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         creatureList.setListData(list);
         if (selected >= 0) {
             creatureList.setSelectedIndex(selected);
-        } else creatureList.clearSelection();
+        } else {
+            creatureList.clearSelection();
+        }
     }
 
     private void resetDefaultSettings() {
@@ -914,6 +974,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             options.put("nMutatedNeurons", (float) nMutatedNeuronsSlider.getValue() / 100);
             options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue() / 100);
             options.put("mutationFactor", (float) mutationFactorSlider.getValue() / 100);
+            updateSettingsTable();
         }
         currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
         currentSightRange.setText(sightRangeSlider.getValue() + "");
@@ -1154,6 +1215,30 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             creatureList.clearSelection();
         }
     }//GEN-LAST:event_clearSelectedCreatureBtnActionPerformed
+
+    private void updateSettingsTable() {
+        int row = 0;
+        updatingTable = true;
+        for (Object o : options.entrySet().toArray()) {
+            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            if (settingsTable.getRowCount() > row) {
+                settingsTable.getModel().setValueAt(e.getKey(), row, 0);
+                settingsTable.getModel().setValueAt(e.getValue(), row, 1);
+            } else {
+                ((DefaultTableModel) settingsTable.getModel()).addRow(new Object[]{e.getKey(), e.getValue()});
+            }
+            row++;
+        }
+        updatingTable = false;
+    }
+
+    private void saveTableChanges() {
+        for (int row = 0; row < settingsTable.getRowCount(); row++) {
+            options.put((String) settingsTable.getValueAt(row, 0), (Float) settingsTable.getValueAt(row, 1));
+        }
+        updateSettingsUI();
+    }
+
     /**
      * Reads settings and adjusts UI sliders.
      */
@@ -1177,10 +1262,12 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         nMutatedNeuronsSlider.setValue(Math.round(options.get("nMutatedNeurons") * 100));
         nMutatedConnectionsSlider.setValue(Math.round(options.get("nMutatedConnections") * 100));
         mutationFactorSlider.setValue(Math.round(options.get("mutationFactor") * 100));
+        updateSettingsTable();
         updatingSliders = false;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel advSettingsPanel;
     private javax.swing.JButton clearSelectedCreatureBtn;
     private javax.swing.JPanel container;
     private javax.swing.JSlider corpseDecaySlider;
@@ -1227,6 +1314,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton loadBrainBtn;
     private javax.swing.JButton loadSettingsBtn;
     private javax.swing.JComboBox logLevelBox;
@@ -1246,6 +1334,7 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private javax.swing.JButton saveBrainBtn;
     private javax.swing.JButton saveSettingsBtn;
     private javax.swing.JPanel settingsPanel;
+    private javax.swing.JTable settingsTable;
     private javax.swing.JSlider sightRangeSlider;
     private javax.swing.JMenuItem startButton;
     private javax.swing.JLabel status;
