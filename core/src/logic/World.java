@@ -114,6 +114,7 @@ public class World implements Runnable {
 
     public void update() {
         if (cmdRestart) {
+            // Clear everything and start over
             elements.clear();
             graveyard.clear();
             creatures.clear();
@@ -129,6 +130,7 @@ public class World implements Runnable {
             Log.log(Log.INFO, "Reached maximum generation time (" + maximumTicksPerGen + ")");
             newGen(false);
         }
+        // Add stuff to the world
         for (Element e : toAdd) {
             elements.add(e);
             if (e instanceof Creature) {
@@ -138,10 +140,11 @@ public class World implements Runnable {
             }
         }
         toAdd.clear();
+        // Clear creature from graveyard
         elements.removeAll(graveyard);
         if (selected != null && graveyard.contains(selected)) {
             selected = null;
-            Log.log(Log.INFO, "Cleared selection");
+            Log.log(Log.DEBUG, "Cleared selection");
         }
         elements.removeAll(deadPlants);
         plants.removeAll(deadPlants);
@@ -150,6 +153,7 @@ public class World implements Runnable {
             fire(Listener.CREATURE_LIST_CHANGED);
         }
         if (cmdLaunchNewGen) {
+            // Skip to new generation
             newGen(false);
             cmdLaunchNewGen = false;
         }
