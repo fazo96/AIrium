@@ -241,6 +241,8 @@ public class World implements Runnable {
                     n = top[first].getBrain().breed(top[sec].getBrain().getMap());
                 } catch (Exception ex) {
                     // Should not happen
+                    Log.log(Log.ERROR, "Could not breed: " + ex.getMessage()
+                            + "\nIt is advised to restart the simulation after changing the brain's topology");
                     Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Creature ne = spawnCreature(n);

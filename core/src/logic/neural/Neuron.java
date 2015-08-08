@@ -15,7 +15,7 @@ public class Neuron {
     private NeuronCache cache;
     private float bias, output;
     private boolean isInputNeuron;
-    private int layer;
+    private int layer, receivesFromLayer;
     private Brain brain;
 
     /**
@@ -24,10 +24,12 @@ public class Neuron {
      *
      * @param layer the layer in which this neuron is positioned
      * @param bias the bias of this neuron
+     * @param receivesFromLayer the layer to read data from (negative for input
+     * neurons)
      * @param brain the brain which contains this neuron
      */
-    public Neuron(int layer, float bias, Brain brain) {
-        this(layer, bias, brain, null);
+    public Neuron(int layer, int receivesFromLayer, float bias, Brain brain) {
+        this(layer, receivesFromLayer, bias, brain, null);
     }
 
     /**
@@ -35,19 +37,26 @@ public class Neuron {
      * being the input layer, with given weights
      *
      * @param layer the layer in which this neuron is positioned
+     * @param receivesFromLayer the layer to read data from (negative for input
+     * neurons)
      * @param bias the bias of this neuron
      * @param brain the brain which contains this neuron
      * @param weights the weights to use to configure this neuron
      */
-    public Neuron(int layer, float bias, Brain brain, float[] weights) {
+    public Neuron(int layer, int receivesFromLayer, float bias, Brain brain, float[] weights) {
         this.brain = brain;
         this.layer = layer;
-        if (weights == null) {
+        this.receivesFromLayer = receivesFromLayer;
+        if (receivesFromLayer < 0 || layer == 0) {
+            isInputNeuron = true;
+        } else if (weights == null) {
             scramble();
         } else {
             this.weights = weights;
         }
-        cache = new NeuronCache(this.weights.length);
+        if (!isInputNeuron) {
+            cache = new NeuronCache(this.weights.length);
+        }
     }
 
     /**
@@ -56,8 +65,8 @@ public class Neuron {
     private void scramble() {
         // init weights
         if (layer > 0) {
-            weights = new float[brain.getNeurons()[layer - 1].length];
-        } else { // layer 0
+            weights = new float[brain.getNeurons()[receivesFromLayer].length];
+        } else { // layer 0 or negative
             isInputNeuron = true;
             weights = new float[0];
         }
@@ -76,7 +85,9 @@ public class Neuron {
      * @return the output of this neuron.
      */
     public float compute() {
-        if(weights == null || weights.length == 0) isInputNeuron = true;
+        if (weights == null || weights.length == 0) {
+            isInputNeuron = true;
+        }
         if (isInputNeuron) {
             return output;
         }
@@ -93,7 +104,7 @@ public class Neuron {
                     Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
-                Neuron n = brain.getNeurons()[layer - 1][i];
+                Neuron n = brain.getNeurons()[receivesFromLayer][i];
                 float v = n.compute() * weights[i];
                 a += v;
                 cache.put(i, v);

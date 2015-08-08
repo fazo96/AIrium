@@ -46,7 +46,7 @@ public class Brain {
             for (int j = 0; j < brainMap[i].length; j++) { // for each neuron
                 // skip input layer
                 if (neurons[i + 1][j] == null) {
-                    neurons[i + 1][j] = new Neuron(j, bias, this, brainMap[i][j]);
+                    neurons[i + 1][j] = new Neuron(i + 1, i, bias, this, brainMap[i][j]);
                 } else {
                     neurons[i + 1][j].setWeights(brainMap[i][j]);
                 }
@@ -63,7 +63,7 @@ public class Brain {
         for (int i = 0; i < neurons.length; i++) {
             for (int j = 0; j < neurons[i].length; j++) {
                 // create neuron
-                Neuron n = new Neuron(i, bias, this);
+                Neuron n = new Neuron(i, i - 1, bias, this);
                 neurons[i][j] = n;
                 Log.log(Log.DEBUG, "Adding Layer " + (i + 1) + " Neuron " + (j + 1));
             }
@@ -269,10 +269,10 @@ public class Brain {
         }
     }
 
-    private void recomputeName(){
+    private void recomputeName() {
         name = Serializer.nameBrain(getMap());
     }
-    
+
     /**
      * Returns an array with pointers to all this brain's neurons.
      *
@@ -285,5 +285,5 @@ public class Brain {
     public String getName() {
         return name;
     }
-    
+
 }
