@@ -57,7 +57,7 @@ public class Game extends ApplicationAdapter {
             @Override
             public boolean touchDragged(int i, int i1, int i2) {
                 //renderer.translate(Gdx.input.getDeltaX(), -Gdx.input.getDeltaY(), 0);
-                camera.translate(-Gdx.input.getDeltaX()*camera.zoom, Gdx.input.getDeltaY()*camera.zoom);
+                camera.translate(-Gdx.input.getDeltaX() * camera.zoom, Gdx.input.getDeltaY() * camera.zoom);
                 camera.update();
                 return true;
             }
@@ -70,17 +70,20 @@ public class Game extends ApplicationAdapter {
             @Override
             public boolean scrolled(int i) {
                 /*
-                if (i>0) {
-                    renderer.scale(0.9f, 0.9f, 1);
-                } else {
-                    renderer.scale(1.1f, 1.1f, 1);
-                }
-                */
+                 if (i>0) {
+                 renderer.scale(0.9f, 0.9f, 1);
+                 } else {
+                 renderer.scale(1.1f, 1.1f, 1);
+                 }
+                 */
                 camera.zoom += i;
-                if(camera.zoom < 1f) camera.zoom = 1f;
-                else if(camera.zoom > 10) camera.zoom = 10;
+                if (camera.zoom < 1f) {
+                    camera.zoom = 1f;
+                } else if (camera.zoom > 10) {
+                    camera.zoom = 10;
+                }
                 camera.update();
-                Log.log(Log.DEBUG, "Camera zoom: "+camera.zoom+" Delta: "+i);
+                Log.log(Log.DEBUG, "Camera zoom: " + camera.zoom + " Delta: " + i);
                 return true;
             }
         };
@@ -101,18 +104,18 @@ public class Game extends ApplicationAdapter {
     public Game() {
         this(new World(null));
     }
-    
-    public Game(World world){
+
+    public Game(World world) {
         this.world = world;
         world.start();
     }
 
     @Override
-    public void resize(int width, int height){
+    public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
         camera.update();
     }
-    
+
     @Override
     public void render() {
         // Draw
@@ -132,9 +135,11 @@ public class Game extends ApplicationAdapter {
                     // Render only half the elements because the list gets
                     // modified by another thread? Who cares, it's a simulation
                     // not some videogame
+                    Log.log(Log.DEBUG, "Failed to complete rendering");
                 }
             }
         } catch (ConcurrentModificationException ex) {
+            Log.log(Log.DEBUG, "Failed to complete rendering");
         }
         renderer.setColor(0.3f, 0.3f, 0.3f, 1);
         // draw borders
