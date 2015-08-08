@@ -1,8 +1,24 @@
 # AIrium
 
+![AIrium Short GIF](http://i.imgur.com/OTkPsSC.gif)
+
 This project aims to build an interactive simple artificial life simulation that uses genetic algorithm and fitness evaluation to improve, over different generations, the performance of the agents.
 
 For now, agents are evaluated based on how much they eat. Using default settings you can see them evolve to be herbivores, but by tweaking it is possible to get carnivores or scavengers.
+
+__In the GIF__ you can see an environment similar to the default, but smaller. Most creatures are pretty efficient herbivores with a few showing slight carnivore behavior. This was obtained in only 5 generations of training, in about two minutes on an average CPU.
+
+__Since version 0.5__ it is possible to __save your best creatures to disk__ so you can reintroduce them to different environments later and avoid losing very efficient agents.
+
+### Features
+
+- __Artifical Life__ creatures with simple brains
+- Artificial selection to ensure the evolution of the creatures over time
+- Many __configurable settings__ to create different environments (still a little limited, but I'm working on it)
+- __Easy to use__ with working default settings for beginners, __highy configurable__ and fully open source for hackers!
+- __Save and Load__ your configuration and your creatures
+- Every creature has a unique, persistent name generated using its brain topology, so on every computer the same creature will have the same name
+- Multithread design, resizeable window, configurable simulation speed, __multiplatform support, free and open source!__
 
 ### Screenshots and videos
 
@@ -10,13 +26,12 @@ You can see some footage from [version 0.4](https://github.com/fazo96/AIrium/rel
 
 ### Download
 
-Visis the [releases page](https://github.com/fazo96/AIrium/releases) to download the latest version. It was tested on Linux, OSX and Windows using the latest version of Java 8. On OSX there is a small bug in the GUI but you can fix it by resizing it to be bigger.
+Visis the [releases page](https://github.com/fazo96/AIrium/releases) to [download the latest version](https://github.com/fazo96/AIrium/releases/latest). It was tested on Linux, OSX and Windows using the latest version of Java 8. On OSX there is a small bug in the GUI but you can fix it by resizing it to be bigger.
 
 ### Planned features
 
 - More behavioral variety
 - More sensors for the creatures
-- Ability to import/export settings and creature brains to create more complex environments
 - Ability to save and load simulation states
 - More in the [issues page](https://github.com/fazo96/AIrium/issues)
 
