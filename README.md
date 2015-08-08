@@ -6,7 +6,7 @@ This project aims to build an interactive simple artificial life simulation that
 
 For now, agents are evaluated based on how much they eat. Using default settings you can see them evolve to be herbivores, but by tweaking it is possible to get carnivores or scavengers.
 
-__In the GIF__ you can see an environment similar to the default, but smaller. Most creatures are pretty efficient herbivores with a few showing slight carnivore behavior. This was obtained in only 5 generations of training, in about two minutes on an average CPU.
+__In the GIF__ you can see an environment similar to the default, but smaller. Most creatures are pretty efficient herbivores with a few showing slight carnivore behavior. This was obtained in only 5 generations of training, in about two minutes on an average CPU. __You can see a GIF with a totally different outcome [here](http://www.gfycat.com/MilkyFloweryImperatorangel)__, it shows some creatures which evolved to eat food by stopping when they encounter it and always travelling in a straight line. This was obtained in a little more time with a slightly different configuration, showing that a lot can change just by running different simulation even with the same settings.
 
 __Since version 0.5__ it is possible to __save your best creatures to disk__ so you can reintroduce them to different environments later and avoid losing very efficient agents.
 
