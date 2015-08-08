@@ -164,14 +164,16 @@ public class World implements Runnable {
         while (plants.size() < nPlants) {
             spawnVegetable();
         }
-        if (multithreading) { // Multi-thread: use workers
-            for (Vegetable v : plants) {
-                v.update();
-            }
+        if (multithreading) {
+            // Multi-thread: use workers
             for (Creature c : creatures) {
                 c.startWorker();
             }
-            Thread.yield();
+        }
+        for (Vegetable v : plants) {
+            v.update();
+        }
+        if (multithreading) {
             int finishedCount = 0;
             while (finishedCount < creatures.size()) {
                 finishedCount = 0;
