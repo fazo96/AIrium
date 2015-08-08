@@ -3,6 +3,7 @@ package logic;
 import com.mygdx.game.Game;
 import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
+import com.mygdx.game.Serializer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.neural.Brain;
 
 /**
  * This class represents an instance of a simulation, its world and its
@@ -28,7 +30,7 @@ public class World implements Runnable {
     private Map<String, Float> options;
     private long ticksSinceGenStart = 0, maximumTicksPerGen = 0;
     private Creature selected;
-    private Comparator creatureComp;
+    private final Comparator creatureComp;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
     private final ArrayList<Creature> creatures;
@@ -67,8 +69,8 @@ public class World implements Runnable {
             }
         };
     }
-    
-    public void start(){
+
+    public void start() {
         newGen(true);
     }
 
@@ -246,34 +248,46 @@ public class World implements Runnable {
         }
     }
 
+    public void resetDefaultOptions() {
+        options.clear();
+        reloadOptions();
+    }
+
     /**
      * Applies current options. Uses default alternatives if options are not
      * provided
      */
     public void reloadOptions() {
-        width = Math.round(options.getOrDefault("world_width", 2000f));
-        height = Math.round(options.getOrDefault("world_height", 2000f));
-        fpsLimit = Math.round(options.getOrDefault("fps_limit", 60f));
-        maximumTicksPerGen = Math.round(options.getOrDefault("max_ticks", 0f));
-        creatPerGen = Math.round(options.getOrDefault("number_of_creatures", (float) Math.min(Math.round(width * height / 20000), 50)));
-        nPlants = Math.round(options.getOrDefault("number_of_plants", width * height / 5500f));
-        multithreading = options.getOrDefault("enable_multithreading", -1f) > 0;
-        Creature.corpseDecayRate = options.getOrDefault("corpse_decay_rate", 0f);
-        Creature.leaveCorpses = options.getOrDefault("enable_corpses", 0f) > 0;
-        Creature.default_radius = Math.round(options.getOrDefault("creature_radius", 20f));
-        Creature.max_hp = Math.round(options.getOrDefault("creature_max_hp", 100f));
-        Creature.max_speed = Math.round(options.getOrDefault("creature_max_speed", 3f));
-        Creature.fov = Math.round(options.getOrDefault("creature_fov", (float) Math.PI / 2.5f));
-        Creature.sightRange = Math.round(options.getOrDefault("creature_sight_range", 100f));
-        Creature.hpDecay = options.getOrDefault("creature_hp_decay", 0.5f);
-        Creature.hpForAttacking = options.getOrDefault("creature_hp_for_attacking", 1f);
-        Creature.hpForEatingPlants = options.getOrDefault("creature_hp_for_eating_plants", 1f);
-        Creature.pointsForAttacking = options.getOrDefault("creature_points_for_attacking", 2f);
-        Creature.pointsForEatingPlants = options.getOrDefault("creature_points_for_eating_plants", 1f);
-        nMutatedBrains = options.getOrDefault("nMutatedBrains", 0.2f);
-        nMutatedNeurons = options.getOrDefault("nMutatedNeurons", 0.5f);
-        nMutatedConnections = options.getOrDefault("nMutatedConnections", 0.5f);
-        mutationFactor = options.getOrDefault("nMutationFactor", 1f);
+        for (Object o : Serializer.getDefaultSettings().entrySet().toArray()) {
+            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            options.putIfAbsent(e.getKey(), e.getValue());
+        }
+        width = Math.round(options.get("world_width"));
+        height = Math.round(options.get("world_height"));
+        fpsLimit = Math.round(options.get("fps_limit"));
+        maximumTicksPerGen = Math.round(options.get("max_ticks"));
+        creatPerGen = Math.round(options.get("number_of_creatures"));
+        nPlants = Math.round(options.get("number_of_plants"));
+        multithreading = options.get("enable_multithreading") > 0;
+        Creature.corpseDecayRate = options.get("corpse_decay_rate");
+        Creature.leaveCorpses = options.get("enable_corpses") > 0;
+        Creature.default_radius = Math.round(options.get("creature_radius"));
+        Creature.max_hp = Math.round(options.get("creature_max_hp"));
+        Creature.max_speed = options.get("creature_max_speed");
+        Creature.fov = options.get("creature_fov");
+        Creature.sightRange = options.get("creature_sight_range");
+        Creature.hpDecay = options.get("creature_hp_decay");
+        Creature.hpForAttacking = options.get("creature_hp_for_attacking");
+        Creature.hpForEatingPlants = options.get("creature_hp_for_eating_plants");
+        Creature.pointsForAttacking = options.get("creature_points_for_attacking");
+        Creature.pointsForEatingPlants = options.get("creature_points_for_eating_plants");
+        Creature.brain_hidden_layers = Math.round(options.get("brain_hidden_layers"));
+        Creature.brain_hidden_neurons = Math.round(options.get("brain_hidden_neurons"));
+        Brain.bias = options.get("brain_bias");
+        nMutatedBrains = options.get("nMutatedBrains");
+        nMutatedNeurons = options.get("nMutatedNeurons");
+        nMutatedConnections = options.get("nMutatedConnections");
+        mutationFactor = options.get("mutationFactor");
     }
 
     /**

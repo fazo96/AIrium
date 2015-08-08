@@ -17,6 +17,7 @@ import java.util.Random;
 public class Serializer {
 
     private static final String[] sillabe = {"ba", "de", "ka", "mo", "shi", "du", "ro", "te", "mi", "lo", "pa"};
+    private static Map<String, Float> defaults;
 
     public static String nameBrain(float[][][] brainMap) {
         // Compute a unique representation of the brainmap
@@ -31,7 +32,7 @@ public class Serializer {
         Random gen = new Random(a);
         String name = "";
         int length = Math.abs(gen.nextInt()) % 5 + 2;
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             name += sillabe[Math.abs(gen.nextInt()) % sillabe.length];
         }
         return name;
@@ -68,9 +69,7 @@ public class Serializer {
                 + "# More information at http://github.com/fazo96/AIrium\n";
         for (Object o : options.entrySet().toArray()) {
             Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
-            if (!e.getKey().equals("fps_limit")) { // dont save this one
-                a += e.getKey() + " = " + e.getValue() + "\n";
-            }
+            a += e.getKey() + " = " + e.getValue() + "\n";
         }
         return a;
     }
@@ -163,5 +162,42 @@ public class Serializer {
         }
         Log.log(Log.INFO, "Loading complete.");
         return brainMap;
+    }
+
+    public static Map<String, Float> getDefaultSettings() {
+        if (defaults == null) {
+            String s = "corpse_decay_rate = 0.0\n"
+                    + "mutationFactor = 1.0\n"
+                    + "fps_limit = 60.0\n"
+                    + "creature_hp_decay = 0.5\n"
+                    + "enable_multithreading = 1.0\n"
+                    + "max_ticks = 0.0\n"
+                    + "parents_count = 0.0\n"
+                    + "draw_view_cones = 0.0\n"
+                    + "world_width = 2000.0\n"
+                    + "world_height = 2000.0\n"
+                    + "number_of_plants = 700.0\n"
+                    + "nMutatedNeurons = 0.2\n"
+                    + "enable_corpses = 0.0\n"
+                    + "nMutatedBrains = 0.5\n"
+                    + "nMutatedConnections = 0.5\n"
+                    + "number_of_creatures = 25.0\n"
+                    + "draw_sight_lines = 0.0\n"
+                    + "creature_max_hp = 100\n"
+                    + "creature_fov = 1.5\n"
+                    + "creature_hp_decay = 0.5\n"
+                    + "creature_max_speed = 3.0\n"
+                    + "creature_hp_for_attacking = 1.0\n"
+                    + "creature_hp_for_eating_plants = 1.0\n"
+                    + "creature_points_for_eating_plants = 1.0\n"
+                    + "creature_points_for_attacking = 2.0\n"
+                    + "creature_sight_range = 100.0\n"
+                    + "creature_radius = 20.0\n"
+                    + "brain_hidden_neurons = 10.0\n"
+                    + "brain_hidden_layers = 2.0\n"
+                    + "brain_bias = 0.5\n";
+            defaults = Serializer.readSettings(s);
+        }
+        return defaults;
     }
 }

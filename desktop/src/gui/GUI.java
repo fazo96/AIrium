@@ -17,15 +17,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import logic.Creature;
 import logic.World;
 
@@ -53,18 +60,31 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         Log.addListener(this);
         options = new HashMap<String, Float>();
         world = new World(options);
-        updateSettings();
+        updateSettingsUI();
         settingsTable.getModel().addTableModelListener(new TableModelListener() {
 
             @Override
             public void tableChanged(TableModelEvent e) {
-                if (updatingTable) {
-                    return;
+                if (!updatingTable) {
+                    saveTableChanges();
                 }
-                saveTableChanges();
-                updateSettingsUI();
             }
         });
+        /*
+        ArrayList<SortKey> sk = new ArrayList<SortKey>();
+        sk.add(new SortKey(0, SortOrder.ASCENDING));
+        DefaultRowSorter rs = new DefaultRowSorter() {};
+        settingsTable.setRowSorter(rs);
+        rs.setSortKeys(sk);
+        rs.setComparator(0, new Comparator() {
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                return ((String)o1).compareToIgnoreCase((String)o2);
+            }
+        });
+        rs.sort();
+        */
         guiUpdater = new Thread() {
             @Override
             public void run() {
@@ -934,33 +954,14 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }
 
     private void resetDefaultSettings() {
-        updatingSliders = true;
-        fpsLimitSlider.setValue(60);
-        nCreaturesSlider.setValue(25);
-        nPlantsSlider.setValue(700);
-        worldSizeSlider.setValue(2000);
-        corpseDecaySlider.setValue(0);
-        topSizeSlider.setValue(0);
-        sightRangeSlider.setValue(100);
-        hpDecaySlider.setValue(500);
-        maxTicksSlider.setValue(0);
-        nMutatedBrainsSlider.setValue(50);
-        nMutatedNeuronsSlider.setValue(20);
-        nMutatedConnectionsSlider.setValue(50);
-        mutationFactorSlider.setValue(100);
-        toggleFPSLimitCheckbox.setSelected(false);
-        multithreadingCheckbox.setSelected(true);
-        enableCorpsesCheckbox.setSelected(false);
-        drawSightLines.setSelected(false);
-        drawViewCones.setSelected(false);
-        updatingSliders = false;
-        updateSettings();
+        world.resetDefaultOptions();
+        updateSettingsUI();
     }
 
     /**
      * Adjusts settings using values from the UI
      */
-    private void updateSettings() {
+    private void saveSliderChanges() {
         if (!updatingSliders) {
             options.put("fps_limit", toggleFPSLimitCheckbox.isSelected() ? 0 : (float) fpsLimitSlider.getValue());
             options.put("enable_multithreading", multithreadingCheckbox.isSelected() ? 1f : 0f);
@@ -982,21 +983,8 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             options.put("nMutatedConnections", (float) nMutatedConnectionsSlider.getValue() / 100);
             options.put("mutationFactor", (float) mutationFactorSlider.getValue() / 100);
             world.reloadOptions();
-            updateSettingsTable();
         }
-        currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
-        currentSightRange.setText(sightRangeSlider.getValue() + "");
-        currentNMutatedBrains.setText(String.format("%.2f", (float) nMutatedBrainsSlider.getValue() / 100) + "%");
-        currentWorldSize.setText(worldSizeSlider.getValue() + "");
-        currentTopSize.setText(topSizeSlider.getValue() + (topSizeSlider.getValue() <= 0 ? " (Auto)" : ""));
-        currentMaxTicks.setText(maxTicksSlider.getValue() + "");
-        currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
-        currentMutationFactor.setText(String.format("%.2f", (float) mutationFactorSlider.getValue() / 100));
-        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
-        currentNCreatures.setText(nCreaturesSlider.getValue() + "");
-        currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue() / 100) + "%");
-        currentNPlants.setText(nPlantsSlider.getValue() + "");
-        currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
+        updateSettingsUI();
     }
 
     public void setScrollBarToTheBottom() {
@@ -1034,15 +1022,15 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }//GEN-LAST:event_pauseMenuButtonActionPerformed
 
     private void topSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_topSizeSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_topSizeSliderStateChanged
 
     private void corpseDecaySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_corpseDecaySliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_corpseDecaySliderStateChanged
 
     private void enableCorpsesCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_enableCorpsesCheckboxStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_enableCorpsesCheckboxStateChanged
 
     private void pauseButtonStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_pauseButtonStateChanged
@@ -1050,39 +1038,39 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }//GEN-LAST:event_pauseButtonStateChanged
 
     private void worldSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_worldSizeSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_worldSizeSliderStateChanged
 
     private void nPlantsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nPlantsSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_nPlantsSliderStateChanged
 
     private void nCreaturesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nCreaturesSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_nCreaturesSliderStateChanged
 
     private void multithreadingCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multithreadingCheckboxStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_multithreadingCheckboxStateChanged
 
     private void toggleFPSLimitCheckboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_toggleFPSLimitCheckboxStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_toggleFPSLimitCheckboxStateChanged
 
     private void fpsLimitSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fpsLimitSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_fpsLimitSliderStateChanged
 
     private void sightRangeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sightRangeSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_sightRangeSliderStateChanged
 
     private void hpDecaySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_hpDecaySliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_hpDecaySliderStateChanged
 
     private void maxTicksSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxTicksSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_maxTicksSliderStateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -1090,27 +1078,27 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void drawViewConesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_drawViewConesStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_drawViewConesStateChanged
 
     private void drawSightLinesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_drawSightLinesStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_drawSightLinesStateChanged
 
     private void nMutatedNeuronsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedNeuronsSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_nMutatedNeuronsSliderStateChanged
 
     private void mutationFactorSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_mutationFactorSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_mutationFactorSliderStateChanged
 
     private void nMutatedBrainsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedBrainsSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_nMutatedBrainsSliderStateChanged
 
     private void nMutatedConnectionsSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nMutatedConnectionsSliderStateChanged
-        updateSettings();
+        saveSliderChanges();
     }//GEN-LAST:event_nMutatedConnectionsSliderStateChanged
     private File saveDialog() {
         return saveDialog(null);
@@ -1221,26 +1209,11 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
     }//GEN-LAST:event_clearSelectedCreatureBtnActionPerformed
 
-    private void updateSettingsTable() {
-        int row = 0;
-        updatingTable = true;
-        for (Object o : options.entrySet().toArray()) {
-            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
-            if (settingsTable.getRowCount() > row) {
-                settingsTable.getModel().setValueAt(e.getKey(), row, 0);
-                settingsTable.getModel().setValueAt(e.getValue(), row, 1);
-            } else {
-                ((DefaultTableModel) settingsTable.getModel()).addRow(new Object[]{e.getKey(), e.getValue()});
-            }
-            row++;
-        }
-        updatingTable = false;
-    }
-
     private void saveTableChanges() {
         for (int row = 0; row < settingsTable.getRowCount(); row++) {
             options.put((String) settingsTable.getValueAt(row, 0), (Float) settingsTable.getValueAt(row, 1));
         }
+        world.reloadOptions();
         updateSettingsUI();
     }
 
@@ -1249,7 +1222,14 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
      */
     private void updateSettingsUI() {
         updatingSliders = true;
-        //fpsLimitSlider.setValue(Math.round(options.get("fps_limit")));
+        int fps = Math.round(options.get("fps_limit"));
+        if (fps < 1) {
+            fpsLimitSlider.setValue(60);
+            toggleFPSLimitCheckbox.setSelected(true);
+        } else {
+            fpsLimitSlider.setValue(fps);
+            toggleFPSLimitCheckbox.setSelected(false);
+        }
         multithreadingCheckbox.setSelected(options.get("enable_multithreading") > 0f);
         nCreaturesSlider.setValue(Math.round(options.get("number_of_creatures")));
         topSizeSlider.setMaximum(nCreaturesSlider.getValue());
@@ -1267,8 +1247,33 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         nMutatedNeuronsSlider.setValue(Math.round(options.get("nMutatedNeurons") * 100));
         nMutatedConnectionsSlider.setValue(Math.round(options.get("nMutatedConnections") * 100));
         mutationFactorSlider.setValue(Math.round(options.get("mutationFactor") * 100));
-        updateSettingsTable();
         updatingSliders = false;
+        currentNMutatedNeurons.setText(String.format("%.2f", (float) nMutatedNeuronsSlider.getValue() / 100) + "%");
+        currentSightRange.setText(sightRangeSlider.getValue() + "");
+        currentNMutatedBrains.setText(String.format("%.2f", (float) nMutatedBrainsSlider.getValue() / 100) + "%");
+        currentWorldSize.setText(worldSizeSlider.getValue() + "");
+        currentTopSize.setText(topSizeSlider.getValue() + (topSizeSlider.getValue() <= 0 ? " (Auto)" : ""));
+        currentMaxTicks.setText(maxTicksSlider.getValue() + "");
+        currentHpDecay.setText(hpDecaySlider.getValue() / 1000f + "");
+        currentMutationFactor.setText(String.format("%.2f", (float) mutationFactorSlider.getValue() / 100));
+        currentFpsLimit.setText("" + fpsLimitSlider.getValue());
+        currentNCreatures.setText(nCreaturesSlider.getValue() + "");
+        currentNMutatedConnections.setText(String.format("%.2f", (float) nMutatedConnectionsSlider.getValue() / 100) + "%");
+        currentNPlants.setText(nPlantsSlider.getValue() + "");
+        currentCorpseDecay.setText(corpseDecaySlider.getValue() / 1000f + "");
+        int row = 0;
+        updatingTable = true;
+        for (Object o : options.entrySet().toArray()) {
+            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            if (settingsTable.getRowCount() > row) {
+                settingsTable.getModel().setValueAt(e.getKey(), row, 0);
+                settingsTable.getModel().setValueAt(e.getValue(), row, 1);
+            } else {
+                ((DefaultTableModel) settingsTable.getModel()).addRow(new Object[]{e.getKey(), e.getValue()});
+            }
+            row++;
+        }
+        updatingTable = false;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

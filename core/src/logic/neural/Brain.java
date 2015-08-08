@@ -11,7 +11,7 @@ import com.mygdx.game.Serializer;
  */
 public class Brain {
 
-    public static final float bias = 0.5f;
+    public static float bias = 0.5f;
     private Neuron[][] neurons;
     private String name;
 

@@ -14,7 +14,7 @@ import logic.neural.Brain;
  */
 public class Creature extends Element implements Runnable {
 
-    public static int default_radius = 20, max_hp = 100;
+    public static int default_radius = 20, max_hp = 100, brain_hidden_layers = 2, brain_hidden_neurons = 10;
     public static float max_speed = 3, max_beak = default_radius / 4, fov, sightRange, corpseDecayRate = 0, hpDecay = 0.5f, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
     public static boolean leaveCorpses = false;
 
@@ -38,7 +38,7 @@ public class Creature extends Element implements Runnable {
         speed = 0;
         rotSpeed = 0;
         fitness = 0;
-        brain = new Brain(9, 5, 2, 10);
+        brain = new Brain(9, 5, brain_hidden_layers, brain_hidden_neurons);
         sights = new Sight[2];
     }
 
@@ -295,8 +295,8 @@ public class Creature extends Element implements Runnable {
                     // Check if attackable
                     if (beak > beak / 2 && tempDist < beak * 1.5f && tempAngle < fov / 2) {
                         // Attacking!
-                        float damage = beak;
-                        hp += damage * hpForAttacking / 2;
+                        float damage = beak * hpForAttacking / 2;
+                        hp += damage;
                         fitness += pointsForAttacking;
                         if (hp > max_hp) {
                             hp = max_hp;
