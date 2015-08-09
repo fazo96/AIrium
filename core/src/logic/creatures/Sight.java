@@ -1,4 +1,6 @@
-package logic;
+package logic.creatures;
+
+import logic.Element;
 
 /**
  * Stores a sight of an element, as seen from a creature's eye

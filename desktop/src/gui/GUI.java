@@ -33,7 +33,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-import logic.Creature;
+import logic.creatures.Creature;
 import logic.World;
 
 /**

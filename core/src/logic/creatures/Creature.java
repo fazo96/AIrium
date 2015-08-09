@@ -1,10 +1,13 @@
-package logic;
+package logic.creatures;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.Game;
 import com.mygdx.game.Log;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.Element;
+import logic.Vegetable;
 import logic.neural.Brain;
 
 /**
@@ -14,12 +17,15 @@ import logic.neural.Brain;
  */
 public class Creature extends Element implements Runnable {
 
-    public static int default_radius = 20, max_hp = 100, brain_hidden_layers = 2, brain_hidden_neurons = 10;
-    public static float max_speed = 3, max_beak = default_radius / 4, fov, sightRange, corpseDecayRate = 0, hpDecay = 0.5f, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
+    public static int brain_hidden_layers = 2, brain_hidden_neurons = 10;
+    public static float max_speed = 3, fov, sightRange, corpseDecayRate = 0, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
     public static boolean leaveCorpses = false;
 
-    private Brain brain;
-    private float dir, hp, prevHp, speed, fitness, rotSpeed, beak;
+    private final Brain brain;
+    private final Torso torso;
+    private final Beak beak;
+    private final ArrayList<BodyPart> bodyParts;
+    private float dir, speed, fitness, rotSpeed;
     private boolean eating = false, killing = false, workerDone = false, killWorker = false;
     private Sight[] sights;
     private Thread workerThread;
@@ -31,13 +37,14 @@ public class Creature extends Element implements Runnable {
      * @param y
      */
     public Creature(float x, float y) {
-        super(x, y, default_radius);
+        super(x, y, Torso.default_radius);
         dir = (float) (Math.random() * 2 * Math.PI);
-        hp = max_hp;
-        prevHp = hp;
         speed = 0;
         rotSpeed = 0;
         fitness = 0;
+        bodyParts = new ArrayList<BodyPart>();
+        bodyParts.add(torso = new Torso(this));
+        bodyParts.add(beak = new Beak(0, this));
         brain = new Brain(9, 5, brain_hidden_layers, brain_hidden_neurons);
         sights = new Sight[2];
     }
@@ -54,16 +61,15 @@ public class Creature extends Element implements Runnable {
                 update();
                 workerDone = true;
             }
-            if(killWorker) break;
+            if (killWorker) {
+                break;
+            }
         }
     }
 
     @Override
     public void update() {
-        // apply hunger
-        hp -= hpDecay;
-        prevHp = hp;
-        if (hp < 0) { // Dead
+        if (!torso.isAlive()) { // Dead
             Game.get().getWorld().getGraveyard().add(this);
             if (leaveCorpses) {
                 Vegetable carcass = new Vegetable(getX(), getY());
@@ -85,28 +91,32 @@ public class Creature extends Element implements Runnable {
         move(xMul * speed, yMul * speed);
         if (getX() < 0) {
             setX(Game.get().getWorld().getWidth() + getX());
+        } else if (getX() > Game.get().getWorld().getWidth()) {
+            setX(getX() - Game.get().getWorld().getWidth());
         }
         if (getY() < 0) {
             setY(Game.get().getWorld().getHeight() + getY());
-        }
-        if (getX() > Game.get().getWorld().getWidth()) {
-            setX(getX() - Game.get().getWorld().getWidth());
-        }
-        if (getY() > Game.get().getWorld().getHeight()) {
+        } else if (getY() > Game.get().getWorld().getHeight()) {
             setY(getY() - Game.get().getWorld().getHeight());
         }
         dir += rotSpeed;
         //fitness -= 0.1;
         if (dir > 2 * Math.PI) {
             dir -= 2 * Math.PI;
-        }
-        if (dir < 0) {
+        } else if (dir < 0) {
             dir += 2 * Math.PI;
         }
         // read from sensors and interact with world
         sights = interactWithWorld();
         // feed data to brain
         float[] values = new float[brain.getNeurons()[0].length];
+        int valueCounter = 0;
+        for (BodyPart b : bodyParts) {
+            for (float v : b.update()) {
+                values[valueCounter] = v;
+                valueCounter++;
+            }
+        }
         // VIEW: PLANTS
         // 0: sight(v): see food?
         // 1: sight(v): distance
@@ -117,29 +127,29 @@ public class Creature extends Element implements Runnable {
         // 5: sight(c): distance
         // 6: sight(c): angle
         // 8: sight(c): hunger
-        // 7: sight(c): beak
+        // 7: sight(c): beak.getLength()
         // OTHER:
         // 8: food sensor
         int viewSensors = 4;
         for (int i = 0; i < sights.length; i++) {
-            int mul = i * viewSensors;
+            int offset = i * viewSensors + valueCounter;
             if (sights[i] == null || sights[i].getElement() == null) {
                 // See nothing
-                values[0 + mul] = 0;
-                values[1 + mul] = 0;
-                values[2 + mul] = 0;
-                values[3 + mul] = 0;
+                values[0 + offset] = 0;
+                values[1 + offset] = 0;
+                values[2 + offset] = 0;
+                values[3 + offset] = 0;
             } else {
                 // See something
-                values[1 + mul] = sights[i].getDistance() / sightRange;
-                values[2 + mul] = sights[i].getAngle();
+                values[1 + offset] = sights[i].getDistance() / sightRange;
+                values[2 + offset] = sights[i].getAngle();
                 if (sights[i].getElement() instanceof Vegetable) {
-                    values[0 + mul] = 1f;
-                    values[3 + mul] = sights[i].getElement().getSize() / default_radius;
+                    values[0 + offset] = 1f;
+                    values[3 + offset] = sights[i].getElement().getSize() / torso.getRadius();
                 } else {
-                    values[0 + mul] = 1f;
-                    values[3 + mul] = max_hp - ((Creature) sights[i].getElement()).getHp() / max_hp;
-                    values[3 + mul] = ((Creature) sights[i].getElement()).getBeak() / max_beak;
+                    values[0 + offset] = 1f;
+                    values[3 + offset] = Torso.max_hp - ((Creature) sights[i].getElement()).getTorso().getHp() / Torso.max_hp;
+                    values[3 + offset] = ((Creature) sights[i].getElement()).getBeak() / Beak.max_length;
                 }
             }
         }
@@ -152,27 +162,35 @@ public class Creature extends Element implements Runnable {
             // Should not happen
             Logger.getLogger(Creature.class.getName()).log(Level.SEVERE, null, ex);
         }
+        int i = 0;
+        // Save brain outputs to body parts
+        for (BodyPart b : bodyParts) {
+            int n = 0;
+            float data[] = new float[b.getOutputNeuronsUsed()];
+            while (n < b.getOutputNeuronsUsed()) {
+                data[n] = actions[i];
+                i++;
+                n++;
+            }
+            b.useOutputs(data);
+        }
         Log.log(Log.DEBUG, "Accel: " + actions[0] + " RotClock: " + actions[1] + " RotAntiClock: " + actions[2] + " Beak: " + actions[3]);
         speed = (actions[0] * 2 - actions[4] / 2) * max_speed;
         rotSpeed = actions[1] - actions[2];
-        beak = actions[3] * max_beak;
-        if (beak > max_beak) {
-            beak = max_beak;
-        } else if (beak < 0) {
-            beak = 0;
-        }
     }
 
     @Override
     public void render(ShapeRenderer s) {
         // Draw Body
-        s.setColor(1 - (hp / max_hp), hp / max_hp, 0, 1);
-        s.circle(getX(), getY(), getSize());
+        for (BodyPart b : bodyParts) {
+            b.render(s);
+        }
         // Prepare vision stuff
         double relX = Math.cos(dir), relY = Math.sin(dir);
         float c = 0;
         float eyeX = (float) (relX * getSize() * 0.6f), eyeY = (float) (relY * getSize() * 0.6f);
         // Draw Sight Lines
+        s.set(ShapeRenderer.ShapeType.Line);
         if (Game.get().getWorld().getOptions().getOrDefault("draw_sight_lines", 0f) > 0) {
             for (Sight sight : sights) {
                 if (sight != null) {
@@ -203,22 +221,6 @@ public class Creature extends Element implements Runnable {
             s.setColor(0.3f, 0.3f, 0.3f, 1);
             s.arc((float) eyeX + getX(), (float) eyeY + getY(), sightRange, orient, degrees);
         }
-        // Draw damage/heal marks
-        if (hp < prevHp) {
-            // Damage mark
-            s.set(ShapeRenderer.ShapeType.Filled);
-            s.setColor(1, 0, 0, 1);
-            s.circle(getX(), getY(), 5);
-        } else if (killing || eating) {
-            // Heal mark
-            s.set(ShapeRenderer.ShapeType.Filled);
-            s.setColor(0, 1, 0, 1);
-            s.circle(getX(), getY(), 5);
-        }
-        s.set(ShapeRenderer.ShapeType.Line);
-        // Draw Beak
-        s.setColor(beak / max_beak, 1 - beak / max_beak, 0, 1);
-        s.line((float) (relX * getSize() * 0.8f + getX()), (float) (relY * getSize() * 0.8f + getY()), (float) (relX * getSize() * (1.5f + beak / max_beak) + getX()), (float) (relY * getSize() * (1.5f + beak / max_beak) + getY()));
     }
 
     /**
@@ -258,11 +260,8 @@ public class Creature extends Element implements Runnable {
                 if (e.getSize() == 0) {
                     e.setSize(0);
                 }
-                hp += hpForEatingPlants;
-                fitness+=pointsForEatingPlants;
-                if (hp > max_hp) {
-                    hp = max_hp;
-                }
+                torso.heal(hpForEatingPlants);
+                praise(pointsForEatingPlants);
             }
         }
         if (seen != null) {
@@ -292,20 +291,7 @@ public class Creature extends Element implements Runnable {
                     seen = e;
                     angle = relAngle - ndir;
                     dist = tempDist;
-                    // Check if attackable
-                    if (beak > beak / 2 && tempDist < beak * 1.5f && tempAngle < fov / 2) {
-                        // Attacking!
-                        float damage = beak * hpForAttacking / 2;
-                        hp += damage;
-                        fitness += pointsForAttacking;
-                        if (hp > max_hp) {
-                            hp = max_hp;
-                        }
-                        killing = true;
-                        Creature c = (Creature) e;
-                        c.heal(-damage);
-                        //c.praise(-1);
-                    }
+                    
                 }
                 //Log.log(Log.DEBUG,"RelAngle "+relAngle+" Dir "+ndir);
             }
@@ -316,13 +302,20 @@ public class Creature extends Element implements Runnable {
         return newSights;
     }
 
-    /**
-     * Apply a modification to this creature's health. Can be negative.
-     *
-     * @param amount how much to heal/damage
-     */
-    private void heal(float amount) {
-        hp += amount;
+    public int howManyInputNeurons() {
+        int n = 0;
+        for (BodyPart b : bodyParts) {
+            n += b.getInputNeuronsUsed();
+        }
+        return n;
+    }
+
+    public int howManyOutputNeurons() {
+        int n = 0;
+        for (BodyPart b : bodyParts) {
+            n += b.getOutputNeuronsUsed();
+        }
+        return n;
     }
 
     /**
@@ -367,24 +360,24 @@ public class Creature extends Element implements Runnable {
         this.dir = dir;
     }
 
+    public float getDirection() {
+        return dir;
+    }
+
     public float getFitness() {
         return fitness;
     }
 
-    public void reset() {
-        fitness = 0;
-        hp = max_hp;
-    }
-
     public float getBeak() {
-        return beak;
+        return beak.getLength();
     }
 
-    public float getHp() {
-        return hp;
+    public Torso getTorso() {
+        return torso;
     }
 
-    public void setHp(float hp) {
-        this.hp = hp;
+    public ArrayList<BodyPart> getBodyParts() {
+        return bodyParts;
     }
+
 }

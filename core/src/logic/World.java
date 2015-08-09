@@ -1,5 +1,6 @@
 package logic;
 
+import logic.creatures.Creature;
 import com.mygdx.game.Game;
 import com.mygdx.game.Listener;
 import com.mygdx.game.Log;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.creatures.Torso;
 import logic.neural.Brain;
 
 /**
@@ -279,12 +281,12 @@ public class World implements Runnable {
         multithreading = options.get("enable_multithreading") > 0;
         Creature.corpseDecayRate = options.get("corpse_decay_rate");
         Creature.leaveCorpses = options.get("enable_corpses") > 0;
-        Creature.default_radius = Math.round(options.get("creature_radius"));
-        Creature.max_hp = Math.round(options.get("creature_max_hp"));
+        Torso.default_radius = Math.round(options.get("creature_radius"));
+        Torso.max_hp = Math.round(options.get("creature_max_hp"));
         Creature.max_speed = options.get("creature_max_speed");
         Creature.fov = options.get("creature_fov");
         Creature.sightRange = options.get("creature_sight_range");
-        Creature.hpDecay = options.get("creature_hp_decay");
+        Torso.hpDecay = options.get("creature_hp_decay");
         Creature.hpForAttacking = options.get("creature_hp_for_attacking");
         Creature.hpForEatingPlants = options.get("creature_hp_for_eating_plants");
         Creature.pointsForAttacking = options.get("creature_points_for_attacking");
@@ -307,10 +309,11 @@ public class World implements Runnable {
      * @return the spawned element
      */
     private Element spawn(boolean isCreature, float[][][] brainMap) {
-        int x, y, r;
-        boolean overlaps = false;
+        int x, y;
+        float r;
+        boolean overlaps;
         if (isCreature) {
-            r = Creature.default_radius;
+            r = Torso.default_radius;
         } else {
             r = Vegetable.default_radius;
         }
