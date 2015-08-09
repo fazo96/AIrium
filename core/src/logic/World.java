@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.creatures.Eye;
+import logic.creatures.Movement;
 import logic.creatures.Torso;
 import logic.neural.Brain;
 
@@ -283,9 +285,9 @@ public class World implements Runnable {
         Creature.leaveCorpses = options.get("enable_corpses") > 0;
         Torso.default_radius = Math.round(options.get("creature_radius"));
         Torso.max_hp = Math.round(options.get("creature_max_hp"));
-        Creature.max_speed = options.get("creature_max_speed");
-        Creature.fov = options.get("creature_fov");
-        Creature.sightRange = options.get("creature_sight_range");
+        Movement.max_speed = options.get("creature_max_speed");
+        Eye.fov = options.get("creature_fov");
+        Eye.sightRange = options.get("creature_sight_range");
         Torso.hpDecay = options.get("creature_hp_decay");
         Creature.hpForAttacking = options.get("creature_hp_for_attacking");
         Creature.hpForEatingPlants = options.get("creature_hp_for_eating_plants");

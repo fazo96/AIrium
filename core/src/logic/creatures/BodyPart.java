@@ -1,7 +1,7 @@
 package logic.creatures;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.mygdx.game.Log;
+import logic.Element;
 
 /**
  *
@@ -9,7 +9,7 @@ import com.mygdx.game.Log;
  */
 public abstract class BodyPart {
 
-    protected int inputNeuronsUsed, outputNeuronsUsed;
+    protected int inputNeuronsUsed;
     protected float angle, distFromCenter;
     protected float outputs[];
     protected Creature creature;
@@ -22,7 +22,29 @@ public abstract class BodyPart {
         outputs = new float[outputNeuronsUsed];
     }
 
-    public abstract float[] update();
+    /**
+     * Prepare data to be sent to the brain
+     *
+     * @return the data to send to the brain, must be inputNeuronsUsed long
+     */
+    public abstract float[] act();
+    
+    /**
+     * Interact with another element
+     *
+     * @param e the Element (creature or plant)
+     * @param distance the distance
+     * @param relAngle the relative angle
+     */
+    public abstract void interactWithElement(Element e, float distance, float relAngle);
+
+    /**
+     * Receive some data from the brain
+     *
+     * @param data the data received from the brain, will be outputNeuronsUsed
+     * long
+     */
+    public abstract void readFromBrain(float data[]);
 
     protected abstract void draw(ShapeRenderer s, float relX, float relY);
 
@@ -31,15 +53,13 @@ public abstract class BodyPart {
         double relY = Math.sin(creature.getDirection() + angle) * creature.getTorso().getRadius() * distFromCenter;
         draw(s, (float) relX, (float) relY);
     }
-    
-    protected abstract void useOutputs(float outputs[]);
 
     public int getInputNeuronsUsed() {
         return inputNeuronsUsed;
     }
 
     public int getOutputNeuronsUsed() {
-        return outputNeuronsUsed;
+        return outputs.length;
     }
 
     public float getAngle() {
