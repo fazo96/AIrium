@@ -26,7 +26,11 @@ You can see some footage from [version 0.4](https://github.com/fazo96/AIrium/rel
 
 ### Download
 
-Visis the [releases page](https://github.com/fazo96/AIrium/releases) to [download the latest version](https://github.com/fazo96/AIrium/releases/latest). It was tested on Linux, OSX and Windows using the latest version of Java 8. On OSX there is a small bug in the GUI but you can fix it by resizing it to be bigger.
+Visis the [releases page](https://github.com/fazo96/AIrium/releases) to [download the latest version](https://github.com/fazo96/AIrium/releases/latest). 
+
+It works on Linux, OSX and Windows. __You will need Java 8__:
+- On __Linux__ you can find the OpenJDK JRE version 1.8 on your package manager repositories
+- On __Windows__ and __OSX__ you can get the Oracle Java VM from [here](https://www.java.com/en/download/manual.jsp)
 
 ### Planned features
 
@@ -42,7 +46,13 @@ Visis the [releases page](https://github.com/fazo96/AIrium/releases) to [downloa
 
 ## Development
 
-To work on the project or try it out, install __Netbeans__ and follow _Libgdx_'s guide to set it up for [Libgdx](http://libgdx.badlogicgames.com/) development (mobile platform are ignored for now so you won't need the Android SDK). It should be possible to work on the project without using Netbeans. You can find further explanation in [Libgdx](http://libgdx.badlogicgames.com/)'s wiki.
+You will need a __Java Development Kit (JDK)__ version __1.8__ (Java 8) or greater. Both the Oracle and OpenJDK distributions have been tested.
+
+__To build from source__:
+- on __Linux__ and __OSX__, make sure you have a Java Development Kit (JDK) version 1.8 or greater, change directory AIrium and then use gradle to build the software and generate an executable, like this: `./gradlew :desktop:dist`. The generated jar executable will be at `AIrium/desktop/build/libs/desktop-1.0.jar`. You can find information about the __gradle__ command line interface [here](https://docs.gradle.org/current/userguide/gradle_command_line.html).
+- on __Windows__ instead of `./gradlew :desktop:dist` you'll need to use `gradlew.bat :desktop:dist`
+
+__To develop and hack on the code with an IDE__, I suggest you install _Netbeans 8_ and follow _Libgdx_'s guide to set it up for [Libgdx](http://libgdx.badlogicgames.com/) development (mobile platform are ignored for now so you won't need the Android SDK). You can find further explanation in [Libgdx](http://libgdx.badlogicgames.com/)'s wiki.
 
 ## License
 
