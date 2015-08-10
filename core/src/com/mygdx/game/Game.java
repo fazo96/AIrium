@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import java.util.ConcurrentModificationException;
-import java.util.Map;
 import logic.creatures.Creature;
 import logic.Element;
 import logic.World;

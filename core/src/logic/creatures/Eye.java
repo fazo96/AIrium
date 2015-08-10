@@ -40,8 +40,8 @@ public class Eye extends BodyPart {
                 ret[j + 2] = sights[i].getDistance() / sightRange;
                 ret[j + 3] = sights[i].getAngle();
                 if (sights[i].getElement() instanceof Creature) {
-                    ret[i + 4] = ((Creature) sights[i].getElement()).getBeak() / Beak.max_length;
-                    ret[i + 5] = ((Creature) sights[i].getElement()).getTorso().getHp() / Torso.max_hp;
+                    ret[i + 4] = ((Creature) sights[i].getElement()).getTorso().getHp() / Torso.max_hp;
+                    ret[i + 5] = ((Creature) sights[i].getElement()).getDangerLevel();
                 } else {
                     ret[i + 4] = ((Vegetable) sights[i].getElement()).getSize() / Vegetable.default_radius;
                     ret[i + 5] = 0;

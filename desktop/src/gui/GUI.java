@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -71,20 +72,20 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             }
         });
         /*
-        ArrayList<SortKey> sk = new ArrayList<SortKey>();
-        sk.add(new SortKey(0, SortOrder.ASCENDING));
-        DefaultRowSorter rs = new DefaultRowSorter() {};
-        settingsTable.setRowSorter(rs);
-        rs.setSortKeys(sk);
-        rs.setComparator(0, new Comparator() {
+         ArrayList<SortKey> sk = new ArrayList<SortKey>();
+         sk.add(new SortKey(0, SortOrder.ASCENDING));
+         DefaultRowSorter rs = new DefaultRowSorter() {};
+         settingsTable.setRowSorter(rs);
+         rs.setSortKeys(sk);
+         rs.setComparator(0, new Comparator() {
 
-            @Override
-            public int compare(Object o1, Object o2) {
-                return ((String)o1).compareToIgnoreCase((String)o2);
-            }
-        });
-        rs.sort();
-        */
+         @Override
+         public int compare(Object o1, Object o2) {
+         return ((String)o1).compareToIgnoreCase((String)o2);
+         }
+         });
+         rs.sort();
+         */
         guiUpdater = new Thread() {
             @Override
             public void run() {
@@ -934,16 +935,20 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
     private void setCreatureList() {
         String list[] = new String[world.getCreatures().size()];
         int selected = -1;
-        for (int i = 0; i < list.length; i++) {
-            if (i >= world.getCreatures().size()) {
-                return;
+        try {
+            for (int i = 0; i < list.length; i++) {
+                if (i >= world.getCreatures().size()) {
+                    return;
+                }
+                list[i] = world.getCreatures().get(i).getBrain().getName()
+                        + " - Fitness: "
+                        + world.getCreatures().get(i).getFitness();
+                if (world.getCreatures().get(i) == world.getSelectedCreature()) {
+                    selected = i;
+                }
             }
-            list[i] = world.getCreatures().get(i).getBrain().getName()
-                    + " - Fitness: "
-                    + world.getCreatures().get(i).getFitness();
-            if (world.getCreatures().get(i) == world.getSelectedCreature()) {
-                selected = i;
-            }
+        } catch (IndexOutOfBoundsException ex) {
+        } catch (ConcurrentModificationException ex) {
         }
         creatureList.setListData(list);
         if (selected >= 0) {

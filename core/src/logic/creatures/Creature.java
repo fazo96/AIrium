@@ -22,7 +22,6 @@ public class Creature extends Element implements Runnable {
 
     private final Brain brain;
     private final Torso torso;
-    private final Beak beak;
     private final ArrayList<BodyPart> bodyParts;
     private float dir, fitness = 0;
     private boolean workerDone = false, killWorker = false;
@@ -40,7 +39,7 @@ public class Creature extends Element implements Runnable {
         dir = (float) (Math.random() * 2 * Math.PI);
         bodyParts = new ArrayList<BodyPart>();
         bodyParts.add(torso = new Torso(this));
-        bodyParts.add(beak = new Beak(0, this));
+        bodyParts.add(new Beak(0, this));
         bodyParts.add(new Eye(5, 0, this));
         bodyParts.add(new Movement(this));
         brain = new Brain(howManyInputNeurons(), howManyOutputNeurons(), brain_hidden_layers, brain_hidden_neurons);
@@ -191,6 +190,19 @@ public class Creature extends Element implements Runnable {
         }
     }
 
+    public float getDangerLevel() {
+        int beaks = 0;
+        float danger = 0;
+        for (BodyPart b : bodyParts) {
+            if (b instanceof Beak) {
+                beaks++;
+                danger += (((Beak)b).getLength() - Beak.min_length) / Beak.max_length;
+            }
+        }
+        if(beaks == 0) return 0;
+        return danger / beaks;
+    }
+
     public Brain getBrain() {
         return brain;
     }
@@ -205,10 +217,6 @@ public class Creature extends Element implements Runnable {
 
     public float getFitness() {
         return fitness;
-    }
-
-    public float getBeak() {
-        return beak.getLength();
     }
 
     public Torso getTorso() {

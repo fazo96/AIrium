@@ -176,14 +176,14 @@ public class Serializer {
                     + "draw_view_cones = 0.0\n"
                     + "world_width = 2000.0\n"
                     + "world_height = 2000.0\n"
-                    + "number_of_plants = 700.0\n"
+                    + "number_of_plants = 200.0\n"
                     + "nMutatedNeurons = 0.2\n"
                     + "enable_corpses = 0.0\n"
                     + "nMutatedBrains = 0.5\n"
                     + "nMutatedConnections = 0.5\n"
-                    + "number_of_creatures = 25.0\n"
+                    + "number_of_creatures = 15.0\n"
                     + "draw_sight_lines = 0.0\n"
-                    + "vegetable_size = 5\n"
+                    + "vegetable_size = 20\n"
                     + "creature_max_hp = 100\n"
                     + "creature_fov = 1.5\n"
                     + "creature_hp_decay = 0.5\n"
@@ -194,8 +194,8 @@ public class Serializer {
                     + "creature_points_for_attacking = 2.0\n"
                     + "creature_sight_range = 100.0\n"
                     + "creature_radius = 20.0\n"
-                    + "brain_hidden_neurons = 10.0\n"
-                    + "brain_hidden_layers = 2.0\n"
+                    + "brain_hidden_neurons = 20.0\n"
+                    + "brain_hidden_layers = 3.0\n"
                     + "brain_bias = 0.5\n";
             defaults = Serializer.readSettings(s);
         }
