@@ -18,7 +18,8 @@ import logic.Vegetable;
 public class Eye extends BodyPart {
 
     private Sight sights[];
-    private int seen;
+    private int farthest = -1, seen;
+    private float farthestDistance = 0;
     public static float fov = 2, sightRange = 30;
 
     public Eye(int nSights, float angle, Creature creature) {
@@ -54,19 +55,32 @@ public class Eye extends BodyPart {
             j += 6;
         }
         seen = 0;
+        farthest = -1;
+        farthestDistance = 0;
         sights = new Sight[sights.length];
         return ret;
     }
 
-
     @Override
     public void interactWithElement(Element e, float distance, float angle) {
-        if (e != creature && distance < sightRange && Math.abs(angle) < fov / 2) {
+        if (e != creature && distance < sightRange && (distance < farthestDistance || seen < sights.length) && Math.abs(angle) < fov / 2) {
             if (seen < sights.length) {
                 sights[seen] = new Sight(e, distance, angle);
-                Log.log(Log.DEBUG, "Saw " + e.getClass().getName() + " at " + distance + " with relative angle " + angle);
+                Log.log(Log.DEBUG,"Adding Sight number "+seen);
                 seen++;
+            } else {
+                Log.log(Log.DEBUG,"Substituting Farthest");
+                sights[farthest] = new Sight(e, distance, angle);
+                farthest = -1;
             }
+            for (int i = 0; i < seen; i++) {
+                Sight s = sights[i];
+                if (s.getDistance() > farthestDistance || farthest < 0) {
+                    farthestDistance = s.getDistance();
+                    farthest = i;
+                }
+            }
+            Log.log(Log.DEBUG,"Seen " + seen + "/" + sights.length + ". Farthest is now " + farthest + " at " + farthestDistance);
         }
     }
 

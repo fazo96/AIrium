@@ -183,6 +183,7 @@ public class Serializer {
                     + "nMutatedConnections = 0.5\n"
                     + "number_of_creatures = 25.0\n"
                     + "draw_sight_lines = 0.0\n"
+                    + "vegetable_size = 5\n"
                     + "creature_max_hp = 100\n"
                     + "creature_fov = 1.5\n"
                     + "creature_hp_decay = 0.5\n"

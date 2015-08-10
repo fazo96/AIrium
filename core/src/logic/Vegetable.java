@@ -9,7 +9,7 @@ import com.mygdx.game.Game;
  */
 public class Vegetable extends Element {
 
-    public static final float default_radius = 5;
+    public static float default_radius = 5;
     private float decayRate = 0;
 
     public Vegetable(float x, float y) {

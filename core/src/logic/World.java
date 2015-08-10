@@ -289,6 +289,7 @@ public class World implements Runnable {
         Eye.fov = options.get("creature_fov");
         Eye.sightRange = options.get("creature_sight_range");
         Torso.hpDecay = options.get("creature_hp_decay");
+        Vegetable.default_radius = options.get("vegetable_size");
         Creature.hpForAttacking = options.get("creature_hp_for_attacking");
         Creature.hpForEatingPlants = options.get("creature_hp_for_eating_plants");
         Creature.pointsForAttacking = options.get("creature_points_for_attacking");
