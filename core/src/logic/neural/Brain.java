@@ -115,7 +115,9 @@ public class Brain {
      */
     public void input(float[] values) throws Exception {
         if (values.length != neurons[0].length) {
-            throw new Exception("Not enough or too many inputs");
+            throw new Exception("Brain has " + neurons[0].length
+                    + " input neurons," + " but was supplied with "
+                    + values.length + " inputs");
         }
         for (int i = 0; i < values.length; i++) {
             neurons[0][i].setOutput(values[i]);

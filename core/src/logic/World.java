@@ -10,9 +10,12 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.creatures.Beak;
 import logic.creatures.Eye;
 import logic.creatures.Movement;
 import logic.creatures.Torso;
@@ -34,6 +37,7 @@ public class World implements Runnable {
     private Map<String, Float> options;
     private long ticksSinceGenStart = 0, maximumTicksPerGen = 0;
     private Creature selected;
+    private Queue<Integer> events = new LinkedList<>();
     private final Comparator creatureComp;
     private final ArrayList<Element> elements;
     private final ArrayList<Element> toAdd;
@@ -41,7 +45,6 @@ public class World implements Runnable {
     private final ArrayList<Creature> graveyard;
     private final ArrayList<Vegetable> plants;
     private final ArrayList<Vegetable> deadPlants;
-    private final ArrayList<Listener> listeners;
 
     /**
      * Create a new World. Can be customized with given options.
@@ -56,13 +59,13 @@ public class World implements Runnable {
             this.options = options;
         }
         reloadOptions();
+        events = new LinkedList<>();
         elements = new ArrayList();
         creatures = new ArrayList();
         toAdd = new ArrayList();
         plants = new ArrayList();
         deadPlants = new ArrayList();
         graveyard = new ArrayList();
-        listeners = new ArrayList();
         selected = null;
         creatureComp = new Comparator<Creature>() {
 
@@ -333,7 +336,15 @@ public class World implements Runnable {
         } while (overlaps && i++ < 20);
         if (isCreature) {
             Log.log(Log.DEBUG, "New Creat: " + x + " " + y);
-            Creature c = new Creature(x, y);
+            Creature c = new Creature(x, y) {
+
+                @Override
+                public void buildBody() {
+                    addBodyPart(new Beak(0, this));
+                    addBodyPart(new Eye(5, 0, this));
+                    addBodyPart(new Movement(this));
+                }
+            };
             if (brainMap != null) {
                 c.getBrain().remap(brainMap);
             }
@@ -380,11 +391,13 @@ public class World implements Runnable {
      */
     public void fire(int eventCode) {
         Log.log(Log.DEBUG, "Firing Event. Code: " + eventCode);
-        for (Listener f : listeners) {
-            f.on(eventCode);
-        }
+        events.add(eventCode);
     }
 
+    public Queue<Integer> getEventQueue(){
+        return events;
+    }
+    
     public void spawnVegetable() {
         spawn(false, null);
     }
@@ -407,10 +420,6 @@ public class World implements Runnable {
 
     public int getGeneration() {
         return generation;
-    }
-
-    public void addListener(Listener f) {
-        listeners.add(f);
     }
 
     public void add(Element e) {

@@ -41,13 +41,14 @@ import logic.World;
  *
  * @author fazo
  */
-public class GUI extends javax.swing.JFrame implements LogListener, Listener {
+public class GUI extends javax.swing.JFrame implements LogListener {
 
     private Game game;
     private World world;
     private LwjglApplication app;
     private boolean shouldUpdateGUI = false;
     private final Thread guiUpdater;
+    private final Listener listener;
     private Map<String, Float> options;
     private boolean updatingSliders = false, updatingTable = false;
 
@@ -59,6 +60,13 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         currentFpsLimit.setText("" + fpsLimitSlider.getValue());
         setLocationRelativeTo(null); // Center the window
         Log.addListener(this);
+        listener = new Listener() {
+
+            @Override
+            public void on(int event) {
+                updateGUI();
+            }
+        };
         options = new HashMap<String, Float>();
         world = new World(options);
         updateSettingsUI();
@@ -90,14 +98,10 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             @Override
             public void run() {
                 for (;;) {
-                    if (shouldUpdateGUI) {
-                        updateGUI();
-                        shouldUpdateGUI = false;
-                    } else {
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException ex) {
-                        }
+                    listener.pollAndHandleEvents();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
                     }
                 }
             }
@@ -885,7 +889,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
             app = new LwjglApplication(game = new Game(world), config);
             startButton.setText("Restart");
             pauseButton.setEnabled(true);
-            world.addListener(this);
             setCreatureList();
         }
         updateGUI();
@@ -898,12 +901,6 @@ public class GUI extends javax.swing.JFrame implements LogListener, Listener {
         }
         logTextArea.append(msg + "\n");
         setScrollBarToTheBottom();
-    }
-
-    @Override
-    public void on(int event) {
-        shouldUpdateGUI = true;
-        guiUpdater.interrupt();
     }
 
     public void enableControlButtons(boolean yn) {

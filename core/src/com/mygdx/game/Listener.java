@@ -9,9 +9,16 @@ package com.mygdx.game;
  *
  * @author Fazo
  */
-public interface Listener {
+public abstract class Listener {
 
     public static int FPS_CHANGED = 0, CREATURE_LIST_CHANGED = 1, PAUSED_OR_RESUMED = 2;
 
-    public void on(int event);
+    public void pollAndHandleEvents() {
+        if(Game.get() == null || Game.get().getWorld() == null) return;
+        while(Game.get().getWorld().getEventQueue().size() > 0) {
+            on(Game.get().getWorld().getEventQueue().poll());
+        }
+    }
+
+    public abstract void on(int event);
 }

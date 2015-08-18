@@ -10,11 +10,14 @@ import logic.Vegetable;
 import logic.neural.Brain;
 
 /**
- * A (hopefully) smart biological creature in the simulated world.
+ * A (hopefully) smart biological creature in the simulated world. It is
+ * initialized with a set of body parts. Every creature has a brain which gets
+ * automatically wired to the body parts. Only creatures with matching brain
+ * structures can breed for now.
  *
  * @author fazo
  */
-public class Creature extends Element implements Runnable {
+public abstract class Creature extends Element implements Runnable {
 
     public static int brain_hidden_layers = 2, brain_hidden_neurons = 10;
     public static float corpseDecayRate = 0, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
@@ -25,7 +28,6 @@ public class Creature extends Element implements Runnable {
     private final ArrayList<BodyPart> bodyParts;
     private float dir, fitness = 0;
     private boolean workerDone = false, killWorker = false;
-    private Sight[] sights;
     private Thread workerThread;
 
     /**
@@ -39,11 +41,8 @@ public class Creature extends Element implements Runnable {
         dir = (float) (Math.random() * 2 * Math.PI);
         bodyParts = new ArrayList<BodyPart>();
         bodyParts.add(torso = new Torso(this));
-        bodyParts.add(new Beak(0, this));
-        bodyParts.add(new Eye(5, 0, this));
-        bodyParts.add(new Movement(this));
+        buildBody();
         brain = new Brain(howManyInputNeurons(), howManyOutputNeurons(), brain_hidden_layers, brain_hidden_neurons);
-        sights = new Sight[2];
     }
 
     @Override
@@ -196,11 +195,22 @@ public class Creature extends Element implements Runnable {
         for (BodyPart b : bodyParts) {
             if (b instanceof Beak) {
                 beaks++;
-                danger += (((Beak)b).getLength() - Beak.min_length) / Beak.max_length;
+                danger += (((Beak) b).getLength() - Beak.min_length) / Beak.max_length;
             }
         }
-        if(beaks == 0) return 0;
+        if (beaks == 0) {
+            return 0;
+        }
         return danger / beaks;
+    }
+
+    /**
+     * Compose this creature's body using the addBodyPart function.
+     */
+    public abstract void buildBody();
+
+    public void addBodyPart(BodyPart p) {
+        bodyParts.add(p);
     }
 
     public Brain getBrain() {
