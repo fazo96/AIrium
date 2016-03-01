@@ -30,11 +30,11 @@ import logic.neural.Brain;
 public class World implements Runnable {
 
     private int width, height, nPlants, creatPerGen;
-    private float nMutatedBrains = 0.2f, nMutatedNeurons = 0.5f, nMutatedConnections = 0.5f, mutationFactor = 1f;
+    private double nMutatedBrains = 0.2f, nMutatedNeurons = 0.5f, nMutatedConnections = 0.5f, mutationFactor = 1f;
     private int generation = 1;
     private boolean multithreading, cmdLaunchNewGen = false, cmdRestart = false;
     private int fpsLimit, fps = 0;
-    private Map<String, Float> options;
+    private Map<String, Double> options;
     private long ticksSinceGenStart = 0, maximumTicksPerGen = 0;
     private Creature selected;
     private Queue<Integer> events = new LinkedList<>();
@@ -52,9 +52,9 @@ public class World implements Runnable {
      * @param options customization options. Can be null. See the
      * "reloadOptions" function for possible options
      */
-    public World(Map<String, Float> options) {
+    public World(Map<String, Double> options) {
         if (options == null) {
-            this.options = new HashMap<String, Float>();
+            this.options = new HashMap<String, Double>();
         } else {
             this.options = options;
         }
@@ -224,7 +224,7 @@ public class World implements Runnable {
             }
             Creature[] top = new Creature[topSize];
             // Calculate avg fitness and prepare best agent list
-            float avgFitness = 0;
+            double avgFitness = 0;
             for (int i = 0; i < graveyard.size(); i++) {
                 Creature c = graveyard.get(i);
                 if (i < topSize) {
@@ -243,7 +243,7 @@ public class World implements Runnable {
                 while (sec == first && topSize > 1) {
                     sec = (int) Math.floor(Math.random() * topSize);
                 }
-                float[][][] n = null;
+                double[][][] n = null;
                 try {
                     n = top[first].getBrain().breed(top[sec].getBrain().getMap());
                 } catch (Exception ex) {
@@ -274,15 +274,15 @@ public class World implements Runnable {
      */
     public void reloadOptions() {
         for (Object o : Serializer.getDefaultSettings().entrySet().toArray()) {
-            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            Map.Entry<String, Double> e = (Map.Entry<String, Double>) o;
             options.putIfAbsent(e.getKey(), e.getValue());
         }
-        width = Math.round(options.get("world_width"));
-        height = Math.round(options.get("world_height"));
-        fpsLimit = Math.round(options.get("fps_limit"));
+        width = (int) Math.round(options.get("world_width"));
+        height = (int) Math.round(options.get("world_height"));
+        fpsLimit = (int) Math.round(options.get("fps_limit"));
         maximumTicksPerGen = Math.round(options.get("max_ticks"));
-        creatPerGen = Math.round(options.get("number_of_creatures"));
-        nPlants = Math.round(options.get("number_of_plants"));
+        creatPerGen = (int) Math.round(options.get("number_of_creatures"));
+        nPlants = (int) Math.round(options.get("number_of_plants"));
         multithreading = options.get("enable_multithreading") > 0;
         Creature.corpseDecayRate = options.get("corpse_decay_rate");
         Creature.leaveCorpses = options.get("enable_corpses") > 0;
@@ -297,8 +297,8 @@ public class World implements Runnable {
         Creature.hpForEatingPlants = options.get("creature_hp_for_eating_plants");
         Creature.pointsForAttacking = options.get("creature_points_for_attacking");
         Creature.pointsForEatingPlants = options.get("creature_points_for_eating_plants");
-        Creature.brain_hidden_layers = Math.round(options.get("brain_hidden_layers"));
-        Creature.brain_hidden_neurons = Math.round(options.get("brain_hidden_neurons"));
+        Creature.brain_hidden_layers = (int) Math.round(options.get("brain_hidden_layers"));
+        Creature.brain_hidden_neurons = (int) Math.round(options.get("brain_hidden_neurons"));
         Brain.bias = options.get("brain_bias");
         nMutatedBrains = options.get("nMutatedBrains");
         nMutatedNeurons = options.get("nMutatedNeurons");
@@ -314,9 +314,9 @@ public class World implements Runnable {
      * null, a random mind will be created
      * @return the spawned element
      */
-    private Element spawn(boolean isCreature, float[][][] brainMap) {
+    private Element spawn(boolean isCreature, double[][][] brainMap) {
         int x, y;
-        float r;
+        double r;
         boolean overlaps;
         if (isCreature) {
             r = Torso.default_radius;
@@ -394,10 +394,10 @@ public class World implements Runnable {
         events.add(eventCode);
     }
 
-    public Queue<Integer> getEventQueue(){
+    public Queue<Integer> getEventQueue() {
         return events;
     }
-    
+
     public void spawnVegetable() {
         spawn(false, null);
     }
@@ -406,7 +406,7 @@ public class World implements Runnable {
         return (Creature) spawn(true, null);
     }
 
-    public Creature spawnCreature(float[][][] b) {
+    public Creature spawnCreature(double[][][] b) {
         return (Creature) spawn(true, b);
     }
 
@@ -446,7 +446,7 @@ public class World implements Runnable {
         return plants;
     }
 
-    public float getFpsLimit() {
+    public double getFpsLimit() {
         return fpsLimit;
     }
 
@@ -454,11 +454,11 @@ public class World implements Runnable {
         this.fpsLimit = fpsLimit;
     }
 
-    public float getFps() {
+    public double getFps() {
         return fps;
     }
 
-    public Map<String, Float> getOptions() {
+    public Map<String, Double> getOptions() {
         return options;
     }
 
@@ -478,7 +478,7 @@ public class World implements Runnable {
         this.multithreading = multithreading;
     }
 
-    public void replaceOptions(Map<String, Float> options) {
+    public void replaceOptions(Map<String, Double> options) {
         this.options = options;
         reloadOptions();
     }

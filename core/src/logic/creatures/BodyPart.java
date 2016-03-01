@@ -12,8 +12,8 @@ import logic.Element;
 public abstract class BodyPart {
 
     protected int inputNeuronsUsed;
-    protected float angle, distFromCenter;
-    protected float outputs[];
+    protected double angle, distFromCenter;
+    protected double outputs[];
     protected Creature creature;
 
     /**
@@ -26,12 +26,12 @@ public abstract class BodyPart {
      * this body part
      * @param creature the creature that owns this body part
      */
-    public BodyPart(int inputNeuronsUsed, int outputNeuronsUsed, float angle, float distFromCenter, Creature creature) {
+    public BodyPart(int inputNeuronsUsed, int outputNeuronsUsed, double angle, double distFromCenter, Creature creature) {
         this.inputNeuronsUsed = inputNeuronsUsed;
         this.angle = angle;
         this.distFromCenter = distFromCenter;
         this.creature = creature;
-        outputs = new float[outputNeuronsUsed];
+        outputs = new double[outputNeuronsUsed];
     }
 
     /**
@@ -40,7 +40,7 @@ public abstract class BodyPart {
      *
      * @return the data to send to the brain, must be inputNeuronsUsed long
      */
-    public abstract float[] act();
+    public abstract double[] act();
 
     /**
      * Interact with another element. This will be called every time the body
@@ -52,7 +52,7 @@ public abstract class BodyPart {
      * @param distance the distance
      * @param relAngle the relative angle
      */
-    public abstract void interactWithElement(Element e, float distance, float relAngle);
+    public abstract void interactWithElement(Element e, double distance, double relAngle);
 
     /**
      * Receive some data from the brain. This is called once every frame, after
@@ -61,7 +61,7 @@ public abstract class BodyPart {
      * @param data the data received from the brain, will be outputNeuronsUsed
      * long
      */
-    public abstract void readFromBrain(float data[]);
+    public abstract void readFromBrain(double data[]);
 
     /**
      * This will be called when the
@@ -72,7 +72,7 @@ public abstract class BodyPart {
      * @param relY the Y position of this bodypart relative to the center its
      * creature
      */
-    protected abstract void draw(ShapeRenderer s, float relX, float relY);
+    protected abstract void draw(ShapeRenderer s, double relX, double relY);
 
     /**
      * Prepares data and calls draw
@@ -82,7 +82,7 @@ public abstract class BodyPart {
     public final void render(ShapeRenderer s) {
         double relX = Math.cos(creature.getDirection() + angle) * creature.getTorso().getRadius() * distFromCenter;
         double relY = Math.sin(creature.getDirection() + angle) * creature.getTorso().getRadius() * distFromCenter;
-        draw(s, (float) relX, (float) relY);
+        draw(s, (double) relX, (double) relY);
     }
 
     /**
@@ -105,11 +105,11 @@ public abstract class BodyPart {
      *
      * @return the angle of this bodypart relative to the center of the creature
      */
-    public float getAngle() {
+    public double getAngle() {
         return angle;
     }
 
-    public float getDistanceFromCreatureCenter() {
+    public double getDistanceFromCreatureCenter() {
         return distFromCenter;
     }
 

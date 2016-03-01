@@ -20,13 +20,13 @@ import logic.neural.Brain;
 public abstract class Creature extends Element implements Runnable {
 
     public static int brain_hidden_layers = 2, brain_hidden_neurons = 10;
-    public static float corpseDecayRate = 0, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
+    public static double corpseDecayRate = 0, pointsForEatingPlants = 1f, pointsForAttacking = 2f, hpForAttacking = 1f, hpForEatingPlants = 1f;
     public static boolean leaveCorpses = false;
 
     private final Brain brain;
     private final Torso torso;
     private final ArrayList<BodyPart> bodyParts;
-    private float dir, fitness = 0;
+    private double dir, fitness = 0;
     private boolean workerDone = false, killWorker = false;
     private Thread workerThread;
 
@@ -36,9 +36,9 @@ public abstract class Creature extends Element implements Runnable {
      * @param x
      * @param y
      */
-    public Creature(float x, float y) {
+    public Creature(double x, double y) {
         super(x, y, Torso.default_radius);
-        dir = (float) (Math.random() * 2 * Math.PI);
+        dir = (double) (Math.random() * 2 * Math.PI);
         bodyParts = new ArrayList<BodyPart>();
         bodyParts.add(torso = new Torso(this));
         buildBody();
@@ -77,10 +77,10 @@ public abstract class Creature extends Element implements Runnable {
             return;
         }
         // collect inputs
-        float values[] = new float[howManyInputNeurons()];
+        double values[] = new double[howManyInputNeurons()];
         int i = 0;
         for (BodyPart b : bodyParts) {
-            for (float v : b.act()) {
+            for (double v : b.act()) {
                 values[i] = v;
                 i++;
             }
@@ -88,7 +88,7 @@ public abstract class Creature extends Element implements Runnable {
         // read from sensors and interact with world
         interactWithWorld();
         // compute behavior
-        float[] actions = null;
+        double[] actions = null;
         try {
             actions = brain.compute(values);
         } catch (Exception ex) {
@@ -99,7 +99,7 @@ public abstract class Creature extends Element implements Runnable {
         // Save brain outputs to body parts
         for (BodyPart b : bodyParts) {
             int n = 0;
-            float data[] = new float[b.getOutputNeuronsUsed()];
+            double data[] = new double[b.getOutputNeuronsUsed()];
             while (n < b.getOutputNeuronsUsed()) {
                 data[n] = actions[i];
                 i++;
@@ -122,8 +122,8 @@ public abstract class Creature extends Element implements Runnable {
      */
     public void interactWithWorld() {
         for (Element e : Game.get().getWorld().getElements()) {
-            float distance = distanceFrom(e);
-            float angle = (float) (Math.atan2(getY() - e.getY(), getX() - e.getX())) - (dir - (float) Math.PI);
+            double distance = distanceFrom(e);
+            double angle = (double) (Math.atan2(getY() - e.getY(), getX() - e.getX())) - (dir - (double) Math.PI);
             for (BodyPart b : bodyParts) {
                 b.interactWithElement(e, distance, angle);
             }
@@ -146,7 +146,7 @@ public abstract class Creature extends Element implements Runnable {
         return n;
     }
 
-    public void rotate(float amount) {
+    public void rotate(double amount) {
         dir += amount;
         if (dir > 2 * Math.PI) {
             dir -= 2 * Math.PI;
@@ -161,7 +161,7 @@ public abstract class Creature extends Element implements Runnable {
      *
      * @param amount how much
      */
-    public void praise(float amount) {
+    public void praise(double amount) {
         fitness += amount;
     }
 
@@ -189,9 +189,9 @@ public abstract class Creature extends Element implements Runnable {
         }
     }
 
-    public float getDangerLevel() {
+    public double getDangerLevel() {
         int beaks = 0;
-        float danger = 0;
+        double danger = 0;
         for (BodyPart b : bodyParts) {
             if (b instanceof Beak) {
                 beaks++;
@@ -217,15 +217,15 @@ public abstract class Creature extends Element implements Runnable {
         return brain;
     }
 
-    public void setDirection(float dir) {
+    public void setDirection(double dir) {
         this.dir = dir;
     }
 
-    public float getDirection() {
+    public double getDirection() {
         return dir;
     }
 
-    public float getFitness() {
+    public double getFitness() {
         return fitness;
     }
 

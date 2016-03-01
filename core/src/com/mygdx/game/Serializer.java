@@ -17,9 +17,9 @@ import java.util.Random;
 public class Serializer {
 
     private static final String[] sillabe = {"ba", "de", "ka", "mo", "shi", "du", "ro", "te", "mi", "lo", "pa"};
-    private static Map<String, Float> defaults;
+    private static Map<String, Double> defaults;
 
-    public static String nameBrain(float[][][] brainMap) {
+    public static String nameBrain(double[][][] brainMap) {
         // Compute a unique representation of the brainmap
         long a = 0;
         for (int i = 0; i < brainMap.length; i++) {
@@ -64,19 +64,19 @@ public class Serializer {
         return a;
     }
 
-    public static String serializeSettings(Map<String, Float> options) {
+    public static String serializeSettings(Map<String, Double> options) {
         String a = "# Settings file for use with AIrium.\n"
                 + "# More information at http://github.com/fazo96/AIrium\n";
         for (Object o : options.entrySet().toArray()) {
-            Map.Entry<String, Float> e = (Map.Entry<String, Float>) o;
+            Map.Entry<String, Double> e = (Map.Entry<String, Double>) o;
             a += e.getKey() + " = " + e.getValue() + "\n";
         }
         return a;
     }
 
-    public static Map<String, Float> readSettings(String fileContent) {
+    public static Map<String, Double> readSettings(String fileContent) {
         int line = 0;
-        Map<String, Float> m = new HashMap<String, Float>();
+        Map<String, Double> m = new HashMap<String, Double>();
         for (String s : fileContent.split("\n")) {
             line++;
             if (s.startsWith("#")) {
@@ -88,8 +88,8 @@ public class Serializer {
                 if (ss.length != 2) {
                     throw new Exception("Invalid string at line " + line);
                 }
-                Log.log(Log.DEBUG, "Loading setting \"" + ss[0].trim() + "\" with value \"" + Float.parseFloat(ss[1].trim()) + "\"");
-                m.put(ss[0].trim(), Float.parseFloat(ss[1].trim()));
+                Log.log(Log.DEBUG, "Loading setting \"" + ss[0].trim() + "\" with value \"" + Double.parseDouble(ss[1].trim()) + "\"");
+                m.put(ss[0].trim(), Double.parseDouble(ss[1].trim()));
             } catch (Exception e) {
                 Log.log(Log.ERROR, e.getMessage());
             }
@@ -97,7 +97,7 @@ public class Serializer {
         return m;
     }
 
-    public static String serializeBrain(float brainMap[][][]) {
+    public static String serializeBrain(double brainMap[][][]) {
         String s = "# Neural Map for use with AIrium.\n"
                 + "# More information at http://github.com/fazo96/AIrium\n"
                 + "Layers: " + (brainMap.length + 1);
@@ -116,8 +116,8 @@ public class Serializer {
         return s;
     }
 
-    public static float[][][] loadBrain(String s) {
-        float brainMap[][][] = null;
+    public static double[][][] loadBrain(String s) {
+        double brainMap[][][] = null;
         Log.log(Log.INFO, "Loading brain from String with " + s.split("\n").length + " lines");
         for (String l : s.split("\n")) {
             l = l.trim();
@@ -126,25 +126,25 @@ public class Serializer {
             } else if (l.startsWith("Layers: ")) {
                 // Set Layer number
                 int layers = Integer.parseInt(l.split(" ")[1]) - 1;
-                brainMap = new float[layers][][];
+                brainMap = new double[layers][][];
                 Log.log(Log.INFO, "Loaded NLayers: " + layers);
             } else if (l.startsWith("Input Neurons")) {
                 int in = Integer.parseInt(l.split(" ")[2]);
-                brainMap[0] = new float[in][0];
+                brainMap[0] = new double[in][0];
                 Log.log(Log.INFO, "Loaded NInputNeurons: " + in);
             } else if (l.startsWith("Layer ")) {
                 // Set neuron number for given layer
                 String ll[] = l.split(" ");
                 int layer = Integer.parseInt(ll[1]) - 2;
                 int n = Integer.parseInt(ll[3]);
-                brainMap[layer] = new float[n][];//[layer>0?brainMap[layer-1].length:0];
+                brainMap[layer] = new double[n][];//[layer>0?brainMap[layer-1].length:0];
             } else if (l.startsWith("Weights ")) {
                 // Set weights
                 String ll[] = l.split(" ");
                 int layer = Integer.parseInt(ll[3]) - 2;
                 int neuron = Integer.parseInt(ll[5]) - 1;
                 int nWeights = ll.length - 7;
-                brainMap[layer][neuron] = new float[nWeights];
+                brainMap[layer][neuron] = new double[nWeights];
                 if (layer == 0) {
                     Log.log(Log.DEBUG, "This weightmap is for brains with " + (nWeights) + " input neurons.");
                 } else if (nWeights != brainMap[layer - 1].length) {
@@ -154,7 +154,7 @@ public class Serializer {
                             + " weights are supplied to this neuron");
                 }
                 for (int i = 7; i < ll.length; i++) {
-                    brainMap[layer][neuron][i - 7] = Float.parseFloat(ll[i]);
+                    brainMap[layer][neuron][i - 7] = Double.parseDouble(ll[i]);
                     Log.log(Log.DEBUG, "Loading L" + layer + "N" + neuron + "W" + (i - 7) + " = " + brainMap[layer][neuron][i - 7]);
                 }
                 Log.log(Log.DEBUG, "Loaded " + (nWeights) + " Weights for Layer " + layer + " Neuron " + neuron);
@@ -164,7 +164,7 @@ public class Serializer {
         return brainMap;
     }
 
-    public static Map<String, Float> getDefaultSettings() {
+    public static Map<String, Double> getDefaultSettings() {
         if (defaults == null) {
             String s = "corpse_decay_rate = 0.0\n"
                     + "mutationFactor = 1.0\n"

@@ -7,8 +7,8 @@ package logic.neural;
  */
 public class NeuronCache {
 
-    private float[] cache;
-    private float cachedOutput;
+    private double[] cache;
+    private double cachedOutput;
     private boolean cachedOutputValid;
     private boolean[] validity;
 
@@ -18,7 +18,7 @@ public class NeuronCache {
      * @param size how many inputs the requiring neuron has.
      */
     public NeuronCache(int size) {
-        cache = new float[size];
+        cache = new double[size];
         validity = new boolean[size];
         clear();
     }
@@ -29,7 +29,7 @@ public class NeuronCache {
      * @param index the index of the value
      * @param value the value itself
      */
-    public void put(int index, float value) {
+    public void put(int index, double value) {
         validity[index] = true;
         cache[index] = value;
     }
@@ -41,7 +41,7 @@ public class NeuronCache {
      * @return the value required
      * @throws Exception if value not stored or declared invalid
      */
-    public float get(int index) throws Exception {
+    public double get(int index) throws Exception {
         if (validity[index]) {
             return cache[index];
         } else {
@@ -59,7 +59,7 @@ public class NeuronCache {
         return validity[index];
     }
 
-    public float getCachedOutput() {
+    public double getCachedOutput() {
         return cachedOutput;
     }
 
@@ -67,7 +67,7 @@ public class NeuronCache {
         return cachedOutputValid;
     }
 
-    public void setCachedOutput(float cachedOutput) {
+    public void setCachedOutput(double cachedOutput) {
         this.cachedOutput = cachedOutput;
     }
 

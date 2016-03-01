@@ -11,7 +11,7 @@ import com.mygdx.game.Serializer;
  */
 public class Brain {
 
-    public static float bias = 0.5f;
+    public static double bias = 0.5f;
     private Neuron[][] neurons;
     private String name;
 
@@ -41,7 +41,7 @@ public class Brain {
      *
      * @param brainMap the new brain map to apply
      */
-    public void remap(float[][][] brainMap) {
+    public void remap(double[][][] brainMap) {
         for (int i = 0; i < brainMap.length; i++) { // for each layer (skip input)
             for (int j = 0; j < brainMap[i].length; j++) { // for each neuron
                 // skip input layer
@@ -89,17 +89,17 @@ public class Brain {
             //s.set(ShapeRenderer.ShapeType.Line);
             for (int j = 0; j < neurons[i].length; j++) {
                 // get neuron result first so cache system can kick in and save some calculations
-                float nr = neurons[i][j].compute();
+                double nr = neurons[i][j].compute();
                 // Draw neuron links
-                float[] links = neurons[i][j].getWeights();
+                double[] links = neurons[i][j].getWeights();
                 if (links != null) {
                     for (int f = 0; f < links.length; f++) {
-                        s.setColor(links[f] < 0 ? links[f] / 2 * -1 : 0, links[f] > 0 ? links[f] / 2 : 0, 0, 1);
+                        s.setColor((float) (links[f] < 0 ? links[f] / 2 * -1 : 0), (float) (links[f] > 0 ? links[f] / 2 : 0), 0, 1);
                         s.line(i * sepX + offset, j * sepY + offset, (i - 1) * sepX + offset, f * sepY + offset);
                     }
                 }
                 // Draw neuron
-                s.setColor(1 - nr, nr, 0, 1);
+                s.setColor((float) (1 - nr), (float) nr, 0, 1);
                 s.circle(i * sepX + offset, j * sepY + offset, 15);
             }
         }
@@ -113,7 +113,7 @@ public class Brain {
      * @throws Exception if the number of inputs given differs from the number
      * of input neurons of this brain
      */
-    public void input(float[] values) throws Exception {
+    public void input(double[] values) throws Exception {
         if (values.length != neurons[0].length) {
             throw new Exception("Brain has " + neurons[0].length
                     + " input neurons," + " but was supplied with "
@@ -130,9 +130,9 @@ public class Brain {
      * @return an array as long as the number of output neurons, containing the
      * result
      */
-    public float[] compute() {
+    public double[] compute() {
         clearCache(); // unnecessary if already called when changing inputs
-        float[] res = new float[neurons[neurons.length - 1].length];
+        double[] res = new double[neurons[neurons.length - 1].length];
         for (int i = 0; i < neurons[neurons.length - 1].length; i++) {
             res[i] = neurons[neurons.length - 1][i].compute();
         }
@@ -147,7 +147,7 @@ public class Brain {
      * @throws Exception if the number of inputs given differs from the number
      * of input neurons of this brain
      */
-    public float[] compute(float[] values) throws Exception {
+    public double[] compute(double[] values) throws Exception {
         input(values);
         return compute();
     }
@@ -158,11 +158,11 @@ public class Brain {
      * @return a tridimensional floating point number array representing a full
      * mind
      */
-    public float[][][] getMap() {
-        float[][][] res = new float[neurons.length - 1][][];
+    public double[][][] getMap() {
+        double[][][] res = new double[neurons.length - 1][][];
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
-            res[i - 1] = new float[neurons[i].length][];
+            res[i - 1] = new double[neurons[i].length][];
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
                 res[i - 1][j] = neurons[i][j].getWeights();
@@ -181,11 +181,11 @@ public class Brain {
      * of mutated neurons (range: from 0 to 1)
      * @return a mutated brain map of this brain's mind
      */
-    public float[][][] getMutatedMap(float mutationProbability, float connectionMutationProbability, float mutationFactor) {
-        float[][][] res = new float[neurons.length - 1][][];
+    public double[][][] getMutatedMap(double mutationProbability, double connectionMutationProbability, double mutationFactor) {
+        double[][][] res = new double[neurons.length - 1][][];
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
-            res[i - 1] = new float[neurons[i].length][];
+            res[i - 1] = new double[neurons[i].length][];
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
                 if (Math.random() <= mutationProbability) {
@@ -205,7 +205,7 @@ public class Brain {
      * of mutated neurons (range: from 0 to 1)
      * @param mutationFactor the higher this number, the bigger the mutation
      */
-    public void mutate(float mutationProbability, float connectionMutationProbability, float mutationFactor) {
+    public void mutate(double mutationProbability, double connectionMutationProbability, double mutationFactor) {
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
@@ -228,20 +228,20 @@ public class Brain {
      * @throws Exception if the brains don't have identical neuron and layer
      * numbers
      */
-    public float[][][] breed(float[][][] map) throws Exception {
-        float[][][] res = new float[neurons.length - 1][][];
+    public double[][][] breed(double[][][] map) throws Exception {
+        double[][][] res = new double[neurons.length - 1][][];
         if (map.length != neurons.length - 1) {
             throw new Exception("incompatible brains");
         }
         for (int i = 1; i < neurons.length; i++) // layers (skip input layer)
         {
-            res[i - 1] = new float[neurons[i].length][];
+            res[i - 1] = new double[neurons[i].length][];
             if (map[i - 1].length != neurons[i].length) {
                 throw new Exception("incompatible brains");
             }
             for (int j = 0; j < neurons[i].length; j++) // neurons per layer
             {
-                res[i - 1][j] = new float[neurons[i][j].getWeights().length];
+                res[i - 1][j] = new double[neurons[i][j].getWeights().length];
                 if (map[i - 1][j].length != neurons[i][j].getWeights().length) {
                     throw new Exception("incompatible brains");
                 }

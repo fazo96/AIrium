@@ -19,18 +19,18 @@ public class Eye extends BodyPart {
 
     private Sight sights[];
     private int farthest = -1, seen;
-    private float farthestDistance = 0;
-    public static float fov = 2, sightRange = 30;
+    private double farthestDistance = 0;
+    public static double fov = 2, sightRange = 30;
 
-    public Eye(int nSights, float angle, Creature creature) {
+    public Eye(int nSights, double angle, Creature creature) {
         super(6 * nSights, 0, angle, 0.8f, creature);
         sights = new Sight[nSights];
         seen = 0;
     }
 
     @Override
-    public float[] act() {
-        float ret[] = new float[inputNeuronsUsed];
+    public double[] act() {
+        double ret[] = new double[inputNeuronsUsed];
         int j = 0;
         for (int i = 0; i < sights.length; i++) {
             if (i < seen) {
@@ -62,7 +62,7 @@ public class Eye extends BodyPart {
     }
 
     @Override
-    public void interactWithElement(Element e, float distance, float angle) {
+    public void interactWithElement(Element e, double distance, double angle) {
         if (e != creature && distance < sightRange && (distance < farthestDistance || seen < sights.length) && Math.abs(angle) < fov / 2) {
             if (seen < sights.length) {
                 sights[seen] = new Sight(e, distance, angle);
@@ -85,36 +85,36 @@ public class Eye extends BodyPart {
     }
 
     @Override
-    protected void draw(ShapeRenderer s, float relX, float relY) {
+    protected void draw(ShapeRenderer s, double relX, double relY) {
         // Draw eye
         s.setColor(1, 1, 1, 1);
-        s.circle(creature.getX() + relX, creature.getY() + relY, 3);
+        s.circle((float) (creature.getX() + relX), (float) (creature.getY() + relY), 3);
         // Draw FOV cone
-        float degrees = fov * 360f / (float) Math.PI;
-        float orient = (creature.getDirection() + angle) * 180f / (float) Math.PI - degrees / 2;
-        if (Game.get().getWorld().getOptions().getOrDefault("draw_view_cones", 0f) > 0) {
+        double degrees = fov * 360f / (double) Math.PI;
+        double orient = (creature.getDirection() + angle) * 180f / (double) Math.PI - degrees / 2;
+        if (Game.get().getWorld().getOptions().getOrDefault("draw_view_cones", 0d) > 0) {
             s.setColor(0.3f, 0.3f, 0.3f, 1);
-            s.arc((float) relX + creature.getX(), (float) relY + creature.getY(), sightRange, orient, degrees);
+            s.arc((float) (relX + creature.getX()), (float) (relY + creature.getY()), (float) sightRange, (float) orient, (float) degrees);
         }
         // Sight Lines
-        float c = 0;
-        if (Game.get().getWorld().getOptions().getOrDefault("draw_sight_lines", 0f) > 0) {
+        double c = 0;
+        if (Game.get().getWorld().getOptions().getOrDefault("draw_sight_lines", 0d) > 0) {
             for (Sight sight : sights) {
                 if (sight != null) {
                     c = sight.getDistance() / sightRange * 2 + sightRange;
                     if (sight.getElement() instanceof Creature) {
-                        s.setColor(c, 0, 0, 1);
+                        s.setColor((float) c, 0, 0, 1);
                     } else if (sight.getElement() instanceof Vegetable) {
-                        s.setColor(0, c, 0, 1);
+                        s.setColor(0, (float) c, 0, 1);
                     }
-                    s.line(relX + creature.getX(), creature.getY() + relY, sight.getElement().getX(), sight.getElement().getY());
+                    s.line((float) (relX + creature.getX()), (float) (creature.getY() + relY), (float) (sight.getElement().getX()), (float) (sight.getElement().getY()));
                 }
             }
         }
     }
 
     @Override
-    public void readFromBrain(float[] data) {
+    public void readFromBrain(double[] data) {
     }
 
 }

@@ -148,7 +148,7 @@ public class Game extends ApplicationAdapter {
             Creature c = world.getSelectedCreature();
             renderer.setColor(1, 1, 1, 1);
             // Draw selection rectangle
-            renderer.rect(c.getX() - c.getSize(), c.getY() - c.getSize(), c.getSize() * 2, c.getSize() * 2);
+            renderer.rect((float) (c.getX() - c.getSize()), (float) (c.getY() - c.getSize()), (float) (c.getSize() * 2), (float) (c.getSize() * 2));
             // Draw brain
             overlayRenderer.begin();
             c.getBrain().render(overlayRenderer);

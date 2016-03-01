@@ -14,18 +14,18 @@ import logic.Element;
  */
 public class Beak extends BodyPart {
 
-    private float length;
+    private double length;
     private boolean attacking = false;
-    public static float max_length = Torso.default_radius / 4, min_length = max_length / 4;
+    public static double max_length = Torso.default_radius / 4, min_length = max_length / 4;
 
-    public Beak(float angle, Creature creature) {
+    public Beak(double angle, Creature creature) {
         super(3, 1, angle, 1, creature);
         length = min_length;
     }
 
     @Override
-    public float[] act() {
-        float r[] = new float[]{
+    public double[] act() {
+        double r[] = new double[]{
             length / max_length, // current beak length
             length > max_length / 2 ? 1f : 0f, // wether the beak is doing damage
             attacking ? 1f : 0f
@@ -35,7 +35,7 @@ public class Beak extends BodyPart {
     }
 
     @Override
-    public void interactWithElement(Element e, float distance, float relAngle) {
+    public void interactWithElement(Element e, double distance, double relAngle) {
         if (e instanceof Creature && distance < length && length > max_length / 2 && Math.abs(relAngle) < 0.3f) {
             // Can attack
             creature.praise(Creature.pointsForAttacking);
@@ -46,10 +46,10 @@ public class Beak extends BodyPart {
     }
 
     @Override
-    protected void draw(ShapeRenderer s, float relX, float relY) {
+    protected void draw(ShapeRenderer s, double relX, double relY) {
         s.set(ShapeRenderer.ShapeType.Line);
         // Draw Beak
-        s.setColor(getLength() / Beak.max_length, 1 - getLength() / Beak.max_length, 0, 1);
+        s.setColor((float) (getLength() / Beak.max_length), (float) (1 - getLength() / Beak.max_length), 0, 1);
         s.line((float) (relX + creature.getX()), (float) (relY + creature.getY()), (float) (relX * (1.5f + getLength() / Beak.max_length) + creature.getX()), (float) (relY * (1.5f + getLength() / Beak.max_length) + creature.getY()));
         if (attacking) {
             s.circle((float) (relX * (1.5f + getLength() / Beak.max_length) + creature.getX()), (float) (relY * (1.5f + getLength() / Beak.max_length) + creature.getY()), 0.3f);
@@ -57,7 +57,7 @@ public class Beak extends BodyPart {
     }
 
     @Override
-    public void readFromBrain(float[] outputs) {
+    public void readFromBrain(double[] outputs) {
         length = outputs[0] * max_length;
         if (length > max_length) {
             length = max_length;
@@ -66,7 +66,7 @@ public class Beak extends BodyPart {
         }
     }
 
-    public float getLength() {
+    public double getLength() {
         return length;
     }
 

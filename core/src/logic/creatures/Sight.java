@@ -10,9 +10,9 @@ import logic.Element;
 public class Sight {
 
     private Element seen;
-    private float distance, angle;
+    private double distance, angle;
 
-    public Sight(Element seen, float distance, float angle) {
+    public Sight(Element seen, double distance, double angle) {
         this.seen = seen;
         this.distance = distance;
         this.angle = angle;
@@ -22,11 +22,11 @@ public class Sight {
         return seen;
     }
 
-    public float getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    public float getAngle() {
+    public double getAngle() {
         return angle;
     }
 

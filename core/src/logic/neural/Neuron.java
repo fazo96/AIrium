@@ -11,9 +11,9 @@ import java.util.logging.Logger;
  */
 public class Neuron {
 
-    private float[] weights;
+    private double[] weights;
     private NeuronCache cache;
-    private float bias, output;
+    private double bias, output;
     private boolean isInputNeuron;
     private int layer, receivesFromLayer;
     private Brain brain;
@@ -28,7 +28,7 @@ public class Neuron {
      * neurons)
      * @param brain the brain which contains this neuron
      */
-    public Neuron(int layer, int receivesFromLayer, float bias, Brain brain) {
+    public Neuron(int layer, int receivesFromLayer, double bias, Brain brain) {
         this(layer, receivesFromLayer, bias, brain, null);
     }
 
@@ -43,7 +43,7 @@ public class Neuron {
      * @param brain the brain which contains this neuron
      * @param weights the weights to use to configure this neuron
      */
-    public Neuron(int layer, int receivesFromLayer, float bias, Brain brain, float[] weights) {
+    public Neuron(int layer, int receivesFromLayer, double bias, Brain brain, double[] weights) {
         this.brain = brain;
         this.layer = layer;
         this.receivesFromLayer = receivesFromLayer;
@@ -65,14 +65,14 @@ public class Neuron {
     private void scramble() {
         // init weights
         if (layer > 0) {
-            weights = new float[brain.getNeurons()[receivesFromLayer].length];
+            weights = new double[brain.getNeurons()[receivesFromLayer].length];
         } else { // layer 0 or negative
             isInputNeuron = true;
-            weights = new float[0];
+            weights = new double[0];
         }
         // Put random weights
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = (float) (Math.random() * 5 - 2.5f);
+            weights[i] = (double) (Math.random() * 5 - 2.5f);
         }
     }
 
@@ -84,7 +84,7 @@ public class Neuron {
      *
      * @return the output of this neuron.
      */
-    public float compute() {
+    public double compute() {
         if (weights == null || weights.length == 0) {
             isInputNeuron = true;
         }
@@ -94,7 +94,7 @@ public class Neuron {
         if (cache.hasCachedOutput()) {
             return cache.getCachedOutput();
         }
-        float a = bias * -1; // activation
+        double a = bias * -1; // activation
         for (int i = 0; i < weights.length; i++) {
             if (cache.has(i)) {
                 try {
@@ -105,13 +105,13 @@ public class Neuron {
                 }
             } else {
                 Neuron n = brain.getNeurons()[receivesFromLayer][i];
-                float v = n.compute() * weights[i];
+                double v = n.compute() * weights[i];
                 a += v;
                 cache.put(i, v);
             }
         }
         // sigmoid function
-        float res = (float) (1 / (1 + Math.pow(Math.E, a * -1)));
+        double res = (double) (1 / (1 + Math.pow(Math.E, a * -1)));
         cache.setCachedOutput(res);
         Log.log(Log.DEBUG, "Computed Value " + res + " for neuron");
         return res;
@@ -124,11 +124,11 @@ public class Neuron {
      * @param mutationFactor controls how much weights mutate
      * @return the new weights
      */
-    public float[] getMutatedWeights(float mutationProbability, float mutationFactor) {
-        float[] mutatedWeights = new float[weights.length];
+    public double[] getMutatedWeights(double mutationProbability, double mutationFactor) {
+        double[] mutatedWeights = new double[weights.length];
         for (int i = 0; i < weights.length; i++) {
             if (Math.random() <= mutationProbability) {
-                mutatedWeights[i] = weights[i] + (float) (Math.random() * mutationFactor) - mutationFactor / 2;
+                mutatedWeights[i] = weights[i] + (double) (Math.random() * mutationFactor) - mutationFactor / 2;
             } else {
                 mutatedWeights[i] = weights[i];
             }
@@ -141,16 +141,16 @@ public class Neuron {
      *
      * @param output the output you want to set
      */
-    public void setOutput(float output) {
+    public void setOutput(double output) {
         isInputNeuron = true;
         this.output = output;
     }
 
-    public float getBias() {
+    public double getBias() {
         return bias;
     }
 
-    public void setBias(float bias) {
+    public void setBias(double bias) {
         this.bias = bias;
     }
 
@@ -166,7 +166,7 @@ public class Neuron {
         this.layer = layer;
     }
 
-    public float[] getWeights() {
+    public double[] getWeights() {
         return weights;
     }
 
@@ -175,7 +175,7 @@ public class Neuron {
      *
      * @param weights the new weights to put
      */
-    public void setWeights(float[] weights) {
+    public void setWeights(double[] weights) {
         this.weights = weights;
         // Changing the neuron makes the cache invalid
         clearCache();

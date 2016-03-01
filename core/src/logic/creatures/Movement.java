@@ -16,15 +16,15 @@ import logic.Element;
  */
 public class Movement extends BodyPart {
 
-    private float speed = 0, rotSpeed = 0;
-    public static float max_speed = 3;
+    private double speed = 0, rotSpeed = 0;
+    public static double max_speed = 3;
 
     public Movement(Creature creature) {
         super(0, 4, 0, 0, creature);
     }
 
     @Override
-    public float[] act() {
+    public double[] act() {
         if (speed > max_speed) {
             speed = max_speed;
         }
@@ -32,7 +32,7 @@ public class Movement extends BodyPart {
             speed = -max_speed;
         }
         // apply speed
-        float xMul = (float) Math.cos(creature.getDirection()), yMul = (float) Math.sin(creature.getDirection());
+        double xMul = (double) Math.cos(creature.getDirection()), yMul = (double) Math.sin(creature.getDirection());
         creature.move(xMul * speed, yMul * speed);
         if (creature.getX() < 0) {
             creature.setX(Game.get().getWorld().getWidth() + creature.getX());
@@ -45,19 +45,19 @@ public class Movement extends BodyPart {
             creature.setY(creature.getY() - Game.get().getWorld().getHeight());
         }
         creature.rotate(rotSpeed);
-        return new float[]{};
+        return new double[]{};
     }
 
     @Override
-    public void interactWithElement(Element e, float distance, float relAngle) {
+    public void interactWithElement(Element e, double distance, double relAngle) {
     }
 
     @Override
-    protected void draw(ShapeRenderer s, float relX, float relY) {
+    protected void draw(ShapeRenderer s, double relX, double relY) {
     }
 
     @Override
-    public void readFromBrain(float[] data) {
+    public void readFromBrain(double[] data) {
         Log.log(Log.DEBUG, "Fowward: " + data[0] + "Back: " + data[1] + " Rot: " + data[2] + " RotAnti: " + data[3]);
         speed = (data[0] * 2 - data[1] / 2) * max_speed;
         rotSpeed = data[2] - data[3];

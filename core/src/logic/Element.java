@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
  */
 public abstract class Element {
 
-    private float x, y, size;
+    private double x, y, size;
 
     /**
      * Create an element at given position with given radius. Elements have a
@@ -19,7 +19,7 @@ public abstract class Element {
      * @param y the y position
      * @param size the element body radius
      */
-    public Element(float x, float y, float size) {
+    public Element(double x, double y, double size) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -35,8 +35,8 @@ public abstract class Element {
      * @return the distance from the element. It's 0 if they are just touching,
      * negative if they are colliding and positive if they are not
      */
-    public float distanceFrom(Element e) {
-        return (float) Math.sqrt(Math.pow(e.x - x, 2) + Math.pow(e.y - y, 2)) - getSize() - e.getSize();
+    public double distanceFrom(Element e) {
+        return  Math.sqrt(Math.pow(e.x - x, 2) + Math.pow(e.y - y, 2)) - getSize() - e.getSize();
     }
 
     /**
@@ -58,8 +58,8 @@ public abstract class Element {
      * @param radius the radius of the circular object
      * @return true if the object overlaps this one
      */
-    public boolean overlaps(float x, float y, float radius) {
-        return (float) Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2)) < getSize() + radius;
+    public boolean overlaps(double x, double y, double radius) {
+        return Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2)) < getSize() + radius;
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class Element {
      * @param y the y position of the point to check
      * @return true if the point is part of this object's area
      */
-    public boolean overlaps(float x, float y) {
+    public boolean overlaps(double x, double y) {
         return overlaps(x, y, 1);
     }
 
@@ -79,7 +79,7 @@ public abstract class Element {
      * @param deltaX x translation
      * @param deltaY y translation
      */
-    public void move(float deltaX, float deltaY) {
+    public void move(double deltaX, double deltaY) {
         x += deltaX;
         y += deltaY;
     }
@@ -96,27 +96,27 @@ public abstract class Element {
      */
     public abstract void render(ShapeRenderer s);
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public float getSize() {
+    public double getSize() {
         return size;
     }
 
-    public void setX(float x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public void setY(float y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public void setSize(float size) {
+    public void setSize(double size) {
         this.size = size;
     }
 

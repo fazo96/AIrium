@@ -10,8 +10,8 @@ import logic.Vegetable;
  */
 public class Torso extends BodyPart {
 
-    private float hp, prevHp, radius, pain = 0;
-    public static float default_radius = 20, max_hp = 100, hpDecay = 0.5f, eatingSpeed = 0.1f;
+    private double hp, prevHp, radius, pain = 0;
+    public static double default_radius = 20, max_hp = 100, hpDecay = 0.5f, eatingSpeed = 0.1f;
     private boolean eating = false;
 
     public Torso(Creature c) {
@@ -22,9 +22,9 @@ public class Torso extends BodyPart {
     }
 
     @Override
-    public void draw(ShapeRenderer s, float x, float y) {
-        s.setColor(1 - (hp / max_hp), hp / max_hp, 0, 1);
-        s.circle(x + creature.getX(), y + creature.getY(), radius);
+    public void draw(ShapeRenderer s, double x, double y) {
+        s.setColor((float) (1 - (hp / max_hp)), (float) (hp / max_hp), 0, 1);
+        s.circle((float) (x + creature.getX()), (float) (y + creature.getY()), (float) radius);
         // Draw damage/heal marks
         s.set(ShapeRenderer.ShapeType.Filled);
         if (getReceivedDamage() > 0) {
@@ -35,15 +35,15 @@ public class Torso extends BodyPart {
             s.setColor(0, 1, 0, 1);
         }
         if (getReceivedDamage() != 0 || eating) {
-            s.circle(x + creature.getX(), y + creature.getY(), 5);
+            s.circle((float) (x + creature.getX()), (float) (y + creature.getY()), 5);
         }
     }
 
     @Override
-    public float[] act() {
+    public double[] act() {
         // apply hunger
         hp -= hpDecay;
-        float r[] = new float[]{
+        double r[] = new double[]{
             hp/max_hp,
             eating ? 1f : 0f,
             pain
@@ -55,7 +55,7 @@ public class Torso extends BodyPart {
     }
 
     @Override
-    public void interactWithElement(Element e, float distance, float relAngle) {
+    public void interactWithElement(Element e, double distance, double relAngle) {
         if (e instanceof Vegetable && distance < 0 && hp < max_hp) {
             e.setSize(e.getSize() - eatingSpeed);
                 if (e.getSize() == 0) {
@@ -68,7 +68,7 @@ public class Torso extends BodyPart {
     }
 
     @Override
-    public void readFromBrain(float[] data) {
+    public void readFromBrain(double[] data) {
         if (getReceivedDamage() > 0) {
             pain = -1;
         } else if (getReceivedDamage() < 0) {
@@ -87,7 +87,7 @@ public class Torso extends BodyPart {
      *
      * @param amount how much to heal/damage
      */
-    public void heal(float amount) {
+    public void heal(double amount) {
         hp += amount;
         if (hp < 0) {
             hp = 0;
@@ -97,23 +97,23 @@ public class Torso extends BodyPart {
         }
     }
 
-    public float getReceivedDamage() {
+    public double getReceivedDamage() {
         return prevHp - hp;
     }
 
-    public float getRadius() {
+    public double getRadius() {
         return radius;
     }
 
-    public void setRadius(float radius) {
+    public void setRadius(double radius) {
         this.radius = radius;
     }
 
-    public float getHp() {
+    public double getHp() {
         return hp;
     }
 
-    public void setHp(float hp) {
+    public void setHp(double hp) {
         this.hp = hp;
     }
 
